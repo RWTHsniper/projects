@@ -1,0 +1,79 @@
+****************************************************************************************************
+2D SERIAL EXPLICIT FEM SOLVER
+****************************************************************************************************
+Copyright (C) 2012  Loïc Wendling wendling@cats.rwth-aachen.de
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU 
+General Public License as published by the Free Software Foundation, either version 3 of the 
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without 
+even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  If not, 
+see <http://www.gnu.org/licenses/>.
+
+
+****************************************************************************************************
+DESCRIPTION OF THE CODE
+****************************************************************************************************
+* This code solves the 2d transient heat diffusion equation using the finite element method.
+* It can only support 2D linear triangular elements.
+* Numerical integration is done by 7 point Gauss quadrature integration.
+* For the time discretization, forward Euler discretization, which is an explicit method, is used. 
+* Mass matrix is lumped so that the resulting equation system can be solved without assembling the
+  global equation system.
+* Supports Drichlet and Neumann type boundary conditions.
+* VTK library is used for post processing of the results. 
+
+
+****************************************************************************************************
+EXAMPLE INPUT FILE
+****************************************************************************************************
+#Title of the simulation
+title Rectangular_domain
+
+# Name of the mesh information file
+minf pathToFile/minf
+
+# Name of the coordinates file
+mxyz pathToFile/mxyz
+
+# Name of the connectivity file 
+mien pathToFile/mien
+
+# Name of the boundary information file 
+mrng pathToFile/mrng
+
+# Name of the initial distribution file 
+data pathToFile/pres
+
+# Initial value of the unknown variable
+init 0.0
+
+# Diffusion coefficient
+D 10.0
+
+# Source term
+S 0.0
+
+# Number of face groups
+nfg 4
+
+# Face group, corresponding boundary type and boundary value 
+# 4 face groups must be defined!
+# Type 1 = Drichlet, Type 2 = Neumann
+fg1 1 -100.0
+fg2 1 100.0
+fg3 1 -100.0
+fg4 1 100.0
+
+# Number of iterations
+iter 50000
+
+# Time step
+dt 0.000001
+
+# Restart from a previous simulation
+restart 1

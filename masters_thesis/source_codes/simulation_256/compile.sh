@@ -1,0 +1,3 @@
+#g++ -c -std=c++11 -O3 -DNDEBUG -mavx -mfma -fopenmp -I/usr/local/include/eigen3 fini_diff.cpp helpers.cpp math_op.cpp main.cpp sparmat.cpp 
+#g++ *.o -o exec -L/usr/lib/x86_64-linux-gnu -L/usr/local/lib -lfftw3 -lfftw3_omp -lm 
+g++ -std=c++11 -O3 -DNDEBUG -mavx -mfma -fopenmp -I/usr/local/include/eigen3 ./src/continuum_mech.cpp ./src/damage.cpp ./src/ffts.cpp ./src/fini_diff.cpp ./src/FIsimul.cpp ./src/grid2d.cpp ./src/helpers.cpp ./src/indexing.cpp ./src/math_op.cpp ./src/nloc_damage.cpp ./src/vtks.cpp ./src/res_eig_vidyasagar.cpp -o exec -L/usr/lib/x86_64-linux-gnu -L/usr/local/lib -lfftw3 -lfftw3_omp -lm 
