@@ -9,9 +9,8 @@ class TradingSPYEnv(gym.Env):
     """
     SPY (S&P500) trading environment.
   
-    State: [[short, neutral, long], portfolio value]
-      - The states are 
-  
+    The features are boolean. Signal of breakout smas
+
   
     Action: sell (0), hold (1), and buy (2)
       - I prescribe a very simple policy
@@ -23,7 +22,7 @@ class TradingSPYEnv(gym.Env):
         train_data = pd.read_csv(train_data_path, index_col = False, parse_dates= ['Date'])
         self.stock_price_history = train_data 
         self.max_sma_len = max(sma_len)
-        self.current_step = self.max_sma_len # minimum number of steps
+        self.current_step = self.max_sma_len # The step in the data
         self.iteration = 0 # the iteration step in an episode
         self.init_invest = init_invest
         self.accumulated_profit = 0.0
@@ -49,7 +48,8 @@ class TradingSPYEnv(gym.Env):
         self.features = pd.DataFrame(feature_dict)
         if isinstance(sma_len,list):
             self._set_sma(sma_len)
-#        self.features.reset_index(drop=True,inplace=True)
+            self._set_breakout_sma(sma_len)
+            self._set_daily_return()
     
         train_test_split_index = int(self.features.shape[0] * train_test_split)
         if mode == 'train':
@@ -61,7 +61,7 @@ class TradingSPYEnv(gym.Env):
 
         # Set up data and features
         self.reset(current_step = self.current_step)
-            
+                    
         # action space
         # 0: short, 1: neutral, 2: long
         self.action_space = spaces.Discrete(3)
@@ -73,18 +73,36 @@ class TradingSPYEnv(gym.Env):
     def _set_sma(self, sma_len):
         feature = 'Close'
         for sma in sma_len:
-            col_name = feature+'_'+str(sma)
-            self.stock_price_history[col_name] = self.stock_price_history[feature].rolling(sma).mean()
-            self.features[col_name] = self.stock_price_history[feature].rolling(sma).mean()
+            sma_name = feature+'_'+str(sma)
+            self.stock_price_history[sma_name] = self.stock_price_history[feature].rolling(sma).mean()
+            self.features[sma_name] = self.stock_price_history[feature].rolling(sma).mean()
         self.features = self.features.dropna(axis=0)        
             
+    def _set_breakout_sma(self,sma_len):
+        feature = 'Close'
+        features = self.features
+        for sma in sma_len:
+            sma_name = feature+'_'+str(sma)
+            breakout_name = 'breakout_' + str(sma)
+            features[breakout_name] = features[feature] >= features[sma_name]
+            features.drop(columns=[sma_name],inplace=True)
+        
+    def _set_daily_return(self):
+        self.features['daily_return'] = self.stock_price_history['Close'].pct_change()
         
     def _get_observation(self):
         # return features at current step
 #        print(self.features)
 #        print(self.current_step)
-        observation = self.features.drop(columns=['Date']).loc[self.current_step].to_numpy()
-        # state, portfolio_value, Close, smas
+#        observation = self.features.drop(columns=['Date']).loc[self.current_step].to_numpy('float32')
+
+        # Only return things I want to
+        observation = self.features[['State','accumulated_profit','daily_return']].loc[self.current_step].to_numpy('float32')
+        # breakout signals
+        for col in self.features.columns:
+            if 'breakout_' in col:
+                observation = np.append(observation, self.features[col].loc[self.current_step])
+            
         return observation
 
     def reset(self, current_step = None):
@@ -101,11 +119,16 @@ class TradingSPYEnv(gym.Env):
             
         self.features['portfolio_value'].loc[self.current_step] = self.init_invest
         
-        if self.normalize_price:
-            price = self.stock_price_history['Close'].loc[self.current_step]
-            for col in self.features.columns:
-                if 'Close' in col:
-                    self.features[col].loc[self.current_step:self.end_step] = self.stock_price_history[col].loc[self.current_step:self.end_step] / price
+        # normalize Close price
+        price = self.stock_price_history['Close'].loc[self.current_step]
+        self.features['Close'].loc[self.current_step:self.end_step] = self.stock_price_history['Close'].loc[self.current_step:self.end_step] / price
+        
+#        if self.normalize_price:
+#            price = self.stock_price_history['Close'].loc[self.current_step]
+#            self.features[].loc[self.current_step:self.end_step] = self.stock_price_history[col].loc[self.current_step:self.end_step] / price
+#            for col in self.features.columns:
+#                if 'Close' in col:
+#                    self.features[col].loc[self.current_step:self.end_step] = self.stock_price_history[col].loc[self.current_step:self.end_step] / price
 
         return self._get_observation()
 
@@ -142,12 +165,13 @@ class TradingSPYEnv(gym.Env):
     
         # Compute next step
         # compute portfolio value at next step
+        stock_price_history = self.stock_price_history
         if action == 0: # shorting
-            portfolio_value.loc[next_step] = portfolio_value.loc[self.current_step] * features[col_name].loc[self.current_step] / features[col_name].loc[next_step]
+            portfolio_value.loc[next_step] = portfolio_value.loc[self.current_step] * stock_price_history[col_name].loc[self.current_step] / stock_price_history[col_name].loc[next_step]
         elif action == 1: # market-neutral position (100% cash)  
             portfolio_value.loc[next_step] = portfolio_value.loc[self.current_step]
         elif action == 2: # longing
-            portfolio_value.loc[next_step] = portfolio_value.loc[self.current_step] * features[col_name].loc[next_step] / features[col_name].loc[self.current_step]
+            portfolio_value.loc[next_step] = portfolio_value.loc[self.current_step] * stock_price_history[col_name].loc[next_step] / stock_price_history[col_name].loc[self.current_step]
         else:
             raise TypeError("Action is out of the space")
         self.features.State.loc[next_step] = action
