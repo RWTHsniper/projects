@@ -35,14 +35,7 @@ class TradingSPYEnv(gym.Env):
                     'portfolio_value': np.zeros(self.stock_price_history.shape[0], dtype=float),
                     'Close': self.stock_price_history['Close']
                     }
-    
-        # feature engineering. Put values like sma
-#        if sma_len([],list):
-            
-#            for sma in sma_len:
-#                feature_dict[feature+'_'+str(sma)] = self.stock_price_history[feature].rolling(sma).mean()
-#            self.stock_price_history[feature+'_'+str(sma)] = self.stock_price_history[feature].rolling(sma).mean()
-                    
+                        
         self.stock_price_history.dropna(axis=0,inplace=True)
         self.stock_price_history.reset_index(drop=True,inplace=True)
 
@@ -83,9 +76,16 @@ class TradingSPYEnv(gym.Env):
         # return features at current step
 #        print(self.features)
 #        print(self.current_step)
-        observation = self.features.drop(columns=['Date']).loc[self.current_step].to_numpy()
+#        observation = self.features.drop(columns=['Date']).loc[self.current_step].to_numpy()
         # state, portfolio_value, Close, smas
-        return observation
+
+        observation = self.stock_price_history.loc[self.current_step - self.max_sma_len:self.current_step][['Open','High','Low','Close']]
+        return observation.to_numpy(dtype=np.float32).flatten()
+#        return_list = []
+#        for col in observation.columns:
+#            return_list.append(observation[col].to_numpy())        
+        
+#        return return_list
 
     def reset(self, current_step = None):
         self.iteration = 0 
@@ -106,7 +106,7 @@ class TradingSPYEnv(gym.Env):
             for col in self.features.columns:
                 if 'Close' in col:
                     self.features[col].loc[self.current_step:self.end_step] = self.stock_price_history[col].loc[self.current_step:self.end_step] / price
-
+                    
         return self._get_observation()
 
     """
@@ -121,21 +121,8 @@ class TradingSPYEnv(gym.Env):
         portfolio_value = self.features.portfolio_value        
 
         done = False
-        # reward 
-        r_t = 0.0
-        if (self.iteration > 0) and (self.current_step is not self.end_step): # Exclude the very first step
-            # difference in portfolio value 
-            r_t = portfolio_value.loc[self.current_step] - portfolio_value.loc[prev_step]
-        features['accumulated_profit'].loc[self.current_step] = features['accumulated_profit'].loc[prev_step] + r_t    
-
-        if next_step == self.end_step: 
-            # At the end, we have nothing to do
-            done = True
-            self.accumulated_profit = features['accumulated_profit'].loc[self.current_step]
-            long_return = self.features['Close'].loc[self.current_step] / self.features['Close'].loc[self.current_step-self.iteration]
-            return None, None, done, {'profit_iteration': self.accumulated_profit/self.iteration, 'iterations': self.iteration, 
-                                      'long_return': long_return}
-        
+        r_t =0.0
+               
         
         # Current state is set
         self.features.State.loc[self.current_step] = action
@@ -151,9 +138,26 @@ class TradingSPYEnv(gym.Env):
         else:
             raise TypeError("Action is out of the space")
         self.features.State.loc[next_step] = action
-    
+
+        # reward after taking action
+        # difference in portfolio value 
+        r_t = portfolio_value.loc[next_step] - portfolio_value.loc[self.current_step]
+
+        features['accumulated_profit'].loc[next_step] = features['accumulated_profit'].loc[self.current_step] + r_t    
+
+        if next_step == self.end_step: 
+#            print('step ', self.current_step, ' daily profit', r_t)
+            # At the end, we have nothing to do
+            done = True
+            long_return = self.features['Close'].loc[next_step] / self.features['Close'].loc[next_step-self.iteration]
+            return None, r_t, done, {'profit_iteration': self.accumulated_profit/self.iteration, 'iterations': self.iteration, 
+                                      'long_return': long_return}
+         
+        
         self.current_step += 1 
         self.iteration += 1
+        
+        
         s_prime = self._get_observation() # state at t+1
     
         return s_prime, r_t, done, None
