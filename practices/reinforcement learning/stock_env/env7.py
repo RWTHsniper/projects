@@ -35,15 +35,15 @@ class TradingSPYEnv(gym.Env):
         self.accumulated_profit = 0.0
         self.normalize_price = normalize_price
 
-        self.stock_price_history.dropna(axis=0,inplace=True)
-        self.stock_price_history.reset_index(drop=True,inplace=True)
-        
         feature_dict = {'Date': self.stock_price_history['Date'],
                     'State': np.zeros(self.stock_price_history.shape[0], dtype=int),
                     'accumulated_profit': np.zeros(self.stock_price_history.shape[0], dtype=float), 
                     'portfolio_value': np.zeros(self.stock_price_history.shape[0], dtype=float),
                     'Close': self.stock_price_history['Close']
-                    }                        
+                    }
+                        
+        self.stock_price_history.dropna(axis=0,inplace=True)
+        self.stock_price_history.reset_index(drop=True,inplace=True)
 
         self.features = pd.DataFrame(feature_dict)
         if isinstance(sma_len,list):
@@ -58,6 +58,7 @@ class TradingSPYEnv(gym.Env):
         if mode == 'train':
             self.end_step = train_test_split_index
         elif mode == 'test':
+            self.features.shape[0]
             self.current_step = train_test_split_index
             self.end_step = self.features.shape[0]
 
@@ -115,14 +116,14 @@ class TradingSPYEnv(gym.Env):
         if current_step is not None:
             self.current_step = current_step
         else:
-            self.current_step = random.randint(self.max_sma_len, int(self.end_step))
+            self.current_step = random.randint(self.max_sma_len, int(self.features.shape[0] * 0.9))
             
         self.features['portfolio_value'].loc[self.current_step] = self.init_invest
         
         if self.normalize_price:
             price = self.stock_price_history['Close'].loc[self.current_step]
             for col in self.features.columns:
-                if 'Close_' in col:
+                if 'Close' in col:
                     self.features[col].loc[self.current_step:self.end_step] = self.stock_price_history[col].loc[self.current_step:self.end_step] / price
                     
         return self._get_observation()
@@ -158,10 +159,11 @@ class TradingSPYEnv(gym.Env):
         self.features.State.loc[next_step] = action
 
         # reward after taking action
-        # difference in portfolio value 
-        r_t = portfolio_value.loc[next_step] - portfolio_value.loc[self.current_step]
+        # daily return of portfolio value 
+        daily_profit = (portfolio_value.loc[next_step] - portfolio_value.loc[self.current_step])
+        r_t = (portfolio_value.loc[next_step] - portfolio_value.loc[self.current_step])/ portfolio_value.loc[self.current_step]
 
-        features['accumulated_profit'].loc[next_step] = features['accumulated_profit'].loc[self.current_step] + r_t    
+        features['accumulated_profit'].loc[next_step] = features['accumulated_profit'].loc[self.current_step] + daily_profit    
 
         if next_step == self.end_step: 
 #            print('step ', self.current_step, ' daily profit', r_t)
@@ -169,7 +171,7 @@ class TradingSPYEnv(gym.Env):
             done = True
             long_return = self.features['Close'].loc[next_step] / self.features['Close'].loc[next_step-self.iteration]
             return None, r_t, done, {'profit_iteration': self.accumulated_profit/self.iteration, 'iterations': self.iteration, 
-                                      'long_return': long_return}
+                                      'long_return': long_return, 'accumulated_profit': features['accumulated_profit'].loc[next_step]}
          
         
         self.current_step += 1 
