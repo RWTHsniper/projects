@@ -8,7 +8,7 @@ from buffer import ReplayBuffer
 
 class Agent():
     def __init__(self, alpha, beta, input_dims, tau, n_actions, gamma=0.99,
-                 max_size=1000000, fc1_dims=400, fc2_dims=300, 
+                 max_size=100000, fc1_dims=400, fc2_dims=300, 
                  batch_size=64, chkpt_dir='tmp/ddpg'):
         self.gamma = gamma
         self.tau = tau
@@ -81,11 +81,13 @@ class Agent():
         target = rewards + self.gamma*critic_value_
         target = target.view(self.batch_size, 1)
 
+        # Optimize critic
         self.critic.optimizer.zero_grad()
         critic_loss = F.mse_loss(target, critic_value)
         critic_loss.backward()
         self.critic.optimizer.step()
 
+        # Optimize actor
         self.actor.optimizer.zero_grad()
         actor_loss = -self.critic.forward(states, self.actor.forward(states))
         actor_loss = T.mean(actor_loss)

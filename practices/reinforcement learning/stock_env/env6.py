@@ -24,8 +24,8 @@ class TradingSPYEnv(gym.Env):
       - when selling, sell all the shares
       - when buying, buy as many as cash in hand allows
     """
-    def __init__(self, train_data_path='historySPY.csv', sma_len=[5], init_invest=10000, learning_rate=0.0002, gamma=0.98,
-                normalize_price = True, mode = 'train', train_test_split = 0.9):
+    def __init__(self, train_data_path='historySPY.csv', sma_len=[5], init_invest=10000, gamma=0.98,
+                normalize_price = True, mode = 'train', train_test_split = 0.9, fee=0.001):
         train_data = pd.read_csv(train_data_path, index_col = False, parse_dates= ['Date'])
         self.stock_price_history = train_data 
         self.max_sma_len = max(sma_len)
@@ -34,6 +34,7 @@ class TradingSPYEnv(gym.Env):
         self.init_invest = init_invest
         self.accumulated_profit = 0.0
         self.normalize_price = normalize_price
+        self.fee = fee
 
         self.stock_price_history.dropna(axis=0,inplace=True)
         self.stock_price_history.reset_index(drop=True,inplace=True)
@@ -65,7 +66,7 @@ class TradingSPYEnv(gym.Env):
         self.reset(current_step = self.current_step)
             
         # action space
-        # 0: short, 1: neutral, 2: long
+        # 0: short, 1: cash, 2: long
         self.action_space = spaces.Discrete(3)
     
         # observation space
@@ -144,22 +145,27 @@ class TradingSPYEnv(gym.Env):
         
         # Current state is set
         self.features.State.loc[self.current_step] = action
+        # Compute fee for changing state (position)
+        position_change = abs(action - self.features.State.loc[prev_step])
+        if position_change > 0:
+            r_t -= position_change * portfolio_value.loc[self.current_step] * self.fee
     
         # Compute next step
         # compute portfolio value at next step
         if action == 0: # shorting
-            portfolio_value.loc[next_step] = portfolio_value.loc[self.current_step] * features[col_name].loc[self.current_step] / features[col_name].loc[next_step]
+            r_t += portfolio_value.loc[self.current_step] * features[col_name].loc[self.current_step] / features[col_name].loc[next_step] - portfolio_value.loc[self.current_step]
         elif action == 1: # market-neutral position (100% cash)  
-            portfolio_value.loc[next_step] = portfolio_value.loc[self.current_step]
+            r_t += 0.0
         elif action == 2: # longing
-            portfolio_value.loc[next_step] = portfolio_value.loc[self.current_step] * features[col_name].loc[next_step] / features[col_name].loc[self.current_step]
+            r_t += portfolio_value.loc[self.current_step] * features[col_name].loc[next_step] / features[col_name].loc[self.current_step] - portfolio_value.loc[self.current_step]
         else:
             raise TypeError("Action is out of the space")
         self.features.State.loc[next_step] = action
 
         # reward after taking action
         # difference in portfolio value 
-        r_t = portfolio_value.loc[next_step] - portfolio_value.loc[self.current_step]
+#        r_t = portfolio_value.loc[next_step] - portfolio_value.loc[self.current_step]
+        portfolio_value.loc[next_step] = portfolio_value.loc[self.current_step] + r_t
 
         features['accumulated_profit'].loc[next_step] = features['accumulated_profit'].loc[self.current_step] + r_t    
 
