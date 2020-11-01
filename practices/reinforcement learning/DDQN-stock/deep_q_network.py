@@ -6,7 +6,7 @@ import torch.optim as optim
 import numpy as np
 
 class DeepQNetwork(nn.Module):
-    def __init__(self, lr, n_actions, name, input_dims, chkpt_dir, fc1_dims=64, fc2_dims=64):
+    def __init__(self, lr, n_actions, name, input_dims, chkpt_dir, fc1_dims=64, fc2_dims=64, p=0.0, weight_decay=1e-6):
         super(DeepQNetwork, self).__init__()
         self.checkpoint_dir = chkpt_dir
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
@@ -18,24 +18,23 @@ class DeepQNetwork(nn.Module):
 #        fc_input_dims = self.calculate_conv_output_dims(input_dims)
 
         self.fc1 = nn.Linear(*input_dims, fc1_dims)
-        self.fc2 = nn.Linear(fc2_dims, n_actions)
+        self.fc2 = nn.Linear(fc1_dims, fc2_dims)
+        self.fc3 = nn.Linear(fc2_dims, n_actions)
+        self.dropout = nn.Dropout(p) 
 
-        self.optimizer = optim.RMSprop(self.parameters(), lr=lr)
+#        self.optimizer = optim.RMSprop(self.parameters(), lr=lr)
+        self.optimizer = optim.Adam(self.parameters(), lr=lr, weight_decay=weight_decay)
 
-        self.loss = nn.MSELoss()
+#        self.loss = nn.MSELoss()
+        self.loss = nn.SmoothL1Loss()
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
         self.to(self.device)
-
-    def calculate_conv_output_dims(self, input_dims):
-        state = T.zeros(1, *input_dims)
-        dims = self.conv1(state)
-        dims = self.conv2(dims)
-        dims = self.conv3(dims)
-        return int(np.prod(dims.size()))
 
     def forward(self, state):
         actions = F.relu(self.fc1(state))
         actions = F.relu(self.fc2(actions))
+        actions = self.dropout(actions) # dropout for regularization
+        actions = F.relu(self.fc3(actions))
 
         return actions
 

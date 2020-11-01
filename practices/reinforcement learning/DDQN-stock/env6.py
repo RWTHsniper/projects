@@ -97,14 +97,15 @@ class TradingSPYEnv(gym.Env):
         
     def _get_observation(self):
         observation = []
-        observation.append(self.features['State'].loc[self.current_step-self.max_sma_len+1:self.current_step].to_numpy('float32'))
-        observation.append(self.features['accumulated_profit'].loc[self.current_step-self.max_sma_len+1:self.current_step].to_numpy('float32'))
-        observation.append(self.features['daily_return'].loc[self.current_step-self.max_sma_len+1:self.current_step].to_numpy('float32'))
+#        observation.append(self.features['State'].loc[self.current_step-self.max_sma_len+1:self.current_step].to_numpy('float32'))
+#        observation.append(self.features['State'].loc[self.current_step])
+#        observation.append(self.features['accumulated_profit'].loc[self.current_step-self.max_sma_len+1:self.current_step].to_numpy('float32'))
+#        observation.append(self.features['daily_return'].loc[self.current_step-self.max_sma_len+1:self.current_step].to_numpy('float32'))
         # breakout signals
         for col in self.features.columns:
             if 'breakout_' in col:
                 observation.append(self.features[col].loc[self.current_step-self.max_sma_len+1:self.current_step].values)
-            
+        observation = np.append(self.features['State'].loc[self.current_step:self.current_step].to_numpy('float32'), observation)
         return np.array(observation).flatten()
         
         
@@ -185,5 +186,8 @@ class TradingSPYEnv(gym.Env):
         
         
         s_prime = self._get_observation() # state at t+1
+        
+        # normalized reward for a test
+        r_t /= portfolio_value.loc[self.current_step]
     
         return s_prime, r_t, done, None

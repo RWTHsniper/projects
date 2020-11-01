@@ -7,7 +7,7 @@ class DDQNAgent(object):
     def __init__(self, gamma, epsilon, lr, n_actions, input_dims,
                  mem_size, batch_size, eps_min=0.01, eps_dec=5e-7,
                  replace=1000, algo=None, env_name=None, chkpt_dir='tmp/dqn',
-                 fc1_dims=64, fc2_dims=64):
+                 fc1_dims=64, fc2_dims=64, p=0.0, weight_decay=1e-6):
         self.gamma = gamma
         self.epsilon = epsilon
         self.lr = lr
@@ -29,12 +29,12 @@ class DDQNAgent(object):
                                     fc1_dims=fc1_dims, fc2_dims=fc2_dims,
                                     input_dims=self.input_dims,
                                     name=self.env_name+'_'+self.algo+'_q_eval',
-                                    chkpt_dir=self.chkpt_dir)
+                                    chkpt_dir=self.chkpt_dir, p=p, weight_decay=weight_decay)
         self.q_next = DeepQNetwork(self.lr, self.n_actions,
                                     fc1_dims=fc1_dims, fc2_dims=fc2_dims,
                                     input_dims=self.input_dims,
                                     name=self.env_name+'_'+self.algo+'_q_next',
-                                    chkpt_dir=self.chkpt_dir)
+                                    chkpt_dir=self.chkpt_dir, p=p, weight_decay=weight_decay)
 
     def store_transition(self, state, action, reward, state_, done):
         self.memory.store_transition(state, action, reward, state_, done)
@@ -92,6 +92,7 @@ class DDQNAgent(object):
         q_target = rewards + self.gamma*q_next[indices, max_actions]
         loss = self.q_eval.loss(q_target, q_pred).to(self.q_eval.device)
         loss.backward()
+        T.nn.utils.clip_grad_norm_(self.q_eval.parameters(), 1.0) # gradient clip
 
         self.q_eval.optimizer.step()
         self.learn_step_counter += 1

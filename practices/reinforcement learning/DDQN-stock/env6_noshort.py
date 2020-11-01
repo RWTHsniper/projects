@@ -19,7 +19,7 @@ class TradingSPYEnv(gym.Env):
       - CCI: Commodity Channel Index (CCI) is calculated using high, low and close price.
       - ADX: Average Directional Index (ADX) is calculated using high, low and close price.  
   
-    Action: sell (0), hold (1), and buy (2)
+    Action: hold (0), and buy (1)
       - I prescribe a very simple policy
       - when selling, sell all the shares
       - when buying, buy as many as cash in hand allows
@@ -68,8 +68,8 @@ class TradingSPYEnv(gym.Env):
         self.reset(current_step = self.current_step)
             
         # action space
-        # 0: short, 1: cash, 2: long
-        self.action_space = spaces.Discrete(3)
+        # 0: cash, 1: long
+        self.action_space = spaces.Discrete(2)
     
         # observation space
         # This contains features to make decisions
@@ -98,8 +98,8 @@ class TradingSPYEnv(gym.Env):
     def _get_observation(self):
         observation = []
         observation.append(self.features['State'].loc[self.current_step-self.max_sma_len+1:self.current_step].to_numpy('float32'))
-        observation.append(self.features['accumulated_profit'].loc[self.current_step-self.max_sma_len+1:self.current_step].to_numpy('float32'))
-        observation.append(self.features['daily_return'].loc[self.current_step-self.max_sma_len+1:self.current_step].to_numpy('float32'))
+#        observation.append(self.features['accumulated_profit'].loc[self.current_step-self.max_sma_len+1:self.current_step].to_numpy('float32'))
+#        observation.append(self.features['daily_return'].loc[self.current_step-self.max_sma_len+1:self.current_step].to_numpy('float32'))
         # breakout signals
         for col in self.features.columns:
             if 'breakout_' in col:
@@ -154,11 +154,9 @@ class TradingSPYEnv(gym.Env):
     
         # Compute next step
         # compute portfolio value at next step
-        if action == 0: # shorting
-            r_t += portfolio_value.loc[self.current_step] * features[col_name].loc[self.current_step] / features[col_name].loc[next_step] - portfolio_value.loc[self.current_step]
-        elif action == 1: # market-neutral position (100% cash)  
+        if action == 0: # market-neutral position (100% cash)  
             r_t += 0.0
-        elif action == 2: # longing
+        elif action == 1: # longing
             r_t += portfolio_value.loc[self.current_step] * features[col_name].loc[next_step] / features[col_name].loc[self.current_step] - portfolio_value.loc[self.current_step]
         else:
             raise TypeError("Action is out of the space")
@@ -185,5 +183,8 @@ class TradingSPYEnv(gym.Env):
         
         
         s_prime = self._get_observation() # state at t+1
+        
+        # normalized reward for a test
+        r_t /= portfolio_value.loc[self.current_step]
     
         return s_prime, r_t, done, None
