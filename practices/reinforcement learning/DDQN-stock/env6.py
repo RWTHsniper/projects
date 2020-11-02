@@ -104,7 +104,8 @@ class TradingSPYEnv(gym.Env):
         # breakout signals
         for col in self.features.columns:
             if 'breakout_' in col:
-                observation.append(self.features[col].loc[self.current_step-self.max_sma_len+1:self.current_step].values)
+                observation.append(self.features[col].loc[self.current_step:self.current_step].values)
+#                observation.append(self.features[col].loc[self.current_step-self.max_sma_len+1:self.current_step].values)
         observation = np.append(self.features['State'].loc[self.current_step:self.current_step].to_numpy('float32'), observation)
         return np.array(observation).flatten()
         
