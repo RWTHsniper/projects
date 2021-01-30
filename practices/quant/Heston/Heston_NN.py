@@ -23,7 +23,6 @@ class Net(nn.Module):
         self.to(self.device)
     
     def forward(self, x):
-        # Max pooling over a (2, 2) window
         x = F.relu(self.fc1(x))
         x = torch.tanh(self.fc2(x))
         x = torch.tanh(self.fc3(x))
