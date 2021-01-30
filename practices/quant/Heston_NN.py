@@ -6,7 +6,7 @@ from torch.autograd import grad
 
 class Net(nn.Module):
 
-    def __init__(self,num_input=7, num_neurons=128):
+    def __init__(self,num_input=7, num_neurons=128, device=None):
         super(Net, self).__init__()
         self.fc1 = nn.Linear(num_input, num_neurons) 
         self.fc2 = nn.Linear(num_neurons, num_neurons)
@@ -16,6 +16,12 @@ class Net(nn.Module):
 #        self.fc6 = nn.Linear(num_neurons, num_neurons)
         self.fc7 = nn.Linear(num_neurons, 1)
 
+        if device is None:
+            self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        else:
+            self.device = device
+        self.to(self.device)
+    
     def forward(self, x):
         # Max pooling over a (2, 2) window
         x = F.relu(self.fc1(x))
@@ -31,20 +37,20 @@ class Net(nn.Module):
     def get_loss(self, x, y_train, T_loc, k_loc, criterion, arbitrage_weight, l2_weight, show_log=False):
         y_hat = self.forward(x)
         loss = criterion(y_hat, y_train)
-        l2_reg = torch.tensor(0.)
+        l2_reg = torch.tensor(0.).to(self.device)
 
         # Penalization (loop over each data)
         ## calendar arbitrage
         calendar_arbi_count = 0
-        calendar_loss = torch.tensor(0.)
-        butterfly_loss = torch.tensor(0.)
+        calendar_loss = torch.tensor(0.).to(self.device)
+        butterfly_loss = torch.tensor(0.).to(self.device)
         for elem in x:
             y= self.forward(elem)
             dydx = grad(y, elem, create_graph = True)[0]
             dydT = dydx[T_loc]
             if dydT < 0.0:
                 calendar_arbi_count += 1
-                calendar_loss += torch.exp(-dydT) * arbitrage_weight[0]
+                calendar_loss += (torch.exp(-dydT) * arbitrage_weight[0])
         loss += calendar_loss
         ## butterfly arbitrage
         butterfly_count = 0
