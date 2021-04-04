@@ -24,14 +24,18 @@ class Net(nn.Module):
     
     def forward(self, x):
         x = F.relu(self.fc1(x))
-        x = torch.tanh(self.fc2(x))
-#        x = torch.tanh(self.fc3(x))
+        x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
+        
+#        x = F.relu(self.fc1(x))
+#        x = torch.tanh(self.fc2(x))
+#        x = F.relu(self.fc3(x))
+
 #        x = F.relu(self.fc4(x))
 #        x = F.relu(self.fc5(x))
 #        x = F.relu(self.fc6(x))
-        x = F.relu(self.fc7(x))
-#        x = torch.sigmoid(self.fc7(x))
+#        x = F.relu(self.fc7(x))
+        x = 0.5*torch.sigmoid(self.fc7(x))
         return x
     
     def get_loss(self, x, y_train, T_loc, k_loc, criterion, arbitrage_weight, l2_weight, show_log=False):

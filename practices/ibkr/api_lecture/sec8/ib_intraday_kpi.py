@@ -70,8 +70,10 @@ def dataDataframe(symbols,TradeApp_obj):
     "returns extracted historical data in dataframe format"
     df_data = {}
     for symbol in symbols:
+        print('start ',symbol)
         df_data[symbol] = pd.DataFrame(TradeApp_obj.data[symbols.index(symbol)])
         df_data[symbol].set_index("Date",inplace=True)
+        print('made ',symbol)
     return df_data
 ################################################################################
 
