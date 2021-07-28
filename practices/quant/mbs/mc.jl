@@ -61,11 +61,12 @@ params = Dict(
     # ho(t) parameters
             :a => 0.024,
             :b => 1,
-            :b => 0.0000001, # test
+            # :b => 0.0000001, # test
             :T_asterisk => 2.5, # prepayment date,
             :gamma => 1,
             :k => 0.0007, # prepayment strike
-            :k => 0.000000007, # prepayment strike
+            :k => 0.03, # prepayment strike
+            # :k => 0.000000007, # prepayment strike
             :T_asterisk => 0.0, # prepayment date test
     )
 e_dist = dist.Exponential(1) # exponential distribution about prepayment. Integration of harzard process > e
@@ -110,7 +111,7 @@ for i in 1:num_x
     x[:,i,current] .= params[:x0][i] # assign initial treasury variable
     r[:,current] .+= params[:x0][i] # initial interest rate
 end
-println("Initial r ",r[1,1])
+println("Initial r ", r[1,1])
 h[:,current] = get_h_t(a,b,gamma,k,r[:,current],0.0,T_asterisk)
 t_sim = collect(0:num_steps-1)*dt
 
@@ -144,7 +145,8 @@ for current in 1:(num_steps-1)
     
     # compute harzard rate
     global h_t
-    h[:,next] = get_h_t(a,b,gamma,k,view(r,:,next),t,T_asterisk)
+    x_view = @view x[:,end,next]
+    h[:,next] = get_h_t(a,b,gamma,k,x_view,t,T_asterisk)
 end
 
 println("Check whether CIR process simulation is reliable")
@@ -238,6 +240,7 @@ end
 obj_fun = x -> (x - m_func(x,t_sim,T,int_0_u_r_h,r))^2
 res = Optim.optimize(obj_fun, 0.001,0.04)
 m = res.minimizer
+println("Mortgage rate ",m)
 c = get_c(m,P0,T) # coupon (2.1)
 
 # Computation of M0 (3.1)
