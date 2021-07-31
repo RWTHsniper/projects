@@ -5,6 +5,7 @@ import NumericalIntegration; ni = NumericalIntegration
 import Optim
 
 # include("C://Users//golde//Documents//GitHub//projects//practices//quant//mbs//mc.jl")
+# include("/Users/jungjaeyong/projects/practices/quant/mbs/mc.jl")
 
 # Price of MBS
 # if t< tau < T
@@ -77,8 +78,8 @@ annual_steps = 12 # steps per year
 num_paths= 1000
 annual_steps = 300 # steps per year
 dt = 1/annual_steps
-T = 10 # year
-# T = 30 # test
+# T = 10 # year
+T = 30 # test
 num_steps = T * annual_steps
 
 # variables in simulations
@@ -174,7 +175,7 @@ prepay_step = zeros(Int64, num_paths)
 for i in 1:length(prepay_step)
     try
         prepay_step[i] = findfirst(prepay_flag[i,:])
-    catch e
+    catch err
         prepay_step[i] = num_steps # prepayment did not happen
     end
 end
@@ -223,23 +224,29 @@ end
 # calculate m
 m0 = 0.01 # initial guess on m
 function m_func(m0,t_sim,T,int_0_u_r_h,r) # 3.9
-    d_num = zeros(size(t_sim))
-    d_den = zeros(size(t_sim))
-    for (j,u) in enumerate(t_sim)
+    t_frac = @view t_sim[t_sim .< T]
+    d_num = zeros(size(t_frac))
+    d_den = zeros(size(t_frac))
+    for (j,u) in enumerate(t_frac)
         r_u = view(r,:,j)
-        factor = (1-exp(-m0*(T-u)))
+        factor = (1.0-exp(-m0*(T-u)))
         d_num[j] = factor*get_R(int_0_u_r_h[:,j], r_u)
         d_den[j] = factor*get_Q(int_0_u_r_h[:,j])
     end
-    num = ni.integrate(t_sim, d_num)
-    den = ni.integrate(t_sim, d_den)
+    num = ni.integrate(t_frac, d_num)
+    den = ni.integrate(t_frac, d_den)
     m = num/den
     return m
 end
 
-obj_fun = x -> (x - m_func(x,t_sim,T,int_0_u_r_h,r))^2
-res = Optim.optimize(obj_fun, 0.001,0.04)
-m = res.minimizer
+function get_m(m0,t_sim,T,int_0_u_r_h)
+    obj_fun = x -> (x - m_func(x,t_sim,T,int_0_u_r_h,r))^2
+    res = Optim.optimize(obj_fun, 0.001,0.04)
+    m = res.minimizer
+    return m    
+end
+
+m = get_m(m0,t_sim,T,int_0_u_r_h)
 println("Mortgage rate ",m)
 c = get_c(m,P0,T) # coupon (2.1)
 
@@ -272,16 +279,18 @@ println("M0 at t=0 ",stats.mean(M0))
 
 # Test for M0
 # The following expression should be zero 3.6
-t = 0.0
-t_ind = 1
-# buffer = zeros(length(t_sim)-t_ind+1)
-buffer = zeros(length(t_sim))
-for (u_ind,u) in enumerate(t_sim)
-    factor = (1.0-exp(-m*(T-u)))/(1.0-exp(-m*(T-t)))
-    int_view = view(int_0_u_r_h,:,t_ind:u_ind)
-    r_view = view(r,:,u_ind)
-    factor2 = m * get_Q(int_view) - get_R(int_view, r_view)
-    buffer[u_ind] = factor*factor2
-end
-int_test = ni.integrate(t_sim, buffer)
-println("int_test is supposed to be 0 at t=0", int_test)
+# t = 0.0
+# t_ind = 1
+# # buffer = zeros(length(t_sim)-t_ind+1)
+# buffer = zeros(length(t_sim))
+# for (u_ind,u) in enumerate(t_sim)
+#     factor = (1.0-exp(-m*(T-u)))/(1.0-exp(-m*(T-t)))
+#     int_view = view(int_0_u_r_h,:,t_ind:u_ind)
+#     r_view = view(r,:,u_ind)
+#     factor2 = m * get_Q(int_view) - get_R(int_view, r_view)
+#     buffer[u_ind] = factor*factor2
+# end
+# int_test = ni.integrate(t_sim, buffer)
+# println("int_test is supposed to be 0 at t=0", int_test)
+
+
