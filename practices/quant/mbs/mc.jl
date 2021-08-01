@@ -4,8 +4,8 @@ import Statistics; stats = Statistics
 import NumericalIntegration; ni = NumericalIntegration
 import Optim
 
-# include("C://Users//golde//Documents//GitHub//projects//practices//quant//mbs//mc.jl")
-# include("/Users/jungjaeyong/projects/practices/quant/mbs/mc.jl")
+# include("C://Users//golde//Documents//GitHub//projects//practices//quant//mbs//mc.jl") # windows
+# include("/Users/jungjaeyong/projects/practices/quant/mbs/mc.jl") # mac
 
 # Price of MBS
 # if t< tau < T
@@ -75,7 +75,7 @@ e_dist = dist.Exponential(1) # exponential distribution about prepayment. Integr
 # Let's write a simulation code
 num_paths= 5
 annual_steps = 12 # steps per year
-num_paths= 1000
+num_paths= 5000
 annual_steps = 300 # steps per year
 dt = 1/annual_steps
 # T = 10 # year
@@ -285,12 +285,12 @@ println("M0 at t=0 ",stats.mean(M0))
 # buffer = zeros(length(t_sim))
 # for (u_ind,u) in enumerate(t_sim)
 #     factor = (1.0-exp(-m*(T-u)))/(1.0-exp(-m*(T-t)))
-#     int_view = view(int_0_u_r_h,:,t_ind:u_ind)
+#     int_view = view(int_0_u_r_h,:,t_ind:u_ind) # when you slice, use view to save costs
 #     r_view = view(r,:,u_ind)
 #     factor2 = m * get_Q(int_view) - get_R(int_view, r_view)
 #     buffer[u_ind] = factor*factor2
 # end
 # int_test = ni.integrate(t_sim, buffer)
 # println("int_test is supposed to be 0 at t=0", int_test)
-
-
+int_view = view(int_0_u_r_h,:,size(int_0_u_r_h,2))
+println("Q at t=0 ", get_Q(int_view))
