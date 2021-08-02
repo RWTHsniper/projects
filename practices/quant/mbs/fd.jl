@@ -165,6 +165,7 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
                     # Vc[count] = -Val[count]
                     count += 1
                 elseif p == 1
+                    C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
                     cen_val = 2.0/dt + C2[dof] + C3[dof]
                     I[count] = ind; J[count] = ind; Val[count] = cen_val; 
                     # Vc[count] = -cen_val + 4.0/dt # offset
@@ -174,6 +175,7 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
                     # Vc[count] = -Val[count]
                     count += 1
                 elseif p == Nx[dof]
+                    C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
                     I[count] = ind; J[count] = indm; Val[count] = C2[dof]
                     # Vc[count] = -Val[count]
                     count += 1
@@ -201,6 +203,7 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
                     # Vc[count] = -Val[count]
                     count += 1
                 elseif p == 1
+                    C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
                     cen_val = 2.0/dt + C2[dof] + C3[dof]
                     Val[center] += cen_val;
                     # Vc[center] += -cen_val + 4.0/dt
@@ -208,6 +211,7 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
                     # Vc[count] = -Val[count]
                     count += 1
                 elseif p == Nx[dof]
+                    C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
                     I[count] = ind; J[count] = indm; Val[count] = C2[dof]
                     # Vc[count] = -Val[count]
                     count += 1
@@ -233,6 +237,7 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
                     # Vc[count] = -Val[count]
                     count += 1
                 elseif p == 1
+                    C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
                     cen_val = 2.0/dt + C2[dof] + C3[dof]
                     Val[center] += cen_val;
                     # Vc[center] += -cen_val + 4.0/dt
@@ -240,6 +245,7 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
                     # Vc[count] = -Val[count]
                     count += 1
                 elseif p == Nx[dof]
+                    C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
                     I[count] = ind; J[count] = indm; Val[count] = C2[dof]
                     # Vc[count] = -Val[count]
                     count += 1
@@ -312,9 +318,10 @@ x_min = [0.0,0.0,0.0] # CIR
 x_max = [0.1,0.1,0.1]
 x_max = th*3.0
 grid_d = Dict(
-    :Nt => 30*300, # num of timesteps
+    :Nt => 30*100, # num of timesteps
     # :Nx => [3,3,3], # num of state variables
     :Nx => [64,64,16], # num of state variables
+    :Nx => [128,128,16], # num of state variables
     :x_min => x_min,
     :x_max => x_max,
 )
@@ -380,4 +387,4 @@ R0_sort_ind = sortperm(R0)
 R0_sorted = R0[R0_sort_ind]
 Q_res = Qn[R0_sort_ind]
 inter_func = ip.LinearInterpolation(R0_sorted,Q_res)
-println("Interpolated Qn at t=0 ", inter_func(r0))
+println("Interpolated Qn at t=0 ", inter_func(r0)) # expect 0.02

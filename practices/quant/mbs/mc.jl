@@ -18,6 +18,12 @@ function get_CIR_mean(t,ve,ka,si,x0)
     return res
 end
 
+function get_CIR_var(t,ve,ka,si,x0)
+    th = ve/ka
+    res = si^2/ka*x0*(exp(-ka*t)-exp(-2.0*ka*t)) +th*si^2/(2.0*ka)*(1-exp(-ka*t))^2
+    return res
+end
+
 function get_P_no_prepay(P0,m,t,T)
 # Principle without prepayment
     Pt = P0*(1-exp(-m*(T-t)))/(1-exp(-m*T))
@@ -165,8 +171,10 @@ theo_mean_x = get_CIR_mean.(T,ve,ka,si,params[:x0])
 mean_r = stats.mean(r[:,end])
 std_r = stats.std(r[:,end])
 theo_mean_r = sum(theo_mean_x) + params[:l0]
+theo_var_r = sum(get_CIR_var.(T,ve,ka,si,params[:x0]))
+theo_std_r = sqrt(theo_var_r)
 @show mean_r, std_r
-@show theo_mean_r
+@show theo_mean_r, theo_std_r
 
 # integrate h_t
 int_h = zeros(size(h))
