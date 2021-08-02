@@ -4,7 +4,8 @@
 
 import SparseArrays; sp = SparseArrays
 import IterativeSolvers; is = IterativeSolvers
-
+import LinearAlgebra; la = LinearAlgebra
+import Interpolations; ip = Interpolations
 
 function get_ind(N, pos)
     res = 0
@@ -64,14 +65,15 @@ end
 =#
 
 
-function compute_fd!(V0,Vc,Vn,matc,mat,t_space)
-    Vc .= V0
+function compute_fd!(Vc,Vn,matc,mat,t_space)
+    tmp = zeros(size(Vc))
     for (ind, tau) in enumerate(t_space)
-        Vc .= matc*Vc
-        Vn .= mat\Vc
+        tmp .= matc*Vc
+        # Vn .= mat\tmp
+        is.gmres!(Vn,mat,tmp)
         Vc .= Vn
     end
-    
+    return Vn
 end
 
 # Let's go
@@ -128,7 +130,7 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
     si = params[:si]
     ve = params[:ve]
     ka = params[:ka]
-    gamma = params[:gamma]
+    gamma = params[:gamma] # gamma should be a variable
     k = params[:k] # strike interest rate
     count = 1 # counter to point an element in I,J,Val
     for c in 1:Nx[3]
@@ -141,7 +143,8 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
                 C1 = si.^2 .*(pos.-1)./(2.0*dx)
                 C2 = ve./(2.0*dx) - ka.*(pos.-1)/2.0
                 C3 = (1.0-gamma).*(pos.-1).*dx .+ gamma*k
-                C3[1:2] .= 0.0 # Use only the third factor for the harzard process
+                C3[1:2] = (pos[1:2].-1).*dx[1:2] # only the third factor is used for the harzard process
+                # C3[1:2] .= 0.0 # Use only the third factor for the harzard process
                 # a
                 p = a
                 dof = 1
@@ -151,29 +154,32 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
                 indp = get_ind(Nx,indp)
                 if 1 < p < Nx[dof] # inner
                     I[count] = ind; J[count] = indm; Val[count] = -C1[dof] + C2[dof] 
-                    Ic[count] = I[count]; Jc[count] = J[count]; Vc[count] = -Val[count]
+                    # Vc[count] = -Val[count]
                     count += 1
-                    I[count] = ind; J[count] = ind; Val[count] = 2.0*C1[dof] + C3[dof] + 2.0/dt
-                    Ic[count] = I[count]; Jc[count] = J[count]; Vc[count] = -Val[count] + 4.0/dt # offset
+                    cen_val = 2.0*C1[dof] + C3[dof] + 2.0/dt
+                    I[count] = ind; J[count] = ind; Val[count] = cen_val
+                    # Vc[count] = -cen_val + 4.0/dt # offset
                     center = count # center node
                     count += 1
                     I[count] = ind; J[count] = indp; Val[count] = -C1[dof] - C2[dof]
-                    Ic[count] = I[count]; Jc[count] = J[count]; Vc[count] = -Val[count]
+                    # Vc[count] = -Val[count]
                     count += 1
                 elseif p == 1
-                    I[count] = ind; J[count] = ind; Val[count] = 2.0/dt + C2[dof] + C3[dof]; 
-                    Ic[count] = I[count]; Jc[count] = J[count]; Vc[count] = -Val[count] + 4.0/dt # offset
+                    cen_val = 2.0/dt + C2[dof] + C3[dof]
+                    I[count] = ind; J[count] = ind; Val[count] = cen_val; 
+                    # Vc[count] = -cen_val + 4.0/dt # offset
                     center = count
                     count += 1
                     I[count] = ind; J[count] = indp; Val[count] = -C2[dof]
-                    Ic[count] = I[count]; Jc[count] = J[count]; Vc[count] = -Val[count]
+                    # Vc[count] = -Val[count]
                     count += 1
                 elseif p == Nx[dof]
                     I[count] = ind; J[count] = indm; Val[count] = C2[dof]
-                    Ic[count] = I[count]; Jc[count] = J[count]; Vc[count] = -Val[count]
+                    # Vc[count] = -Val[count]
                     count += 1
-                    I[count] = ind; J[count] = ind; Val[count] = 2.0/dt - C2[dof] + C3[dof]; 
-                    Ic[count] = I[count]; Jc[count] = J[count]; Vc[count] = -Val[count] + 4.0/dt # offset
+                    cen_val = 2.0/dt - C2[dof] + C3[dof]
+                    I[count] = ind; J[count] = ind; Val[count] = cen_val; 
+                    # Vc[count] = -cen_val + 4.0/dt # offset
                     center = count
                     count += 1
                 end
@@ -186,25 +192,28 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
                 indp = get_ind(Nx,indp)
                 if 1 < p < Nx[dof] # inner
                     I[count] = ind; J[count] = indm; Val[count] = -C1[dof] + C2[dof] 
-                    Ic[count] = I[count]; Jc[count] = J[count]; Vc[count] = -Val[count]
+                    # Vc[count] = -Val[count]
                     count += 1
-                    Val[center] += 2.0*C1[dof] + C3[dof] + 2.0/dt
-                    Vc[center] = -Val[center] + 4.0/dt
+                    cen_val = 2.0*C1[dof] + C3[dof] + 2.0/dt
+                    Val[center] += cen_val
+                    # Vc[center] += -cen_val + 4.0/dt
                     I[count] = ind; J[count] = indp; Val[count] = -C1[dof] - C2[dof]
-                    Ic[count] = I[count]; Jc[count] = J[count]; Vc[count] = -Val[count]
+                    # Vc[count] = -Val[count]
                     count += 1
                 elseif p == 1
-                    Val[center] += 2.0/dt + C2[dof] + C3[dof];
-                    Vc[center] = -Val[center] + 4.0/dt
+                    cen_val = 2.0/dt + C2[dof] + C3[dof]
+                    Val[center] += cen_val;
+                    # Vc[center] += -cen_val + 4.0/dt
                     I[count] = ind; J[count] = indp; Val[count] = -C2[dof]
-                    Ic[count] = I[count]; Jc[count] = J[count]; Vc[count] = -Val[count]
+                    # Vc[count] = -Val[count]
                     count += 1
                 elseif p == Nx[dof]
                     I[count] = ind; J[count] = indm; Val[count] = C2[dof]
-                    Ic[count] = I[count]; Jc[count] = J[count]; Vc[count] = -Val[count]
+                    # Vc[count] = -Val[count]
                     count += 1
-                    Val[center] = 2.0/dt - C2[dof] + C3[dof]; 
-                    Vc[center] = -Val[center] + 4.0/dt
+                    cen_val = 2.0/dt - C2[dof] + C3[dof]
+                    Val[center] += cen_val; 
+                    # Vc[center] += -cen_val + 4.0/dt
                 end
                 # c
                 p = c
@@ -215,29 +224,42 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
                 indp = get_ind(Nx,indp)
                 if 1 < p < Nx[dof] # inner
                     I[count] = ind; J[count] = indm; Val[count] = -C1[dof] + C2[dof] 
-                    Ic[count] = I[count]; Jc[count] = J[count]; Vc[count] = -Val[count]
+                    Vc[count] = -Val[count]
                     count += 1
-                    Val[center] += 2.0*C1[dof] + C3[dof] + 2.0/dt
-                    Vc[center] = -Val[center] + 4.0/dt
+                    cen_val = 2.0*C1[dof] + C3[dof] + 2.0/dt
+                    Val[center] += cen_val
+                    # Vc[center] += -cen_val + 4.0/dt
                     I[count] = ind; J[count] = indp; Val[count] = -C1[dof] - C2[dof]
-                    Ic[count] = I[count]; Jc[count] = J[count]; Vc[count] = -Val[count]
+                    # Vc[count] = -Val[count]
                     count += 1
                 elseif p == 1
-                    Val[center] += 2.0/dt + C2[dof] + C3[dof];
-                    Vc[center] = -Val[center] + 4.0/dt
+                    cen_val = 2.0/dt + C2[dof] + C3[dof]
+                    Val[center] += cen_val;
+                    # Vc[center] += -cen_val + 4.0/dt
                     I[count] = ind; J[count] = indp; Val[count] = -C2[dof]
-                    Ic[count] = I[count]; Jc[count] = J[count]; Vc[count] = -Val[count]
+                    # Vc[count] = -Val[count]
                     count += 1
                 elseif p == Nx[dof]
                     I[count] = ind; J[count] = indm; Val[count] = C2[dof]
-                    Ic[count] = I[count]; Jc[count] = J[count]; Vc[count] = -Val[count]
+                    # Vc[count] = -Val[count]
                     count += 1
-                    Val[center] = 2.0/dt - C2[dof] + C3[dof]; 
-                    Vc[center] = -Val[center] + 4.0/dt
+                    cen_val = 2.0/dt - C2[dof] + C3[dof]
+                    Val[center] += cen_val; 
+                    # Vc[center] += -cen_val + 4.0/dt
                 end
+                # Vc[center] = -Val[center] + 4.0/dt * 3
             end    
         end
-    end    
+    end
+    Ic .= I
+    Jc .= J
+    Vc .= -Val
+    # corrections on centeral values
+    for i in 1:length(I)
+        if I[i] == J[i] # node center
+            Vc[i] += 4*3/dt
+        end
+    end
 end
 
 
@@ -266,6 +288,7 @@ params = Dict(
     :T => 30, # test
 # Treasury
     :l0 => -0.127061,
+    :l0 => 0.0, # test
     :ve =>[0.2715618,0.0195524,0.0009720],
     :ka => [5.6772530,0.2520333,0.147],
     :si =>[0.0181427,0.0422960,0.034],
@@ -274,23 +297,24 @@ params = Dict(
 # ho(t) parameters
     :a => 0.024,
     :b => 1,
-    # :b => 0.0000001, # test
+    :b => 0.0, # test
     :T_asterisk => 2.5, # prepayment date,
     :gamma => 1,
+    :gamma => 0, # test
     :k => 0.0007, # prepayment strike
     :k => 0.03, # prepayment strike
-    # :k => 0.000000007, # prepayment strike
-    :T_asterisk => 0.0, # prepayment date test
-)
+    :k => -1.0, # prepayment strike # test
+    :T_asterisk => 1000.0, # prepayment date test # test
+    )
 
 th = params[:ve]./params[:ka]
 x_min = [0.0,0.0,0.0] # CIR
 x_max = [0.1,0.1,0.1]
-x_max = th*10.0
+x_max = th*3.0
 grid_d = Dict(
-    :Nt => 30, # num of timesteps
-    :Nx => [5,5,5], # num of state variables
-    :Nx => [100,100,100], # num of state variables
+    :Nt => 30*300, # num of timesteps
+    # :Nx => [3,3,3], # num of state variables
+    :Nx => [64,64,16], # num of state variables
     :x_min => x_min,
     :x_max => x_max,
 )
@@ -328,12 +352,12 @@ tau_space = collect(0.0:dt:T)
 # 1. fQ(ru) = 1
 fQ(ru) = 1.0
 Q0 = zeros(num_dof) # initial value
-Qc = zeros(num_dof) # current
 Qn = zeros(num_dof) # next
 for (ind,elem) in enumerate(Q0)
     Q0[ind] = fQ(elem)
 end
-compute_fd!(Q0,Qc,Qn,matc,mat,tau_space)
+Qc = deepcopy(Q0) # current
+compute_fd!(Qc,Qn,matc,mat,tau_space)
 x0 = params[:x0]
 x0_pos = round.((x0 -x_min)./dx) .+ 1
 x0_ind = Int(get_ind(Nx,x0_pos))
@@ -351,3 +375,9 @@ for (ind,elem) in enumerate(R0)
     ru = sum(dx.*(pos.-1.0).+ x_min) + l0 
     R0[ind] = fQ(ru)
 end
+
+R0_sort_ind = sortperm(R0)
+R0_sorted = R0[R0_sort_ind]
+Q_res = Qn[R0_sort_ind]
+inter_func = ip.LinearInterpolation(R0_sorted,Q_res)
+println("Interpolated Qn at t=0 ", inter_func(r0))

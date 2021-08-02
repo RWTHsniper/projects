@@ -52,30 +52,34 @@ get_P_no_prepay(1.0,0.03,11,10)
 
 # Model parameters
 params = Dict(
+# contract params
+    :T => 30, # test
 # Treasury
-            :l0 => -0.127061,
-            :ve =>[0.2715618,0.0195524,0.0009720],
-            :ka => [5.6772530,0.2520333,0.147],
-            :si =>[0.0181427,0.0422960,0.034],
-            :x0 => [0.05095958,0.06725220,0.00961570],
+    :l0 => -0.127061,
+    :l0 => 0.0, # test
+    :ve =>[0.2715618,0.0195524,0.0009720],
+    :ka => [5.6772530,0.2520333,0.147],
+    :si =>[0.0181427,0.0422960,0.034],
+    :x0 => [0.05095958,0.06725220,0.00961570],
 # harzard rate process (PSA params)
-    # ho(t) parameters
-            :a => 0.024,
-            :b => 1,
-            # :b => 0.0000001, # test
-            :T_asterisk => 2.5, # prepayment date,
-            :gamma => 1,
-            :k => 0.0007, # prepayment strike
-            :k => 0.03, # prepayment strike
-            # :k => 0.000000007, # prepayment strike
-            :T_asterisk => 0.0, # prepayment date test
+# ho(t) parameters
+    :a => 0.024,
+    :b => 1,
+    :b => 0.0, # test
+    :T_asterisk => 2.5, # prepayment date,
+    :gamma => 1,
+    :gamma => 0, # test
+    :k => 0.0007, # prepayment strike
+    :k => 0.03, # prepayment strike
+    :k => -1.0, # prepayment strike # test
+    :T_asterisk => 1000.0, # prepayment date test # test
     )
 e_dist = dist.Exponential(1) # exponential distribution about prepayment. Integration of harzard process > e
 
 # Let's write a simulation code
 num_paths= 5
 annual_steps = 12 # steps per year
-num_paths= 5000
+num_paths= 1000
 annual_steps = 300 # steps per year
 dt = 1/annual_steps
 # T = 10 # year
