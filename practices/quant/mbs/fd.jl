@@ -7,6 +7,40 @@ import IterativeSolvers; is = IterativeSolvers
 import LinearAlgebra; la = LinearAlgebra
 import Interpolations; ip = Interpolations
 
+
+# CIR process functions
+
+function r_a_aux0(dl,th,ka,si,tau,v=1.0,u=0.0)
+    g_aux = sqrt(ka^2 + 2*dl*v*si^2)
+    ex = exp(g_aux*tau) - 1.0
+    c = 2.0*g_aux + ex*(ka + g_aux - u*si^2)
+    return ka*th*(tau*(ka + g_aux) + 2*log(2*g_aux/c))/(si^2)
+end
+
+function r_a_aux0(dl::Vector,th::Vector,ka::Vector,si::Vector,tau,v=1.0,u=0.0)
+    res = zeros(size(dl))
+    for i in 1:length(res)
+        res[i] = r_a_aux0(dl[i],th[i],ka[i],si[i],tau,v,u)
+    end
+    return res
+end
+
+function r_b_aux0(dl,ka,si,tau,v=1.0,u=0.0)
+    g_aux = sqrt(ka^2 + 2*dl*v*si^2)
+    ex = exp(g_aux*tau) - 1.0
+    c = 2.0*g_aux + ex*(ka + g_aux - u*si^2)
+    return (2*u*g_aux - ex*(2*dl*v + u*(ka - g_aux)))/c
+end
+
+function r_b_aux0(dl::Vector,ka::Vector,si::Vector,tau,v=1.0,u=0.0)
+    res = zeros(size(dl))
+    for i in 1:length(res)
+        res[i] = r_b_aux0(dl[i],ka[i],si[i],tau,v,u)
+    end
+    return res
+end
+
+
 function get_ind(N, pos)
     res = 0
     # for i in 1:(length(pos)-1)
@@ -143,7 +177,8 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
                 C1 = si.^2 .*(pos.-1)./(2.0*dx)
                 C2 = ve./(2.0*dx) - ka.*(pos.-1)/2.0
                 C3 = (1.0-gamma).*(pos.-1).*dx .+ gamma*k
-                C3[1:2] = (pos[1:2].-1).*dx[1:2] # only the third factor is used for the harzard process
+                # C3[1:2] = (pos[1:2].-1).*dx[1:2] # only the third factor is used for the harzard process
+                C3 = (pos.-1).*dx # test
                 # C3[1:2] .= 0.0 # Use only the third factor for the harzard process
                 # a
                 p = a
@@ -153,35 +188,31 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
                 indp = pos .+ (1,0,0)
                 indp = get_ind(Nx,indp)
                 if 1 < p < Nx[dof] # inner
-                    I[count] = ind; J[count] = indm; Val[count] = -C1[dof] + C2[dof] 
-                    # Vc[count] = -Val[count]
+                    I[count] = ind; J[count] = indm
+                    Val[count] = -C1[dof] + C2[dof]
                     count += 1
-                    cen_val = 2.0*C1[dof] + C3[dof] + 2.0/dt
-                    I[count] = ind; J[count] = ind; Val[count] = cen_val
-                    # Vc[count] = -cen_val + 4.0/dt # offset
+                    I[count] = ind; J[count] = ind
+                    Val[count] = 2.0*C1[dof] + C3[dof] + 2.0/dt
                     center = count # center node
                     count += 1
-                    I[count] = ind; J[count] = indp; Val[count] = -C1[dof] - C2[dof]
-                    # Vc[count] = -Val[count]
+                    I[count] = ind; J[count] = indp
+                    Val[count] = -C1[dof] - C2[dof]
                     count += 1
                 elseif p == 1
                     C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
-                    cen_val = 2.0/dt + C2[dof] + C3[dof]
-                    I[count] = ind; J[count] = ind; Val[count] = cen_val; 
-                    # Vc[count] = -cen_val + 4.0/dt # offset
+                    I[count] = ind; J[count] = ind; 
+                    Val[count] = 2.0/dt + C2[dof] + C3[dof] 
                     center = count
                     count += 1
                     I[count] = ind; J[count] = indp; Val[count] = -C2[dof]
-                    # Vc[count] = -Val[count]
                     count += 1
                 elseif p == Nx[dof]
                     C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
-                    I[count] = ind; J[count] = indm; Val[count] = C2[dof]
-                    # Vc[count] = -Val[count]
+                    I[count] = ind; J[count] = indm
+                    Val[count] = C2[dof]
                     count += 1
-                    cen_val = 2.0/dt - C2[dof] + C3[dof]
-                    I[count] = ind; J[count] = ind; Val[count] = cen_val; 
-                    # Vc[count] = -cen_val + 4.0/dt # offset
+                    I[count] = ind; J[count] = ind
+                    Val[count] = 2.0/dt - C2[dof] + C3[dof] 
                     center = count
                     count += 1
                 end
@@ -193,31 +224,25 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
                 indp = pos .+ (0,1,0)
                 indp = get_ind(Nx,indp)
                 if 1 < p < Nx[dof] # inner
-                    I[count] = ind; J[count] = indm; Val[count] = -C1[dof] + C2[dof] 
-                    # Vc[count] = -Val[count]
+                    I[count] = ind; J[count] = indm
+                    Val[count] = -C1[dof] + C2[dof] 
                     count += 1
-                    cen_val = 2.0*C1[dof] + C3[dof] + 2.0/dt
-                    Val[center] += cen_val
-                    # Vc[center] += -cen_val + 4.0/dt
-                    I[count] = ind; J[count] = indp; Val[count] = -C1[dof] - C2[dof]
-                    # Vc[count] = -Val[count]
+                    Val[center] += 2.0*C1[dof] + C3[dof] + 2.0/dt
+                    I[count] = ind; J[count] = indp
+                    Val[count] = -C1[dof] - C2[dof]
                     count += 1
                 elseif p == 1
                     C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
-                    cen_val = 2.0/dt + C2[dof] + C3[dof]
-                    Val[center] += cen_val;
-                    # Vc[center] += -cen_val + 4.0/dt
-                    I[count] = ind; J[count] = indp; Val[count] = -C2[dof]
-                    # Vc[count] = -Val[count]
+                    Val[center] += 2.0/dt + C2[dof] + C3[dof]
+                    I[count] = ind; J[count] = indp
+                    Val[count] = -C2[dof]
                     count += 1
                 elseif p == Nx[dof]
                     C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
-                    I[count] = ind; J[count] = indm; Val[count] = C2[dof]
-                    # Vc[count] = -Val[count]
+                    I[count] = ind; J[count] = indm
+                    Val[count] = C2[dof]
                     count += 1
-                    cen_val = 2.0/dt - C2[dof] + C3[dof]
-                    Val[center] += cen_val; 
-                    # Vc[center] += -cen_val + 4.0/dt
+                    Val[center] += 2.0/dt - C2[dof] + C3[dof]
                 end
                 # c
                 p = c
@@ -227,34 +252,27 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
                 indp = pos .+ (0,0,1)
                 indp = get_ind(Nx,indp)
                 if 1 < p < Nx[dof] # inner
-                    I[count] = ind; J[count] = indm; Val[count] = -C1[dof] + C2[dof] 
-                    Vc[count] = -Val[count]
+                    I[count] = ind; J[count] = indm
+                    Val[count] = -C1[dof] + C2[dof] 
                     count += 1
-                    cen_val = 2.0*C1[dof] + C3[dof] + 2.0/dt
-                    Val[center] += cen_val
-                    # Vc[center] += -cen_val + 4.0/dt
-                    I[count] = ind; J[count] = indp; Val[count] = -C1[dof] - C2[dof]
-                    # Vc[count] = -Val[count]
+                    Val[center] += 2.0*C1[dof] + C3[dof] + 2.0/dt
+                    I[count] = ind; J[count] = indp
+                    Val[count] = -C1[dof] - C2[dof]
                     count += 1
                 elseif p == 1
                     C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
-                    cen_val = 2.0/dt + C2[dof] + C3[dof]
-                    Val[center] += cen_val;
-                    # Vc[center] += -cen_val + 4.0/dt
-                    I[count] = ind; J[count] = indp; Val[count] = -C2[dof]
-                    # Vc[count] = -Val[count]
+                    Val[center] += 2.0/dt + C2[dof] + C3[dof]
+                    I[count] = ind; J[count] = indp
+                    Val[count] = -C2[dof]
                     count += 1
                 elseif p == Nx[dof]
                     C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
-                    I[count] = ind; J[count] = indm; Val[count] = C2[dof]
-                    # Vc[count] = -Val[count]
+                    I[count] = ind; J[count] = indm
+                    Val[count] = C2[dof]
                     count += 1
-                    cen_val = 2.0/dt - C2[dof] + C3[dof]
-                    Val[center] += cen_val; 
-                    # Vc[center] += -cen_val + 4.0/dt
+                    Val[center] += 2.0/dt - C2[dof] + C3[dof] 
                 end
-                # Vc[center] = -Val[center] + 4.0/dt * 3
-            end    
+            end
         end
     end
     Ic .= I
@@ -263,9 +281,11 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
     # corrections on centeral values
     for i in 1:length(I)
         if I[i] == J[i] # node center
-            Vc[i] += 4*3/dt
+            Vc[i] += 12.0/dt # 2.0*2.0*3.0
         end
     end
+    # Val *=dt
+    # Vc *= dt
 end
 
 
@@ -295,10 +315,14 @@ params = Dict(
 # Treasury
     :l0 => -0.127061,
     :l0 => 0.0, # test
-    :ve =>[0.2715618,0.0195524,0.0009720],
+    :ve => [0.2715618,0.0195524,0.0009720],
     :ka => [5.6772530,0.2520333,0.147],
-    :si =>[0.0181427,0.0422960,0.034],
+    :si => [0.0181427,0.0422960,0.034],
     :x0 => [0.05095958,0.06725220,0.00961570],
+    # :ve => [0.2715618,0.2715618,0.2715618], # test
+    # :ka => [5.6772530,5.6772530,5.6772530], # test
+    # :si => [0.0181427,0.0181427,0.0181427], # test
+    # :x0 => [0.05095958,0.05095958,0.05095958], # test
 # harzard rate process (PSA params)
 # ho(t) parameters
     :a => 0.024,
@@ -316,12 +340,12 @@ params = Dict(
 th = params[:ve]./params[:ka]
 x_min = [0.0,0.0,0.0] # CIR
 x_max = [0.1,0.1,0.1]
-x_max = th*3.0
+x_max = th*2.0
 grid_d = Dict(
     :Nt => 30*100, # num of timesteps
     # :Nx => [3,3,3], # num of state variables
-    :Nx => [64,64,16], # num of state variables
-    :Nx => [128,128,16], # num of state variables
+    :Nx => [64,64,64], # num of state variables
+    # :Nx => [128,128,32], # num of state variables
     :x_min => x_min,
     :x_max => x_max,
 )
@@ -345,8 +369,6 @@ Val = zeros(num_nonzeros)
 Ic = zeros(num_nonzeros)
 Jc = zeros(num_nonzeros)
 Vc = zeros(num_nonzeros)
-
-
 get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
 mat = sp.sparse(I,J,Val) # next step
 matc = sp.sparse(Ic,Jc,Vc) # current step
@@ -364,7 +386,7 @@ for (ind,elem) in enumerate(Q0)
     Q0[ind] = fQ(elem)
 end
 Qc = deepcopy(Q0) # current
-compute_fd!(Qc,Qn,matc,mat,tau_space)
+compute_fd!(Qc,Qn,matc,mat,@view tau_space[2:end])
 x0 = params[:x0]
 x0_pos = round.((x0 -x_min)./dx) .+ 1
 x0_ind = Int(get_ind(Nx,x0_pos))
@@ -388,3 +410,12 @@ R0_sorted = R0[R0_sort_ind]
 Q_res = Qn[R0_sort_ind]
 inter_func = ip.LinearInterpolation(R0_sorted,Q_res)
 println("Interpolated Qn at t=0 ", inter_func(r0)) # expect 0.02
+# Analytic Q
+dl = ones(3)
+ka = params[:ka]
+si = params[:si]
+tau = T
+A = r_a_aux0(dl,th,ka,si,tau)
+B =r_b_aux0(dl,ka,si,tau)
+bond_price = exp(sum(A+B.*x0))
+println("Analytic solution for bond price: ",bond_price)
