@@ -160,7 +160,7 @@ Ic: I for the matrix for the current step
 Jc: J for the matrix for the current step
 Vc: Val for the matrix for the current step
 """
-function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
+function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc,x_min)
     si = params[:si]
     ve = params[:ve]
     ka = params[:ka]
@@ -174,11 +174,12 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
                 pos = (a,b,c)
                 ind = get_ind(Nx, pos)
                 # Compute vectors of C1, C2, C3
-                C1 = si.^2 .*(pos.-1)./(2.0*dx)
-                C2 = ve./(2.0*dx) - ka.*(pos.-1)/2.0
-                C3 = (1.0-gamma).*(pos.-1).*dx .+ gamma*k
+                # C1 = si.^2 .*(pos.-1)./(2.0*dx) # sig^2 * x / 2*dx^2
+                C1 = si.^2 .*((pos.-1).*dx.+x_min)./(2.0*dx.^2)
+                C2 = ve./(2.0*dx) - ka.*((pos.-1).*dx.+x_min)./(2.0*dx)
+                C3 = (1.0-gamma).*((pos.-1).*dx.+x_min) .+ gamma*k
                 # C3[1:2] = (pos[1:2].-1).*dx[1:2] # only the third factor is used for the harzard process
-                C3 = (pos.-1).*dx # test
+                C3 = (pos.-1).*dx.+x_min # test
                 # C3[1:2] .= 0.0 # Use only the third factor for the harzard process
                 # a
                 p = a
@@ -199,7 +200,8 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
                     Val[count] = -C1[dof] - C2[dof]
                     count += 1
                 elseif p == 1
-                    C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
+                    # C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
+                    C2[dof] = ve[dof]/dx[dof] - ka[dof]*((pos[dof]-1)*dx[dof]+x_min[dof])/dx[dof]
                     I[count] = ind; J[count] = ind; 
                     Val[count] = 2.0/dt + C2[dof] + C3[dof] 
                     center = count
@@ -207,7 +209,8 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
                     I[count] = ind; J[count] = indp; Val[count] = -C2[dof]
                     count += 1
                 elseif p == Nx[dof]
-                    C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
+                    # C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
+                    C2[dof] = ve[dof]/dx[dof] - ka[dof]*((pos[dof]-1)*dx[dof]+x_min[dof])/dx[dof]
                     I[count] = ind; J[count] = indm
                     Val[count] = C2[dof]
                     count += 1
@@ -232,13 +235,15 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
                     Val[count] = -C1[dof] - C2[dof]
                     count += 1
                 elseif p == 1
-                    C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
+                    # C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
+                    C2[dof] = ve[dof]/dx[dof] - ka[dof]*((pos[dof]-1)*dx[dof]+x_min[dof])/dx[dof]
                     Val[center] += 2.0/dt + C2[dof] + C3[dof]
                     I[count] = ind; J[count] = indp
                     Val[count] = -C2[dof]
                     count += 1
                 elseif p == Nx[dof]
-                    C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
+                    # C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
+                    C2[dof] = ve[dof]/dx[dof] - ka[dof]*((pos[dof]-1)*dx[dof]+x_min[dof])/dx[dof]
                     I[count] = ind; J[count] = indm
                     Val[count] = C2[dof]
                     count += 1
@@ -260,13 +265,15 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
                     Val[count] = -C1[dof] - C2[dof]
                     count += 1
                 elseif p == 1
-                    C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
+                    # C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
+                    C2[dof] = ve[dof]/dx[dof] - ka[dof]*((pos[dof]-1)*dx[dof]+x_min[dof])/dx[dof]
                     Val[center] += 2.0/dt + C2[dof] + C3[dof]
                     I[count] = ind; J[count] = indp
                     Val[count] = -C2[dof]
                     count += 1
                 elseif p == Nx[dof]
-                    C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
+                    # C2[dof] = ve[dof]/dx[dof] - ka[dof]*(pos[dof]-1)
+                    C2[dof] = ve[dof]/dx[dof] - ka[dof]*((pos[dof]-1)*dx[dof]+x_min[dof])/dx[dof]
                     I[count] = ind; J[count] = indm
                     Val[count] = C2[dof]
                     count += 1
@@ -338,7 +345,7 @@ params = Dict(
     )
 
 th = params[:ve]./params[:ka]
-x_min = [0.0,0.0,0.0] # CIR
+x_min = [0.001,0.001,0.001] # CIR
 x_max = [0.1,0.1,0.1]
 x_max = th*2.0
 grid_d = Dict(
@@ -369,7 +376,7 @@ Val = zeros(num_nonzeros)
 Ic = zeros(num_nonzeros)
 Jc = zeros(num_nonzeros)
 Vc = zeros(num_nonzeros)
-get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc)
+get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc,x_min)
 mat = sp.sparse(I,J,Val) # next step
 matc = sp.sparse(Ic,Jc,Vc) # current step
 
