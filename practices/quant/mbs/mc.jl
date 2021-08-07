@@ -251,9 +251,9 @@ function m_func(m0,t_sim,T,int_0_u_r_h,r) # 3.9
     return m
 end
 
-function get_m(m0,t_sim,T,int_0_u_r_h)
+function get_m(m0,t_sim,T,int_0_u_r_h;min_m=0.001,max_m=0.04)
     obj_fun = x -> (x - m_func(x,t_sim,T,int_0_u_r_h,r))^2
-    res = Optim.optimize(obj_fun, 0.001,0.04)
+    res = Optim.optimize(obj_fun, min_m,max_m)
     m = res.minimizer
     return m    
 end
@@ -306,3 +306,5 @@ println("M0 at t=0 ",stats.mean(M0))
 # println("int_test is supposed to be 0 at t=0", int_test)
 int_view = view(int_0_u_r_h,:,size(int_0_u_r_h,2))
 println("Q at t=0 ", get_Q(int_view))
+r_view = @view(r[:,size(r,2)])
+println("R at t=0 ",get_R(int_view, r_view))

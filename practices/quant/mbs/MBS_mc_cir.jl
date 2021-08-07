@@ -1,117 +1,10 @@
 
-import Distributions; distr = Distributions
-import Statistics; stats = Statistics
-import NumericalIntegration; ni = NumericalIntegration
-import Random
 
-Random.seed!(3)
+include("mbs_functions.jl")
 
 
 # include("/Users/jungjaeyong/projects/practices/quant/mbs/MBC_mc_cir.jl")
            
-# CIR process functions
-
-function r_a_aux0(dl,th,ka,si,tau,v=1.0,u=0.0)
-    g_aux = sqrt(ka^2 + 2*dl*v*si^2)
-    ex = exp(g_aux*tau) - 1.0
-    c = 2.0*g_aux + ex*(ka + g_aux - u*si^2)
-    return ka*th*(tau*(ka + g_aux) + 2*log(2*g_aux/c))/(si^2)
-end
-
-function r_a_aux0(dl::Vector,th::Vector,ka::Vector,si::Vector,tau,v=1.0,u=0.0)
-    res = zeros(size(dl))
-    for i in 1:length(res)
-        res[i] = r_a_aux0(dl[i],th[i],ka[i],si[i],tau,v,u)
-    end
-    return res
-end
-
-function r_b_aux0(dl,ka,si,tau,v=1.0,u=0.0)
-    g_aux = sqrt(ka^2 + 2*dl*v*si^2)
-    ex = exp(g_aux*tau) - 1.0
-    c = 2.0*g_aux + ex*(ka + g_aux - u*si^2)
-    return (2*u*g_aux - ex*(2*dl*v + u*(ka - g_aux)))/c
-end
-
-function r_b_aux0(dl::Vector,ka::Vector,si::Vector,tau,v=1.0,u=0.0)
-    res = zeros(size(dl))
-    for i in 1:length(res)
-        res[i] = r_b_aux0(dl[i],ka[i],si[i],tau,v,u)
-    end
-    return res
-end
-
-function get_CIR_mean(t,ve,ka,x0)
-    res = exp(-ka*t)*(x0 - ve/ka) + ve/ka
-    return res
-end
-
-function get_CIR_var(t,ve,ka,si,x0)
-    th = ve/ka
-    res = si^2/ka*x0*(exp(-ka*t)-exp(-2.0*ka*t)) +th*si^2/(2.0*ka)*(1-exp(-ka*t))^2
-    return res
-end
-
-function get_CIR_sample!(buffer,num_paths,ka,si,th,s,t,x0)
-    kappa = ka
-    gamma = si
-    vbar = th
-    v_s = x0 # initial state variable
-    delta = 4.0 *kappa*vbar/gamma^2
-    c= 1.0/(4.0*kappa)*gamma^2*(1.0-exp(-kappa*(t-s)))
-    kappaBar = 4.0*kappa*v_s*exp(-kappa*(t-s))/(gamma^2*(1.0-exp(-kappa*(t-s))))
-    d = distr.NoncentralChisq(delta,kappaBar)
-    # @show d,buffer,rand(d, num_paths)
-    buffer .= rand(d, num_paths)
-    buffer .*= c
-    return buffer
-end
-
-function get_CIR_sample(num_paths,ka,si,th,s,t,x0::Float64)
-    if num_paths == 1
-        buffer = [NaN]
-        get_CIR_sample!(buffer,num_paths,ka,si,th,s,t,x0)
-        return buffer[1]
-    else
-        buffer = zeros(num_paths)
-        get_CIR_sample!(buffer,num_paths,ka,si,th,s,t,x0)
-        return buffer
-    end
-end
-
-function get_CIR_sample(num_paths,ka,si,th,s,t,x0::Vector)
-    buffer = zeros(num_paths)
-    get_CIR_sample!(buffer,num_paths,ka,si,th,s,t,x0)
-    return buffer
-end
-
-function get_CIR_sample_steps(num_paths,num_steps,ka,si,th,s,t,x0)
-    dt = (t-s) / num_steps
-    X = zeros(num_paths, num_steps+1)
-    X[:,1] .= x0 # step-1 is initial
-
-    for i in 1:num_steps
-        for j in 1:num_paths
-            X[j,i+1] = get_CIR_sample(1,ka,si,th,0.0,dt,X[j,i])
-        end
-    end
-    return X
-end
-
-function get_Q(int_t_u_r_h) # (3.2)
-    # get int_r_h_u at u
-    res = exp.(-int_t_u_r_h)
-    res = stats.mean(res)
-    return res
-end
-
-function get_ho_t(a,b,t,T_asterisk)
-# ho(t) deterministic
-    res = b*a*max(t,T_asterisk)
-    return res
-end
-
-
 params = Dict(
 # contract params
     :T => 30, # test
@@ -149,10 +42,18 @@ T = params[:T]
 x0 = params[:x0]
 num_states = length(x0)
 num_paths = 3000
-annual_steps = 12 # monthly
+annual_steps = 1 # annual
+# annual_steps = 12 # monthly
 # annual_steps = 52 # weekly
 num_steps = annual_steps * 30 
-t_sim = collect(range(0,30,length = num_steps+1))
+t_sim = collect(range(0,30,length = num_steps+1)) # initial at 0
+
+# get intermediate variables for h(t)
+ab = params[:a]*params[:b]
+T_asterisk = params[:T_asterisk]
+k = params[:k] # strike IR k
+gamma = params[:gamma] # sensitivity to IR below strike k
+
 
 println("start CIR sampling at T")
 x_T = []
@@ -174,28 +75,141 @@ println("std Error % ", std_err)
 
 # get_CIR_sample_steps(num_paths,num_steps,ka[1],si[1],th[1],s,t,x0[1])
 
-x_u = [] # x value at each step
-for i in 1:length(x0)
-    push!(x_u, get_CIR_sample_steps(num_paths,num_steps,ka[i],si[i],th[i],s,T,x0[i]))
-end
+x_u = simulate_x(num_paths,num_steps,ka,si,th,s,T,x0) # x value at each step
 
-# integrate r from u to T where 0<=u<T
-int_r = zeros(num_paths, num_steps) # sum(int_x)
-for sv_idx in 1:length(num_states)
-    for jdx in 1:size(int_r,2)
-        global int_r,t_sim,x_u
-        for idx in 1:size(int_r,1)
-            int_r[idx,jdx] += ni.integrate(@view(t_sim[jdx:end]), @view(x_u[sv_idx][idx,jdx:end]))
-        end
-    end
-end
+# retrieve values
 # you can add integration of shift also
-
+r = get_r(x_u)
+int_r = get_int_r(t_sim,x_u)
 neg_int_r = -int_r # negative value is used
 
-# @time begin
-# ni.integrate(t_sim, @view x_u[1][1,:])
-# end
+inter_h0_1 = zeros(num_steps+1) # same for every path
+inter_h0_2 = zeros(size(r))
+get_inter_h0!(inter_h0_1,inter_h0_2,t_sim,k,r,T_asterisk)
+# inter_h0_1, inter_h0_2 = get_inter_h0(t_sim,k,r,T_asterisk)
+int_h = zeros(num_paths,num_steps+1)
+
+neg_int_r_h = zeros(size(neg_int_r))
+@. neg_int_r_h = neg_int_r - int_h
 
 
+# test whether those numbers makes sense
+t,u = 0, T
+R_0_T = get_R(t_sim,t,u,r,neg_int_r_h)
+# compute Q
+Q_0_T = get_Q(t_sim,t,u,neg_int_r_h)
+# get_m
 
+
+# Analytic Q
+dl = ones(num_states)
+ka = params[:ka]
+si = params[:si]
+tau = u-t
+A = r_a_aux0(dl,th,ka,si,tau)
+B =r_b_aux0(dl,ka,si,tau)
+Q_analytic = exp(sum(A+B.*x0)) # without harzard
+# I think get_Q is fine
+
+# m equation
+# numerator = int_0^T (1-exp(-m0*(T-u)))R(0,u)du
+# denominator = int_0^T (1-exp(-m0*(T-u)))Q(0,u)du
+m0 = 0.01 # initial guess
+
+
+m = get_m_fi(m0,t_sim,T,r,neg_int_r_h)
+
+# test parameters
+# θ = 0.06, κ = 0.25, σ = 0.1
+th = [0.06]
+ka = [0.25]
+si = [0.1]
+x0 = [0.03] # 3,6,9%
+k = x0[1] - 0.0025 # r - 0.0025 no shift
+
+# rerun simulations
+num_states = length(x0)
+num_paths = 3000
+# annual_steps = 1 # annual
+# annual_steps = 12 # monthly
+# annual_steps = 52 # weekly
+num_steps = annual_steps * 30 
+t_sim = collect(range(0,30,length = num_steps+1)) # initial at 0
+
+x_u = simulate_x(num_paths,num_steps,ka,si,th,s,T,x0) # x value at each step
+
+# you can add integration of shift also
+r = get_r(x_u)
+int_r = get_int_r(t_sim,x_u)
+neg_int_r = -int_r # negative value is used
+
+# no prepayment
+a = 0.024
+b = 0
+ab = a*b
+gamma = 0.0
+T_asterisk = 1000.0
+m0 = 0.01
+get_inter_h0!(inter_h0_1, inter_h0_2,t_sim,k,r,T_asterisk)
+get_int_h!(int_h, ab, gamma, inter_h0_1, inter_h0_2)
+@. neg_int_r_h = neg_int_r - int_h
+# case 1
+m_1 = zeros(size(t_sim))
+for (idx,T) in enumerate(t_sim)
+    if T <= 0.0
+        continue
+    end
+    m_1[idx] = get_m_fi(m0,t_sim,T,r,neg_int_r_h)
+end
+
+# case 2 b=0.75, gamma = 0
+a = 0.024
+b = 0.75
+ab = a*b
+gamma = 0
+T_asterisk = 2.5
+get_inter_h0!(inter_h0_1, inter_h0_2,t_sim,k,r,T_asterisk)
+get_int_h!(int_h, ab, gamma, inter_h0_1, inter_h0_2)
+@. neg_int_r_h = neg_int_r - int_h
+m_2 = zeros(size(t_sim))
+for (idx,T) in enumerate(t_sim)
+    if T <= 0.0
+        continue
+    end
+    m_2[idx] = get_m_fi(m0,t_sim,T,r,neg_int_r_h)
+end
+
+
+# case 3 b=0.0, gamma = 10
+a = 0.024
+b = 0.0
+ab = a*b
+gamma = 10.0
+T_asterisk = 2.5
+get_inter_h0!(inter_h0_1, inter_h0_2,t_sim,k,r,T_asterisk)
+get_int_h!(int_h, ab, gamma, inter_h0_1, inter_h0_2)
+@. neg_int_r_h = neg_int_r - int_h
+m_3 = zeros(size(t_sim))
+for (idx,T) in enumerate(t_sim)
+    if T <= 0.0
+        continue
+    end
+    m_3[idx] = get_m_fi(m0,t_sim,T,r,neg_int_r_h)
+end
+
+# case 4 b=0.75, gamma = 10
+a = 0.024
+b = 0.75
+ab = a*b
+gamma = 10.0
+T_asterisk = 2.5
+get_inter_h0!(inter_h0_1, inter_h0_2,t_sim,k,r,T_asterisk)
+get_int_h!(int_h, ab, gamma, inter_h0_1, inter_h0_2)
+@. neg_int_r_h = neg_int_r - int_h
+m_4 = zeros(size(t_sim))
+for (idx,T) in enumerate(t_sim)
+    if T <= 0.0
+        continue
+    end
+    m_4[idx] = get_m_fi(m0,t_sim,T,r,neg_int_r_h)
+end
