@@ -2,6 +2,9 @@
 
 include("mbs_functions.jl")
 
+import Plots; plt = Plots
+import Optim
+import PyPlot
 
 # include("/Users/jungjaeyong/projects/practices/quant/mbs/MBS_mc_cir-2.jl")
            
@@ -110,9 +113,12 @@ function simulate_x!(m::MBS_cir, shift=nothing)
     return 
 end
 
-function compute!(m::MBS_cir)
+function compute!(m::MBS_cir,calibration=false)
     # compute intermediate variables
-    get_inter_h0!(m.inter_h0_1, m.inter_h0_2, m.t_sim, m.k, m.r, m.T_asterisk)
+    if calibration == false # unnecessary for prepayment intensity calibration
+        get_inter_h0_1!(m.inter_h0_1,m.t_sim,m.T_asterisk)
+    end
+    get_inter_h_r!(m.inter_h0_2,m.t_sim,m.k,m.r)
     ab = m.a*m.b
     get_int_h!(m.int_h, ab, m.gamma, m.inter_h0_1, m.inter_h0_2)
     @. m.neg_int_r_h = m.neg_int_r - m.int_h
@@ -131,18 +137,17 @@ function get_m_curve(m::MBS_cir)
     return m_curve
 end
 
-function update!(m::MBS_cir;kwargs...)
+function update!(m::MBS_cir,calibration=false;kwargs...)
     # update! does not re-simulate the paths
     for (key,val) in kwargs
         setfield!(m,key,val)
     end
-    compute!(m::MBS_cir)
+    compute!(m::MBS_cir,calibration)
 end
 
 mbs_model = MBS_cir(params)
 simulate_x!(mbs_model)
 compute!(mbs_model)
-
 
 cases = [Dict(:a=>0.024, :b=>0.0, :gamma=>0.0, :T_asterisk=>1000.0), # no prepayment
         Dict(:a=>0.024, :b=>0.75, :gamma=>0.0, :T_asterisk=>2.5),
@@ -155,5 +160,65 @@ for i in 1:length(cases)
     push!(m_curves,get_m_curve(mbs_model))
 end
 
+# Use PyPlot instead of Plots
+PyPlot.plot(mbs_model.t_sim[2:end],m_curves[1][2:end],label="No prep.")
+for i in 2:length(cases)
+    PyPlot.plot(mbs_model.t_sim[2:end],m_curves[i][2:end],label="b="*string(cases[i][:b])*" gamma="*string(cases[i][:gamma]))
+end
+PyPlot.title("r_0 = "*string(mbs_model.x0[1]))
+PyPlot.legend()
 
+# p = plt.plot(mbs_model.t_sim, m_curves[1])
+# plt.plot!(p, mbs_model.t_sim, m_curves[2])
+# plt.plot!(p, mbs_model.t_sim, m_curves[3])
+# plt.plot!(p, mbs_model.t_sim, m_curves[4])
+# for i in 1:length(cases)
+#     if i==1
+#         p = plt.plot(mbs_model.t_sim, m_curves[i])
+#         global p
+#     else
+#         plt.plot!(p, mbs_model.t_sim, m_curves[i])
+#     end
+# end
 
+# Fit parameters to a mortgage-rate curve
+
+"""
+# Arguments
+- `x`: vector of variables (b and gamma)
+- `m`: MBS model
+- `mat`: maturities from the market
+- `m_market`: mortgage rate curve from the market
+"""
+function objective_function(x, m::MBS_cir, mat,m_market)
+    update!(m, true; b=x[1], gamma=x[2])
+    m0 = 0.01;
+    res = 0.0
+    for (idx,T) in enumerate(mat)
+        # @show m.t_sim, T
+        if T <= 0.0
+            continue
+        end
+        m_idx = get_m_fi(m0,m.t_sim,T,m.r,m.neg_int_r_h)
+        res += (m_idx - m_market[idx])^2
+    end
+    if x[1] < 0.0 # b
+        res += abs(x[1])*100 # penalty
+    end
+    if x[2] < 0.0 # gamma 
+        res += abs(x[1])*100 # penalty
+    end
+    return res
+end
+
+initial_guess = [mbs_model.b, mbs_model.gamma]
+idx = 3
+obj = x -> objective_function(x,mbs_model,mbs_model.t_sim,m_curves[idx]) # let's try to fit curve idx
+res = Optim.optimize(obj, initial_guess)
+sol = res.minimizer
+mbs_model.b = sol[1]; mbs_model.gamma = sol[2]
+calibrated_curve = get_m_curve(mbs_model)
+
+PyPlot.plot(mbs_model.t_sim[2:end],m_curves[idx][2:end],label=string(idx)*" curve")
+PyPlot.plot(mbs_model.t_sim[2:end],calibrated_curve[2:end],label="calibrated curve")
+PyPlot.legend()

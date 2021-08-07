@@ -237,6 +237,9 @@ end
 m0 = 0.01 # initial guess on m
 function m_func(m0,t_sim,T,int_0_u_r_h,r) # 3.9
     t_frac = @view t_sim[t_sim .< T]
+    if length(t_frac) < 2
+        println("In m_func, t_frac is too small. Check T")
+    end
     d_num = zeros(size(t_frac))
     d_den = zeros(size(t_frac))
     for (j,u) in enumerate(t_frac)
