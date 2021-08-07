@@ -3,7 +3,7 @@
 include("mbs_functions.jl")
 
 
-# include("/Users/jungjaeyong/projects/practices/quant/mbs/MBC_mc_cir.jl")
+# include("/Users/jungjaeyong/projects/practices/quant/mbs/MBS_mc_cir.jl")
            
 params = Dict(
 # contract params

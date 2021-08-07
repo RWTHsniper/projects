@@ -4,7 +4,6 @@ import Statistics; stats = Statistics
 import NumericalIntegration; ni = NumericalIntegration
 import Random
 
-Random.seed!(3)
 
 
 # CIR process functions
@@ -169,6 +168,7 @@ end
 
 function get_inter_h0_2!(inter_h0_2,t_sim,k,r)
     @. inter_h0_2 = max(0.0,k -r) # k-r(s)
+    num_paths = size(inter_h0_2,1)
     # compute ∫(k-r(s))ds 
     for jdx in 1:length(t_sim)-1 # exclude the last
         for idx in 1:num_paths
@@ -262,6 +262,7 @@ end
 
 # simulations
 function simulate_x(num_paths,num_steps,ka,si,th,s,T,x0)
+    Random.seed!(3) # make sure the same seeding is used
     x_u = [] # x value at each step
     for i in 1:length(x0)
         push!(x_u, get_CIR_sample_steps(num_paths,num_steps,ka[i],si[i],th[i],s,T,x0[i]))
