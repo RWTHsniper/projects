@@ -75,7 +75,7 @@ mutable struct MBS_cir
     r
     neg_int_r
     inter_h0_1 # intermediate value
-    inter_h0_2 # intermediate value
+    inter_h_r # intermediate value
     int_h
     neg_int_r_h
     function MBS_cir(params::Dict)
@@ -99,7 +99,7 @@ mutable struct MBS_cir
         this.r = zeros(num_paths,num_steps+1)
         this.neg_int_r = zeros(num_paths,num_steps+1)
         this.inter_h0_1 = zeros(num_steps+1)
-        this.inter_h0_2 = zeros(num_paths,num_steps+1)
+        this.inter_h_r = zeros(num_paths,num_steps+1)
         this.int_h = zeros(num_paths,num_steps+1)
         this.neg_int_r_h = zeros(num_paths,num_steps+1)
         return this
@@ -118,9 +118,9 @@ function compute!(m::MBS_cir,calibration=false)
     if calibration == false # unnecessary for prepayment intensity calibration
         get_inter_h0_1!(m.inter_h0_1,m.t_sim,m.T_asterisk)
     end
-    get_inter_h_r!(m.inter_h0_2,m.t_sim,m.k,m.r)
+    get_inter_h_r!(m.inter_h_r,m.t_sim,m.k,m.r)
     ab = m.a*m.b
-    get_int_h!(m.int_h, ab, m.gamma, m.inter_h0_1, m.inter_h0_2)
+    get_int_h!(m.int_h, ab, m.gamma, m.inter_h0_1, m.inter_h_r)
     @. m.neg_int_r_h = m.neg_int_r - m.int_h
 end
 
