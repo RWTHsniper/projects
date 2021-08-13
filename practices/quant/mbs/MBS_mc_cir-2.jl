@@ -5,6 +5,7 @@ include("mbs_functions.jl")
 import Plots; plt = Plots
 import Optim
 import PyPlot
+import Interpolations; ip = Interpolations
 
 # include("/Users/jungjaeyong/projects/practices/quant/mbs/MBS_mc_cir-2.jl")
            
@@ -14,14 +15,14 @@ params = Dict(
 # Treasury
     :l0 => -0.127061,
     :l0 => 0.0, # test
-    :ve => [0.2715618,0.0195524,0.0009720],
-    :ka => [5.6772530,0.2520333,0.147],
-    :si => [0.0181427,0.0422960,0.034],
-    :x0 => [0.05095958,0.06725220,0.00961570],
-    # :ve => [0.2715618,0.2715618,0.2715618], # test
-    # :ka => [5.6772530,5.6772530,5.6772530], # test
-    # :si => [0.0181427,0.0181427,0.0181427], # test
-    # :x0 => [0.05095958,0.05095958,0.05095958], # test
+    # :ve => [0.2715618,0.0195524,0.0009720],
+    # :ka => [5.6772530,0.2520333,0.147],
+    # :si => [0.0181427,0.0422960,0.034],
+    # :x0 => [0.05095958,0.06725220,0.00961570],
+    :ve => [0.194119468,0.072328304,0.000100914], # test
+    :ka => [0.70065303590966288,0.6727014228389625,0.064915528100075642], # test
+    :si => [0.154824047015374,0.11514705447072052,0.0425888418436647], # test
+    :x0 => [0.029083019496270783,0.0048772567753162764,0.03362592979733442], # test
 # harzard rate process (PSA params)
 # ho(t) parameters
     :a => 0.024,
@@ -51,6 +52,7 @@ mutable struct MBS_cir
     x0::Vector{Float64}
     th::Vector{Float64}
     num_states::Real
+    shift_f
     # contract
     t0::Real # initial time
     T::Real # maturity
@@ -70,6 +72,7 @@ mutable struct MBS_cir
     neg_int_r
     inter_h0_1 # intermediate value
     inter_h_r # intermediate value
+    int_shift
     int_h
     neg_int_r_h
     function MBS_cir(params::Dict)
@@ -94,6 +97,8 @@ mutable struct MBS_cir
         this.neg_int_r = zeros(num_paths,num_steps+1)
         this.inter_h0_1 = zeros(num_steps+1)
         this.inter_h_r = zeros(num_paths,num_steps+1)
+        this.int_shift = zeros(num_paths,num_steps+1)
+        get_int_shift!(m.int_shift,m.shift_f,m.t_sim)
         this.int_h = zeros(num_paths,num_steps+1)
         this.neg_int_r_h = zeros(num_paths,num_steps+1)
         return this
@@ -116,7 +121,7 @@ function compute!(m::MBS_cir,calibration=false)
     get_inter_h_r!(m.inter_h_r,m.t_sim,m.k,m.x[end]) # use m.x[end] for the harzard process
     ab = m.a*m.b
     get_int_h!(m.int_h, ab, m.gamma, m.inter_h0_1, m.inter_h_r)
-    @. m.neg_int_r_h = m.neg_int_r - m.int_h
+    @. m.neg_int_r_h = m.neg_int_r - m.int_h - m.int_shift
 end
 
 function get_m_curve(m::MBS_cir)
@@ -136,42 +141,53 @@ function update!(m::MBS_cir,calibration=false;kwargs...)
     # update! does not re-simulate the paths
     for (key,val) in kwargs
         setfield!(m,key,val)
+        if key == :shift_f
+            get_int_shift!(m.int_shift,m.shift_f,m.t_sim) # update integration of shift
+        end
     end
     compute!(m::MBS_cir,calibration)
 end
 
-# test parameters
-params[:th] = [0.06]
-params[:ka] = [0.25]
-params[:ve] = params[:th].*params[:ka]
-params[:si] = [0.1]
-params[:x0] = [0.03] # 3,6,9%
-params[:k] = sum(params[:x0]) - 0.0025 # r - 0.0025 no shift
-params[:a] = 0.024
+shift = [0.0 -0.01; 0.25 -0.01; 0.5 -0.01; 1.0 -0.01; 30.0 -0.01]
+shift_f = ip.LinearInterpolation(shift[:,1],shift[:,2])
+params[:shift_f] = shift_f
+
+# # test parameters
+# params[:th] = [0.06]
+# params[:ka] = [0.25]
+# params[:ve] = params[:th].*params[:ka]
+# params[:si] = [0.1]
+# params[:x0] = [0.03] # 3,6,9%
+# params[:k] = sum(params[:x0]) - 0.0025 # r - 0.0025 no shift
+# params[:a] = 0.024
 
 mbs_model = MBS_cir(params)
 simulate_x!(mbs_model)
 compute!(mbs_model)
 r0 = sum(mbs_model.x0)
-k0 = r0
+if mbs_model.num_states == 1
+    k0 = r0
+else
+    k0 = mbs_model.x0[end]
+end
 cases = [Dict(:a=>0.024, :b=>0.0, :gamma=>0.0, :T_asterisk=>1000.0, :k=>k0), # no prepayment
         Dict(:a=>0.024, :b=>0.75, :gamma=>0.0, :T_asterisk=>2.5, :k=>k0),
         Dict(:a=>0.024, :b=>0.0, :gamma=>10.0, :T_asterisk=>2.5, :k=>k0),
         Dict(:a=>0.024, :b=>0.75, :gamma=>10.0, :T_asterisk=>2.5, :k=>k0)] 
 
-m_curves = []
-for i in 1:length(cases)
-    update!(mbs_model; cases[i]...)
-    push!(m_curves,get_m_curve(mbs_model))
-end
+# m_curves = []
+# for i in 1:length(cases)
+#     update!(mbs_model; cases[i]...)
+#     push!(m_curves,get_m_curve(mbs_model))
+# end
 
-# Use PyPlot instead of Plots
-PyPlot.plot(mbs_model.t_sim[2:end],m_curves[1][2:end],label="No prep.")
-for i in 2:length(cases)
-    PyPlot.plot(mbs_model.t_sim[2:end],m_curves[i][2:end],label="b="*string(cases[i][:b])*" gamma="*string(cases[i][:gamma]))
-end
-PyPlot.title("r_0 = "*string(r0))
-PyPlot.legend()
+# # Use PyPlot instead of Plots
+# PyPlot.plot(mbs_model.t_sim[2:end],m_curves[1][2:end],label="No prep.")
+# for i in 2:length(cases)
+#     PyPlot.plot(mbs_model.t_sim[2:end],m_curves[i][2:end],label="b="*string(cases[i][:b])*" gamma="*string(cases[i][:gamma]))
+# end
+# PyPlot.title("r_0 = "*string(r0))
+# PyPlot.legend()
 
 # p = plt.plot(mbs_model.t_sim, m_curves[1])
 # plt.plot!(p, mbs_model.t_sim, m_curves[2])
@@ -216,6 +232,7 @@ function objective_function(x, m::MBS_cir, mat,m_market)
     return res
 end
 
+#=
 initial_guess = [mbs_model.b, mbs_model.gamma]
 idx = 3
 obj = x -> objective_function(x,mbs_model,mbs_model.t_sim,m_curves[idx]) # let's try to fit curve idx
@@ -223,7 +240,7 @@ res = Optim.optimize(obj, initial_guess)
 sol = res.minimizer
 mbs_model.b = sol[1]; mbs_model.gamma = sol[2]
 calibrated_curve = get_m_curve(mbs_model)
-#=
+
 PyPlot.plot(mbs_model.t_sim[2:end],m_curves[idx][2:end],label=string(idx)*" curve")
 PyPlot.plot(mbs_model.t_sim[2:end],calibrated_curve[2:end],label="calibrated curve")
 PyPlot.legend()

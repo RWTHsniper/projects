@@ -153,6 +153,16 @@ function get_r(x_u,l=nothing)
     return r
 end
 
+function get_int_shift!(int_shift,shift_f,t_sim)
+    for ind in 1:length(t_sim)-1
+        if ind == length(t_sim) # skip the last
+            int_shift[ind] = 0.0 
+            continue
+        end
+        int_shift[ind] = ni.integrate(@view(t_sim[ind:end]), shift_f(t_sim[ind:end]))
+    end
+    
+end
 
 function get_inter_h0_1!(inter_h0_1,t_sim,T_asterisk)
     h0(t) = min(t,T_asterisk)
