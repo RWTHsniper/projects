@@ -39,13 +39,7 @@ params = Dict(
     :num_paths => 3000,
     )
 
-# test parameters
-params[:th] = [0.06]
-params[:ka] = [0.25]
-params[:si] = [0.1]
-params[:x0] = [0.03] # 3,6,9%
-params[:k] = params[:x0][1] - 0.0025 # r - 0.0025 no shift
-params[:a] = 0.024
+
 
 mutable struct MBS_cir
     # CIR
@@ -118,7 +112,8 @@ function compute!(m::MBS_cir,calibration=false)
     if calibration == false # unnecessary for prepayment intensity calibration
         get_inter_h0_1!(m.inter_h0_1,m.t_sim,m.T_asterisk)
     end
-    get_inter_h_r!(m.inter_h_r,m.t_sim,m.k,m.r)
+    # get_inter_h_r!(m.inter_h_r,m.t_sim,m.k,m.r)
+    get_inter_h_r!(m.inter_h_r,m.t_sim,m.k,m.x[end]) # use m.x[end] for the harzard process
     ab = m.a*m.b
     get_int_h!(m.int_h, ab, m.gamma, m.inter_h0_1, m.inter_h_r)
     @. m.neg_int_r_h = m.neg_int_r - m.int_h
@@ -145,14 +140,24 @@ function update!(m::MBS_cir,calibration=false;kwargs...)
     compute!(m::MBS_cir,calibration)
 end
 
+# test parameters
+params[:th] = [0.06]
+params[:ka] = [0.25]
+params[:ve] = params[:th].*params[:ka]
+params[:si] = [0.1]
+params[:x0] = [0.03] # 3,6,9%
+params[:k] = sum(params[:x0]) - 0.0025 # r - 0.0025 no shift
+params[:a] = 0.024
+
 mbs_model = MBS_cir(params)
 simulate_x!(mbs_model)
 compute!(mbs_model)
-
-cases = [Dict(:a=>0.024, :b=>0.0, :gamma=>0.0, :T_asterisk=>1000.0), # no prepayment
-        Dict(:a=>0.024, :b=>0.75, :gamma=>0.0, :T_asterisk=>2.5),
-        Dict(:a=>0.024, :b=>0.0, :gamma=>10.0, :T_asterisk=>2.5),
-        Dict(:a=>0.024, :b=>0.75, :gamma=>10.0, :T_asterisk=>2.5)] 
+r0 = sum(mbs_model.x0)
+k0 = r0
+cases = [Dict(:a=>0.024, :b=>0.0, :gamma=>0.0, :T_asterisk=>1000.0, :k=>k0), # no prepayment
+        Dict(:a=>0.024, :b=>0.75, :gamma=>0.0, :T_asterisk=>2.5, :k=>k0),
+        Dict(:a=>0.024, :b=>0.0, :gamma=>10.0, :T_asterisk=>2.5, :k=>k0),
+        Dict(:a=>0.024, :b=>0.75, :gamma=>10.0, :T_asterisk=>2.5, :k=>k0)] 
 
 m_curves = []
 for i in 1:length(cases)
@@ -165,7 +170,7 @@ PyPlot.plot(mbs_model.t_sim[2:end],m_curves[1][2:end],label="No prep.")
 for i in 2:length(cases)
     PyPlot.plot(mbs_model.t_sim[2:end],m_curves[i][2:end],label="b="*string(cases[i][:b])*" gamma="*string(cases[i][:gamma]))
 end
-PyPlot.title("r_0 = "*string(mbs_model.x0[1]))
+PyPlot.title("r_0 = "*string(r0))
 PyPlot.legend()
 
 # p = plt.plot(mbs_model.t_sim, m_curves[1])
@@ -218,7 +223,8 @@ res = Optim.optimize(obj, initial_guess)
 sol = res.minimizer
 mbs_model.b = sol[1]; mbs_model.gamma = sol[2]
 calibrated_curve = get_m_curve(mbs_model)
-
+#=
 PyPlot.plot(mbs_model.t_sim[2:end],m_curves[idx][2:end],label=string(idx)*" curve")
 PyPlot.plot(mbs_model.t_sim[2:end],calibrated_curve[2:end],label="calibrated curve")
 PyPlot.legend()
+=#
