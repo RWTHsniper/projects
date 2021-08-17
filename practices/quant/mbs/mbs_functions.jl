@@ -38,6 +38,16 @@ function r_b_aux0(dl::Vector,ka::Vector,si::Vector,tau,v=1.0,u=0.0)
     return res
 end
 
+function get_zcb_price(dl,th,ka,si,x0,tau,v=1.0,u=0.0;shift_f=nothing)
+    A = r_a_aux0(dl,th,ka,si,tau,v,u)
+    B = r_b_aux0(dl,ka,si,tau,v,u)
+    res = exp(sum(A+B.*x0))
+    if !isnothing(shift)
+
+    end
+    return res
+end
+
 function get_CIR_mean(t,ve,ka,x0)
     res = exp(-ka*t)*(x0 - ve/ka) + ve/ka
     return res
@@ -154,12 +164,10 @@ function get_r(x_u,l=nothing)
 end
 
 function get_int_shift!(int_shift,shift_f,t_sim)
+    int_shift[end] = 0.0
     for ind in 1:length(t_sim)-1
-        if ind == length(t_sim) # skip the last
-            int_shift[ind] = 0.0 
-            continue
-        end
-        int_shift[ind] = ni.integrate(@view(t_sim[ind:end]), shift_f(t_sim[ind:end]))
+        shift_array = shift_f(@view(t_sim[ind:end]))
+        int_shift[ind] = ni.integrate(@view(t_sim[ind:end]), shift_array)
     end
     
 end
@@ -222,15 +230,35 @@ function get_R(t_sim,t,u,r,neg_int_r_h)
     return res
 end
 
+function get_R(t_sim,t::Vector,u,neg_int_r_h)
+    res = zeros(size(t))
+    for i in 1:length(res)
+        res[i] = get_R(t_sim,t[i],u,neg_int_r_h)
+    end
+    return res
+end
+
 """
 Compute E[e^(∫ₜᵘ-(rₛ+hₛ)ds)]
 """
 function get_Q(t_sim,t,u,neg_int_r_h)
     t_ind = findfirst(x->x==t,t_sim)
+    if isnothing(t_ind)
+    end
     u_ind = findfirst(x->x==u,t_sim)
+    if isnothing(u_ind)
+    end
     neg_int_t_u = neg_int_r_h[:,t_ind] - neg_int_r_h[:,u_ind] # ∫ₜᵘ-(rₛ+hₛ)ds
     exp_neg_int = exp.(neg_int_t_u)
     res = stats.mean(exp_neg_int)
+    return res
+end
+
+function get_Q(t_sim,t::Vector,u,neg_int_r_h)
+    res = zeros(size(t))
+    for i in 1:length(res)
+        res[i] = get_Q(t_sim,t[i],u,neg_int_r_h)
+    end
     return res
 end
 

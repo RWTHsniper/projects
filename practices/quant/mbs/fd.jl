@@ -142,13 +142,17 @@ function get_n_nonzeros_iter(Nx)
 end
 
 function get_n_nonzeros(Nx)
-    res = 0
-    dim = length(Nx)
-    if dim == 3
-        res += prod(Nx .- 2)*7 # inner nodes
-        res += 2^dim*4 # vertex nodes
-        res += 2*(dim-1)*(sum(Nx) - 2*dim)*5 # edges
-        res += 2*((Nx[1]-2)*(Nx[2]-2)+(Nx[1]-2)*(Nx[3]-2)+(Nx[2]-2)*(Nx[3]-2))*6 # outer surface
+    if typeof(Nx) <: Real 
+        res = (Nx-2)*3 + 2*2
+    else
+        res = 0
+        dim = length(Nx)
+        if dim == 3
+            res += prod(Nx .- 2)*7 # inner nodes
+            res += 2^dim*4 # vertex nodes
+            res += 2*(dim-1)*(sum(Nx) - 2*dim)*5 # edges
+            res += 2*((Nx[1]-2)*(Nx[2]-2)+(Nx[1]-2)*(Nx[3]-2)+(Nx[2]-2)*(Nx[3]-2))*6 # outer surface
+        end
     end
     return res
 end
