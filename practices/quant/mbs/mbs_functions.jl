@@ -230,10 +230,10 @@ function get_R(t_sim,t,u,r,neg_int_r_h)
     return res
 end
 
-function get_R(t_sim,t::Vector,u,neg_int_r_h)
+function get_R(t_sim,t::Vector,u,r,neg_int_r_h)
     res = zeros(size(t))
     for i in 1:length(res)
-        res[i] = get_R(t_sim,t[i],u,neg_int_r_h)
+        res[i] = get_R(t_sim,t[i],u,r,neg_int_r_h)
     end
     return res
 end

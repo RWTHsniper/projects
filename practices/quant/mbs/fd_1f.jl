@@ -198,16 +198,18 @@ params = Dict(
 th = params[:ve]/params[:ka]
 k = params[:k]
 x_min = 0.0000001 # CIR
-x_max = 0.1
+x_max = 0.6
 x0 = params[:x0]
 x_min = x0/10.0 # CIR
+x_min = 1e-6
 # x_max = k*10.0
 grid_d = Dict(
-    :Nt => 30*100, # num of timesteps
+    :Nt => 30*12, # num of timesteps
     # :Nx => [3,3,3], # num of state variables
     :Nx => 64, # num of state variables
     :Nx => 256, # num of state variables
-    :Nx => 1024, # num of state variables
+    # :Nx => 256, # num of state variables
+    # :Nx => 1024, # num of state variables
     # :Nx => [128,128,32], # num of state variables
     :x_min => x_min,
     :x_max => x_max,
@@ -258,3 +260,17 @@ A = r_a_aux0(dl,th,ka,si,tau)
 B =r_b_aux0(dl,ka,si,tau)
 bond_price = exp(sum(A+B*x0))
 println("Analytic solution for bond price: ",bond_price)
+
+# compute R
+fR(ru) = ru
+R0 = zeros(Nx) # initial value
+Rn = zeros(Nx) # next
+for (ind,elem) in enumerate(R0)
+    x_ind = x_min + dx*(ind-1)
+    R0[ind] = fR(x_ind)
+end
+Rc = deepcopy(R0) # current
+compute_fd!(Rc,Rn,matc,mat,@view tau_space[2:end])
+x0_ind = round(Int,(x0 -x_min)/dx + 1)
+println("Rn at t=0 ", Rn[x0_ind])
+

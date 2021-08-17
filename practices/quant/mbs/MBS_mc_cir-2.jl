@@ -174,6 +174,12 @@ m = mbs_model
 zcb_price = get_zcb_price(mbs_model.dl,mbs_model.th,mbs_model.ka,mbs_model.si,mbs_model.x0,mbs_model.T)
 println("zcb price ",zcb_price)
 println("Q at t=0 ",Q_f(0.0))
+
+R_mc = get_R(mbs_model.t_sim,mbs_model.t_sim,mbs_model.T,mbs_model.r,mbs_model.neg_int_r_h)
+R_f = ip.LinearInterpolation(mbs_model.t_sim,R_mc) # Q function
+R_tm = R_f(tm) # Q value at tm
+println("R at t=0 ",R_f(0.0))
+
 #=
 
 r0 = sum(mbs_model.x0)
