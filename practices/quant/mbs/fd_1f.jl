@@ -138,6 +138,74 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc,x_min)
 
 end
 
+
+"""
+Get tridiagonal matrix for a discretized operator
+
+Ic: I for the matrix for the current step
+Jc: J for the matrix for the current step
+Vc: Val for the matrix for the current step
+"""
+function get_mat_tri!(Nx, params,dt,dx,x_min,mat,matc)
+    si = params[:si]
+    ve = params[:ve]
+    ka = params[:ka]
+    k = params[:k] # strike interest rate
+    count = 1 # counter to point an element in I,J,Val
+    # first index
+    ind = 1 
+    indm = ind - 1
+    indp = ind + 1  
+    x_ind = x_min
+    if k > x_ind
+        gamma = params[:gamma]
+    else
+        gamma = 0.0
+    end
+    C2 = ve/dx - ka*(x_ind)/dx
+    C3 = (1.0-gamma)*(x_ind) + gamma*k
+    mat[ind,ind] = 2.0/dt + C2 + C3
+    mat[ind,indp] = -C2
+    for ind in 2:(Nx-1)
+        x_ind = get_x(x_min,dx,ind)
+        if k > x_ind  
+            gamma = params[:gamma]
+        else
+            gamma = 0.0
+        end
+        C1 = si^2 *(x_ind)/(2.0*dx^2)
+        C2 = ve/(2.0*dx) - ka*((ind-1)*dx+x_min)/(2.0*dx)
+        C3 = (1.0-gamma)*(x_ind) + gamma*k
+        indm = ind - 1
+        indp = ind + 1
+        mat[ind,indm] = -C1 + C2
+        mat[ind,ind] = 2.0*C1 + C3 + 2.0/dt
+        mat[ind,indp] = -C1 - C2
+    end
+    ind = Nx
+    indm = ind - 1
+    indp = ind + 1
+    x_ind = x_min + (ind-1)*dx
+    if k > x_ind
+        gamma = params[:gamma]
+    else
+        gamma = 0.0
+    end
+    C2 = ve/dx - ka*(x_ind)/dx
+    C3 = (1.0-gamma)*(x_ind) + gamma*k
+    mat[ind,indm] = C2
+    mat[ind,ind] = 2.0/dt - C2 + C3
+
+    # matrix for current step
+
+    matc .= -mat
+    # corrections on centeral values
+    for i in 1:size(mat)[1]
+        matc[i,i] += 4.0/dt # 2.0*2.0
+    end
+
+end
+
 function compute_fd!(Vc,Vn,matc,mat,t_space)
     for (ind, tau) in enumerate(t_space)
         Vn .= mat\(matc*Vc)
@@ -191,7 +259,7 @@ params = Dict(
     :b => 0.0, 
     :gamma => 20.0,
     :k => 0.02, # prepayment strike
-    :k => 0.015, # prepayment strike
+    # :k => 0.015, # prepayment strike
     :T_asterisk => 1000.0, # prepayment date test # test
     )
 
@@ -216,6 +284,8 @@ grid_d = Dict(
 dx = (grid_d[:x_max] - grid_d[:x_min]) / (grid_d[:Nx] - 1.0)
 dt = params[:T] / grid_d[:Nt]
 Nx = grid_d[:Nx]
+
+#=
 num_nonzeros = get_n_nonzeros(Nx)
 I = zeros(num_nonzeros)
 J = zeros(num_nonzeros)
@@ -228,6 +298,13 @@ mat = sp.sparse(I,J,Val) # next step
 mat = la.Tridiagonal(mat)
 matc = sp.sparse(Ic,Jc,Vc) # current step
 matc = la.Tridiagonal(matc)
+=#
+
+# define tridiagonal system
+n_dof = grid_d[:Nx]
+mat = la.Tridiagonal(zeros(n_dof-1),zeros(n_dof),zeros(n_dof-1))
+matc = la.Tridiagonal(zeros(n_dof-1),zeros(n_dof),zeros(n_dof-1))
+get_mat_tri!(Nx, params,dt,dx,x_min,mat,matc); #error()
 
 T = params[:T]
 tau_space = collect(0.0:dt:T)

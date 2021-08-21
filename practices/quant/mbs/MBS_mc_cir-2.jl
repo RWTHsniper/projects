@@ -27,7 +27,7 @@ tot_params = Dict(
     :b => 0.0, # test 
     :gamma => 20.0,
     :k => 0.02, # prepayment strike
-    :k => 0.015, # prepayment strike test
+    # :k => 0.015, # prepayment strike test
     :T_asterisk => 1000.0, # prepayment date test # test
     # MC params
     :annual_steps => 1, # annual
