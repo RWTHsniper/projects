@@ -138,13 +138,9 @@ function get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc,x_min)
 
 end
 
-
 function compute_fd!(Vc,Vn,matc,mat,t_space)
-    tmp = zeros(size(Vc))
     for (ind, tau) in enumerate(t_space)
-        tmp .= matc*Vc
-        Vn .= mat\tmp
-        # is.gmres!(Vn,mat,tmp)
+        Vn .= mat\(matc*Vc)
         Vc .= Vn
     end
     return Vn
@@ -195,7 +191,7 @@ params = Dict(
     :b => 0.0, 
     :gamma => 20.0,
     :k => 0.02, # prepayment strike
-    :k => 0.001, # prepayment strike
+    :k => 0.015, # prepayment strike
     :T_asterisk => 1000.0, # prepayment date test # test
     )
 
@@ -211,12 +207,11 @@ grid_d = Dict(
     :Nx => 64, # num of state variables
     :Nx => 256, # num of state variables
     :Nx => 512, # num of state variables
-    # :Nx => 1024, # num of state variables
+    :Nx => 1024, # num of state variables
     # :Nx => [128,128,32], # num of state variables
     :x_min => x_min,
     :x_max => x_max,
 )
-
 
 dx = (grid_d[:x_max] - grid_d[:x_min]) / (grid_d[:Nx] - 1.0)
 dt = params[:T] / grid_d[:Nt]
@@ -264,17 +259,16 @@ println("Analytic solution for bond price: ",bond_price)
 x0_ind = get_x_ind(x0,x_min,dx)
 println("Qn at t=0 ", Qn[x0_ind])
 
-
 # compute R
 fR(ru) = ru
 R0 = zeros(Nx) # initial value
 Rn = zeros(Nx) # next
 for (ind,elem) in enumerate(R0)
-    x_ind = x_min + dx*(ind-1)
+    x_ind = get_x(x_min,dx,ind)
     R0[ind] = fR(x_ind)
 end
 Rc = deepcopy(R0) # current
 compute_fd!(Rc,Rn,matc,mat,@view tau_space[2:end])
-x0_ind = round(Int,(x0 -x_min)/dx + 1)
+x0_ind = get_x_ind(x0,x_min,dx)
 println("Rn at t=0 ", Rn[x0_ind])
 
