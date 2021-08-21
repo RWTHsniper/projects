@@ -55,6 +55,97 @@ function get_n_nonzeros(Nx)
     return res
 end
 
+function get_x(x_min,dx,ind)
+    return x_min + dx*(ind-1)
+end
+
+
+
+"""
+Ic: I for the matrix for the current step
+Jc: J for the matrix for the current step
+Vc: Val for the matrix for the current step
+"""
+function get_trans_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc,x_min)
+    si = params[:si]
+    ve = params[:ve]
+    ka = params[:ka]
+    k = params[:k] # strike interest rate
+    gamma = params[:gamma]
+    count = 1 # counter to point an element in I,J,Val
+    # first index
+    ind = 1 
+    indm = ind - 1
+    indp = ind + 1  
+    x_ind = get_x(x_min,dx,ind)
+    if k > x_ind
+        C2 = (ve - (gamma + params[:hb]*si^2)*x_ind)/dx # Qx: (ve - ka*x)/dx, ve/dx - ka*(x_min)/dx
+    else
+        C2 = (ve - (gamma + params[:hb1]*si^2)*x_ind)/dx # Qx: (ve - ka*x)/dx
+    end
+    # C2 = ve/dx - ka*(x_min)/dx # Qx: (ve - ka*x)/dx
+    # C3 = (1.0-gamma)*(x_min) + gamma*k # Q
+    C3 = 0.0
+    I[count] = ind; J[count] = ind;
+    Val[count] = 2.0/dt + C2 + C3
+    center = count
+    count += 1
+    I[count] = ind; J[count] = indp; Val[count] = -C2
+    count += 1
+    for ind in 2:(Nx-1)
+        x_ind = get_x(x_min,dx,ind)
+        if k > x_ind  
+            C2 = (ve - (gamma +params[:hb]*si^2)*x_ind)/(2.0*dx) # ve/(2.0*dx) - ka*((ind-1)*dx+x_min)/(2.0*dx)
+        else
+            C2 = (ve - (gamma + params[:hb1]*si^2)*x_ind)/(2.0*dx) # ve/(2.0*dx) - ka*((ind-1)*dx+x_min)/(2.0*dx)
+        end
+        C1 = si^2 *(x_ind)/(2.0*dx^2)
+        C3 = 0.0
+        indm = ind - 1
+        indp = ind + 1
+        I[count] = ind; J[count] = indm
+        Val[count] = -C1 + C2
+        count += 1
+        I[count] = ind; J[count] = ind
+        Val[count] = 2.0*C1 + C3 + 2.0/dt
+        count += 1
+        I[count] = ind; J[count] = indp
+        Val[count] = -C1 - C2
+        count += 1
+    end
+    ind = Nx
+    indm = ind - 1
+    indp = ind + 1
+    x_ind = get_x(x_min,dx,ind)
+    if k > x_ind
+        C2 = (ve - (gamma + params[:hb]*si^2)*x_ind)/dx # Qx: (ve - ka*x)/dx, ve/dx - ka*(x_min)/dx
+    else
+        C2 = (ve - (gamma + params[:hb1]*si^2)*x_ind)/dx # Qx: (ve - ka*x)/dx
+    end    
+    C3 = 0.0
+    I[count] = ind; J[count] = indm
+    Val[count] = C2
+    count += 1
+    I[count] = ind; J[count] = ind
+    Val[count] = 2.0/dt - C2 + C3
+    center = count
+    count += 1
+
+    # matrix for current step
+    Ic .= I
+    Jc .= J
+    Vc .= -Val
+    # corrections on centeral values
+    for i in 1:length(I)
+        if I[i] == J[i] # node center
+            Vc[i] += 4.0/dt # 2.0*2.0
+        end
+    end
+
+end
+
+
+
 """
 Ic: I for the matrix for the current step
 Jc: J for the matrix for the current step
@@ -143,20 +234,16 @@ function compute_fd!(Vc,Vn,matc,mat,t_space)
     tmp = zeros(size(Vc))
     for (ind, tau) in enumerate(t_space)
         tmp .= matc*Vc
-        Vn .= mat\tmp
-        # is.gmres!(Vn,mat,tmp)
+        # Vn .= mat\tmp
+        is.gmres!(Vn,mat,tmp)
         Vc .= Vn
     end
     return Vn
 end
 
-function get_x(x_min,dx,ind)
-    return x_min + dx*(ind-1)
-end
-
-function get_x_ind(x,x_min,dx)
-    ind = round(Int,(x -x_min)/dx + 1)
-    return ind
+function get_quadratic_sol(a,b,c)
+    res = ((-b + sqrt(b^2 -4*a*c+0im))/(2.0*a),(-b - sqrt(b^2 -4*a*c+0im))/(2.0*a))
+    return res
 end
 
 
@@ -188,14 +275,15 @@ params = Dict(
     :ve => 0.0027646771594520936,
     :ka => 0.06491552810007564, 
     :si => 0.03362592979733442, 
-    :x0 => 0.022, # test
+    :x0 => 0.000100914, # test
+    :x0 => 0.02, # test
 # harzard rate process (PSA params)
 # ho(t) parameters
     :a => 0.0,
     :b => 0.0, 
     :gamma => 20.0,
     :k => 0.02, # prepayment strike
-    :k => 0.001, # prepayment strike
+    # :k => 0.0, # prepayment strike
     :T_asterisk => 1000.0, # prepayment date test # test
     )
 
@@ -204,19 +292,33 @@ k = params[:k]
 x_min = 0.0000001 # CIR
 x_max = 0.6
 x0 = params[:x0]
+x_min = x0/10.0 # CIR
+x_min = 1e-6
 # x_max = k*10.0
 grid_d = Dict(
-    :Nt => params[:T]*12, # num of timesteps
+    :Nt => 30*12, # num of timesteps
     # :Nx => [3,3,3], # num of state variables
     :Nx => 64, # num of state variables
     :Nx => 256, # num of state variables
-    :Nx => 512, # num of state variables
+    # :Nx => 256, # num of state variables
     # :Nx => 1024, # num of state variables
     # :Nx => [128,128,32], # num of state variables
     :x_min => x_min,
     :x_max => x_max,
 )
 
+H_params = [0.5*params[:si]^2,params[:gamma],-1.0+params[:gamma]]
+hb = get_quadratic_sol(H_params...)
+hb_ind = argmin(abs.(hb))
+# hb_ind = argmax(abs.(hb))
+hb = hb[hb_ind] # b in H transform
+H_params_1 = [0.5*params[:si]^2,params[:gamma],-1.0]
+hb1 = get_quadratic_sol(H_params_1...)
+hb1_ind = argmin(abs.(hb1))
+hb1 = hb1[hb1_ind] # b1 in H1 transform
+t_params = copy(params)
+t_params[:hb] = hb
+t_params[:hb1] = hb1
 
 dx = (grid_d[:x_max] - grid_d[:x_min]) / (grid_d[:Nx] - 1.0)
 dt = params[:T] / grid_d[:Nt]
@@ -228,11 +330,11 @@ Val = zeros(num_nonzeros)
 Ic = zeros(num_nonzeros)
 Jc = zeros(num_nonzeros)
 Vc = zeros(num_nonzeros)
-get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc,x_min)
+# get_mat_COO!(Nx, params, dx,dt,I,J,Val,Ic,Jc,Vc,x_min)
+get_trans_mat_COO!(Nx, t_params, dx,dt,I,J,Val,Ic,Jc,Vc,x_min)
+
 mat = sp.sparse(I,J,Val) # next step
-mat = la.Tridiagonal(mat)
 matc = sp.sparse(Ic,Jc,Vc) # current step
-matc = la.Tridiagonal(matc)
 
 T = params[:T]
 tau_space = collect(0.0:dt:T)
@@ -246,9 +348,38 @@ Qn = zeros(Nx) # next
 for (ind,elem) in enumerate(Q0)
     Q0[ind] = fQ(elem)
 end
+# Transform to H
+hQ0 = copy(Q0)
+tau = 0.0
+for (ind,elem) in enumerate(Q0)
+    x_ind = get_x(x_min,dx,ind)
+    if x_ind < k
+        hQ0[ind] = Q0[ind]*exp(tau*(t_params[:gamma]*k + t_params[:hb]*t_params[:ve]) + t_params[:hb]*x_ind)
+    else
+        hQ0[ind] = Q0[ind]*exp(tau*(t_params[:gamma]*k + t_params[:hb1]*t_params[:ve]) + t_params[:hb1]*x_ind)
+    end
+end
 
-Qc = deepcopy(Q0) # current
-compute_fd!(Qc,Qn,matc,mat,@view tau_space[2:end])
+
+hQc = deepcopy(hQ0) # current
+hQn = zeros(Nx) # current
+compute_fd!(hQc,hQn,matc,mat,@view tau_space[2:end])
+
+# inverse transform from H to Q
+T = t_params[:T]
+for (ind,elem) in enumerate(hQn)
+    x_ind = get_x(x_min,dx,ind)
+    if x_ind < k
+        Qn[ind] = hQn[ind]/exp(T*(t_params[:gamma]*k + t_params[:hb]*t_params[:ve]) + t_params[:hb]*x_ind)
+    else
+        Qn[ind] = hQn[ind]/exp(T*(t_params[:gamma]*k + t_params[:hb1]*t_params[:ve]) + t_params[:hb1]*x_ind)
+    end
+end
+
+
+x0_ind = round(Int,(x0 -x_min)/dx + 1)
+println("Qn at t=0 ", Qn[x0_ind])
+
 
 # Analytic Q
 dl = 1
@@ -259,11 +390,6 @@ A = r_a_aux0(dl,th,ka,si,tau)
 B =r_b_aux0(dl,ka,si,tau)
 bond_price = exp(sum(A+B*x0))
 println("Analytic solution for bond price: ",bond_price)
-
-# Q value
-x0_ind = get_x_ind(x0,x_min,dx)
-println("Qn at t=0 ", Qn[x0_ind])
-
 
 # compute R
 fR(ru) = ru

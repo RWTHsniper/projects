@@ -20,20 +20,20 @@ tot_params = Dict(
     :ve => [0.0027646771594520936], # test
     :ka => [0.06491552810007564], # test
     :si => [0.03362592979733442], # test
-    :x0 => [0.000100914], # test
-    :x0 => [0.02], # test
+    :x0 => [0.022], # test
 # harzard rate process (PSA params)
 # ho(t) parameters
     :a => 0.0,
     :b => 0.0, # test 
     :gamma => 20.0,
     :k => 0.02, # prepayment strike
-    # :k => 0.0, # prepayment strike test
+    :k => 0.001, # prepayment strike test
     :T_asterisk => 1000.0, # prepayment date test # test
     # MC params
     :annual_steps => 1, # annual
+    :annual_steps => 12, # monthly
     # :annual_steps => 52, # weekly
-    :num_paths => 3000,
+    :num_paths => 10000,
     )
 
 # we are going to only work on the last term
