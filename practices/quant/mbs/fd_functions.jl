@@ -43,38 +43,48 @@ function get_fx(dx::Real,order=2)
     return res
 end
 
-function get_mat_explicit!(mat_explicit::la.Tridiagonal,x_min::Real,dx::Real,dt::Real,t=nothing;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
-    mat_explicit .= 0.0
-    t_diag = 1.0/dt # diagonal matrix for next step
-    num_rows = size(mat_explicit,1)
+"""
+Computes the RHS for a second-order PDE with zero-gamma boundary conditions.
+"""
+function get_mat_discretized!(mat::la.Tridiagonal,x_min::Real,dx::Real,t=nothing;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
+    mat .= 0.0
+    num_rows = size(mat,1)
     for ind in 1:num_rows # row index
         x = get_x(x_min,dx,ind)
         indm = ind - 1
         indp = ind + 1
-        mat_explicit[ind,ind] += t_diag # always we have it 1/dt
         if !isnothing(get_coeff_0)
-            mat_explicit[ind,ind] += get_coeff_0(t,x) # always we have it discount term
+            mat[ind,ind] += get_coeff_0(t,x) # always we have it discount term
         end
         if ind == 1 # bc
             # zero gamma: coeff_2 = 0
             # fx
             if !isnothing(get_coeff_1)
-                mat_explicit[ind,ind:indp] .+= get_coeff_1(t,x) * get_fx(dx,1)
+                mat[ind,ind:indp] .+= get_coeff_1(t,x) * get_fx(dx,1)
             end
         elseif ind == num_rows # bc
             # zero gamma: coeff_2 = 0
             # fx
             if !isnothing(get_coeff_1)
-                mat_explicit[ind,indm:ind] .+= get_coeff_1(t,x) * get_fx(dx,1)
+                mat[ind,indm:ind] .+= get_coeff_1(t,x) * get_fx(dx,1)
             end
         else # inner node
             if !isnothing(get_coeff_2)
-                mat_explicit[ind,indm:indp] .+= get_coeff_2(t,x) * get_fxx(dx)
+                mat[ind,indm:indp] .+= get_coeff_2(t,x) * get_fxx(dx)
             end
             if !isnothing(get_coeff_1)
-                mat_explicit[ind,indm:indp] .+= get_coeff_1(t,x) * get_fx(dx) 
+                mat[ind,indm:indp] .+= get_coeff_1(t,x) * get_fx(dx) 
             end
         end
+    end
+end
+
+
+function get_mat_explicit!(mat_explicit::la.Tridiagonal,x_min::Real,dx::Real,dt::Real,t=nothing;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
+    mat_explicit .= 0.0
+    get_mat_discretized!(mat_explicit,x_min,dx,t;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2)
+    for ind in 1:size(mat_explicit,1)
+        mat_explicit[ind,ind] += 1.0/dt
     end
 end
 
@@ -85,10 +95,10 @@ function get_mat_explicit(n_dof,x_min::Real,dx::Real,dt::Real,t=nothing;get_coef
 end
 
 function get_mat_implicit!(mat_implicit::la.Tridiagonal,x_min::Real,dx::Real,dt::Real,t=nothing;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
-    get_mat_explicit!(mat_implicit,x_min,dx,dt,t;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2)
+    get_mat_discretized!(mat_implicit,x_min,dx,t;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2)
     mat_implicit .= -mat_implicit
     for ind in 1:size(mat_implicit,1) # row index
-        mat_implicit[ind,ind] += 2.0/dt
+        mat_implicit[ind,ind] += 1.0/dt
     end
 end
 
@@ -99,37 +109,13 @@ function get_mat_implicit(n_dof,x_min::Real,dx::Real,dt::Real,t=nothing;get_coef
 end
 
 function gat_mat_CN!(mat_next,mat_current,x_min::Real,dx::Real,dt::Real,t=nothing;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
-    t_diag = 1.0/dt # diagonal matrix for next step
-    num_rows = size(mat_next,1)
-    for ind in 1:num_rows # row index
-        x = get_x(x_min,dx,ind)
-        indm = ind - 1
-        indp = ind + 1
-        mat_next[ind,ind] += t_diag # always we have it 1/dt
-        mat_current[ind,ind] += t_diag # always we have it 1/dt
-        tmp = get_coeff_0(t,x)
-        mat_next[ind,ind] += -0.5*tmp # always we have it discount term
-        mat_current[ind,ind] += 0.5*tmp # always we have it discount term
-        if ind == 1 # bc
-            # zero gamma: coeff_2 = 0
-            # fx
-            tmp = get_coeff_1(t,x) * get_fx(dx,1)
-            mat_next[ind,ind:indp] .+= -0.5*tmp
-            mat_current[ind,ind:indp] .+= 0.5*tmp
-        elseif ind == num_rows # bc
-            # zero gamma: coeff_2 = 0
-            # fx
-            tmp = get_coeff_1(t,x) * get_fx(dx,1)
-            mat_next[ind,indm:ind] .+= -0.5*tmp
-            mat_current[ind,indm:ind] .+= 0.5*tmp
-        else # inner node
-            tmp = get_coeff_2(t,x) * get_fxx(dx)
-            mat_next[ind,indm:indp] .+= -0.5*tmp
-            mat_current[ind,indm:indp] .+= 0.5*tmp
-            tmp = get_coeff_1(t,x) * get_fx(dx)
-            mat_next[ind,indm:indp] .+= -0.5*tmp 
-            mat_current[ind,indm:indp] .+= 0.5*tmp
-        end
+    get_mat_discretized!(mat_current,x_min,dx,t;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2)
+    mat_current .*= 0.5 
+    mat_next .= -mat_current
+    t_diag = 1.0/dt # diagonal term for time discretization
+    for ind in 1:size(mat_current,1) # row index
+        mat_current[ind,ind] += t_diag
+        mat_next[ind,ind] += t_diag
     end
 end
 
