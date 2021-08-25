@@ -44,6 +44,87 @@ function get_fx(dx::Real,order=2)
     return res
 end
 
+function get_mat_explicit(n_dof,dt;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
+    mat_explicit = la.Tridiagonal(zeros(n_dof-1),zeros(n_dof),zeros(n_dof-1)) # matrix for nodes at current step
+    t_diag = 1.0/dt # diagonal matrix for next step
+    num_rows = size(mat_explicit,1)
+    for ind in 1:num_rows # row index
+        x = get_x(x_min,dx,ind)[1]
+        indm = ind - 1
+        indp = ind + 1
+        mat_explicit[ind,ind] += diag # always we have it 1/dt
+        if !isnothing(get_coeff_0)
+            mat_explicit[ind,ind] += get_coeff_0(nothing,x) # always we have it discount term
+        end
+        if ind == 1 # bc
+            # zero gamma: coeff_2 = 0
+            # fx
+            if !isnothing(get_coeff_1)
+                mat_explicit[ind,ind:indp] .+= get_coeff_1(nothing,x) * get_fx(dx,1)
+            end
+        elseif ind == num_rows # bc
+            # zero gamma: coeff_2 = 0
+            # fx
+            if !isnothing(get_coeff_1)
+                mat_explicit[ind,indm:ind] .+= get_coeff_1(nothing,x) * get_fx(dx,1)
+            end
+        else # inner node
+            if !isnothing(get_coeff_2)
+                mat_explicit[ind,indm:indp] .+= get_coeff_2(nothing,x) * get_fxx(dx)
+            end
+            if !isnothing(get_coeff_1)
+                mat_explicit[ind,indm:indp] .+= get_coeff_1(nothing,x) * get_fx(dx) 
+            end
+        end
+    end
+    return mat_explicit
+end
+
+function get_mat_implicit(n_dof,dt;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
+    mat_implicit = -get_mat_explicit(n_dof,dt;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2) # reuse code
+    for ind in 1:size(mat_implicit,1) # row index
+        mat_implicit[ind,ind] += 2.0/dt
+    end
+    return mat_implicit
+end
+
+function gat_mat_CN(n_dof,dt;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
+    mat_next = la.Tridiagonal(zeros(n_dof-1),zeros(n_dof),zeros(n_dof-1)) # matrix LHS
+    mat_current = la.Tridiagonal(zeros(n_dof-1),zeros(n_dof),zeros(n_dof-1)) # matrix for RHS
+    t_diag = 1.0/dt # diagonal matrix for next step
+    num_rows = size(mat_next,1)
+    for ind in 1:num_rows # row index
+        x = get_x(x_min,dx,ind)[1]
+        indm = ind - 1
+        indp = ind + 1
+        mat_next[ind,ind] += t_diag # always we have it 1/dt
+        mat_current[ind,ind] += t_diag # always we have it 1/dt
+        tmp = get_coeff_0(nothing,x)
+        mat_next[ind,ind] += -0.5*tmp # always we have it discount term
+        mat_current[ind,ind] += 0.5*tmp # always we have it discount term
+        if ind == 1 # bc
+            # zero gamma: coeff_2 = 0
+            # fx
+            tmp = get_coeff_1(nothing,x) * get_fx(dx,1)
+            mat_next[ind,ind:indp] .+= -0.5*tmp
+            mat_current[ind,ind:indp] .+= 0.5*tmp
+        elseif ind == num_rows # bc
+            # zero gamma: coeff_2 = 0
+            # fx
+            tmp = get_coeff_1(nothing,x) * get_fx(dx,1)
+            mat_next[ind,indm:ind] .+= -0.5*tmp
+            mat_current[ind,indm:ind] .+= 0.5*tmp
+        else # inner node
+            tmp = get_coeff_2(nothing,x) * get_fxx(dx)
+            mat_next[ind,indm:indp] .+= -0.5*tmp
+            mat_current[ind,indm:indp] .+= 0.5*tmp
+            tmp = get_coeff_1(nothing,x) * get_fx(dx)
+            mat_next[ind,indm:indp] .+= -0.5*tmp 
+            mat_current[ind,indm:indp] .+= 0.5*tmp
+        end
+    end
+    return mat_next, mat_current
+end
 
 #=
 Supported discretization schemes
@@ -58,8 +139,6 @@ Todo
 2. Discretization calculator
 
 =#
-
-
 
 params = Dict(
 # contract params
@@ -83,11 +162,12 @@ params = Dict(
 
 grid_d = Dict(
     :Nt => params[:T]*12, # num of timesteps
+    :Nt => params[:T]*12*5*7, # num of timesteps
     # :Nx => [3,3,3], # num of state variables
     :Nx => 64, # num of state variables
     :Nx => 256, # num of state variables
     # :Nx => 512, # num of state variables. Dont work for explicit
-    :Nx => 1024, # num of state variables. Dont work for explicit
+    # :Nx => 1024, # num of state variables. Dont work for explicit
     # :Nx => [128,128,32], # num of state variables
     :x_min => 0.0000001,
     :x_max => 0.6,
@@ -106,10 +186,10 @@ dt = params[:T] / grid_d[:Nt]
 Nx = grid_d[:Nx]
 x_min = grid_d[:x_min]
 
+
 # compose the explicit scheme
 n_dof = Nx[1]
 diag = 1.0/dt # diagonal matrix for next step
-mat_explicit = la.Tridiagonal(zeros(n_dof-1),zeros(n_dof),zeros(n_dof-1)) # matrix for nodes at current step
 
 # coefficients depending on a model
 get_coeff_2(t,x) = 0.5*si^2*x # 2nd order coefficient
@@ -123,27 +203,7 @@ function get_coeff_0(t,x)
     return res
 end
 
-num_rows = size(mat_explicit,1)
-for ind in 1:num_rows # row index
-    x = get_x(x_min,dx,ind)[1]
-    indm = ind - 1
-    indp = ind + 1
-    mat_explicit[ind,ind] += diag # always we have it 1/dt
-    mat_explicit[ind,ind] += get_coeff_0(nothing,x) # always we have it discount term
-    if ind == 1 # bc
-        # zero gamma: coeff_2 = 0
-        # fx
-        mat_explicit[ind,ind:indp] .+= get_coeff_1(nothing,x) * get_fx(dx,1)
-    elseif ind == num_rows # bc
-        # zero gamma: coeff_2 = 0
-        # fx
-        mat_explicit[ind,indm:ind] .+= get_coeff_1(nothing,x) * get_fx(dx,1)
-    else # inner node
-        mat_explicit[ind,indm:indp] .+= get_coeff_2(nothing,x) * get_fxx(dx)
-        mat_explicit[ind,indm:indp] .+= get_coeff_1(nothing,x) * get_fx(dx) 
-    end
-end
-
+# matrices for Crank-Nicolson scheme
 
 
 T = params[:T]
@@ -159,12 +219,13 @@ for (ind,elem) in enumerate(Q0)
     Q0[ind] = fQ(elem)
 end
 
+mat_explicit = get_mat_explicit(n_dof,dt;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2)
 Qc = deepcopy(Q0) # current
 for (ind,tau) in enumerate(tau_space)
     if ind == length(tau_space)
         continue
     end
-    Qn .= 1.0/diag*mat_explicit*Qc
+    Qn .= dt*mat_explicit*Qc
     Qc .= Qn
 end
 
@@ -174,17 +235,13 @@ x0_ind = get_x_ind(x0,x_min,dx)
 println("Explicit scheme: Qn at t=0 ", Qn[x0_ind]) # It is quite sensitive to discretizaitons
 
 # Implicit scheme
-mat_implicit = -copy(mat_explicit)
-for ind in 1:num_rows # row index
-    mat_implicit[ind,ind] += 2.0*diag
-end
-
+mat_implicit = get_mat_implicit(n_dof,dt;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2)
 Qc = deepcopy(Q0) # current
 for (ind,tau) in enumerate(tau_space)
     if ind == length(tau_space)
         continue
     end
-    Qn .= mat_implicit\(Qc*diag)
+    Qn .= mat_implicit\(Qc/dt)
     Qc .= Qn
 end
 # Q value
@@ -192,14 +249,13 @@ x0_ind = get_x_ind(x0,x_min,dx)
 println("Implicit scheme: Qn at t=0 ", Qn[x0_ind])
 
 # Crank-Nicolson scheme. I need to check...
+mat_next, mat_current = gat_mat_CN(n_dof,dt;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2)
 Qc = deepcopy(Q0) # current
 for (ind,tau) in enumerate(tau_space)
     if ind == length(tau_space)
         continue
     end
-    Qn .= 1.0/diag*mat_explicit*Qc # explicit
-    Qn .+= mat_implicit\(Qc*diag) # implicit
-    Qn .*= 0.5 # average(explicit, implicit)
+    Qn .= (mat_next)\(mat_current*Qc) # explicit
     Qc .= Qn
 end
 # Q value
