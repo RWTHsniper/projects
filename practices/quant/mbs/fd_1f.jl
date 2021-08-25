@@ -6,38 +6,7 @@ import IterativeSolvers; is = IterativeSolvers
 import LinearAlgebra; la = LinearAlgebra
 import Interpolations; ip = Interpolations
 
-
-# CIR process functions
-
-function r_a_aux0(dl,th,ka,si,tau,v=1.0,u=0.0)
-    g_aux = sqrt(ka^2 + 2*dl*v*si^2)
-    ex = exp(g_aux*tau) - 1.0
-    c = 2.0*g_aux + ex*(ka + g_aux - u*si^2)
-    return ka*th*(tau*(ka + g_aux) + 2*log(2*g_aux/c))/(si^2)
-end
-
-function r_a_aux0(dl::Vector,th::Vector,ka::Vector,si::Vector,tau,v=1.0,u=0.0)
-    res = zeros(size(dl))
-    for i in 1:length(res)
-        res[i] = r_a_aux0(dl[i],th[i],ka[i],si[i],tau,v,u)
-    end
-    return res
-end
-
-function r_b_aux0(dl,ka,si,tau,v=1.0,u=0.0)
-    g_aux = sqrt(ka^2 + 2*dl*v*si^2)
-    ex = exp(g_aux*tau) - 1.0
-    c = 2.0*g_aux + ex*(ka + g_aux - u*si^2)
-    return (2*u*g_aux - ex*(2*dl*v + u*(ka - g_aux)))/c
-end
-
-function r_b_aux0(dl::Vector,ka::Vector,si::Vector,tau,v=1.0,u=0.0)
-    res = zeros(size(dl))
-    for i in 1:length(res)
-        res[i] = r_b_aux0(dl[i],ka[i],si[i],tau,v,u)
-    end
-    return res
-end
+include("cir_functions.jl")
 
 function get_n_nonzeros(Nx)
     if typeof(Nx) <: Real 
@@ -206,8 +175,12 @@ function get_mat_tri!(Nx, params,dt,dx,x_min,mat,matc)
 
 end
 
-function compute_fd!(Vc,Vn,matc,mat,t_space)
+function compute_fd!(Vc,Vn,matc,mat,t,T,dt)
+    t_space = collect(t:dt:T)
     for (ind, tau) in enumerate(t_space)
+        if ind == 1 # skip initial step
+            continue
+        end
         Vn .= mat\(matc*Vc)
         Vc .= Vn
     end
@@ -258,6 +231,7 @@ params = Dict(
     :a => 0.0,
     :b => 0.0, 
     :gamma => 20.0,
+    :gamma => 00.0,
     :k => 0.02, # prepayment strike
     # :k => 0.015, # prepayment strike
     :T_asterisk => 1000.0, # prepayment date test # test
@@ -320,7 +294,7 @@ for (ind,elem) in enumerate(Q0)
 end
 
 Qc = deepcopy(Q0) # current
-compute_fd!(Qc,Qn,matc,mat,@view tau_space[2:end])
+compute_fd!(Qc,Qn,matc,mat,0.0,T,dt)
 
 # Analytic Q
 dl = 1
@@ -345,7 +319,7 @@ for (ind,elem) in enumerate(R0)
     R0[ind] = fR(x_ind)
 end
 Rc = deepcopy(R0) # current
-compute_fd!(Rc,Rn,matc,mat,@view tau_space[2:end])
+compute_fd!(Rc,Rn,matc,mat,0.0,T,dt)
 x0_ind = get_x_ind(x0,x_min,dx)
 println("Rn at t=0 ", Rn[x0_ind])
 
