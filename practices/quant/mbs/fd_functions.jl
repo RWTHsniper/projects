@@ -44,15 +44,15 @@ function get_fx(dx::Real,order=2)
     return res
 end
 
-function get_mat_explicit(n_dof,dt;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
+function get_mat_explicit(n_dof,x_min::Real,dx::Real,dt::Real;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
     mat_explicit = la.Tridiagonal(zeros(n_dof-1),zeros(n_dof),zeros(n_dof-1)) # matrix for nodes at current step
     t_diag = 1.0/dt # diagonal matrix for next step
     num_rows = size(mat_explicit,1)
     for ind in 1:num_rows # row index
-        x = get_x(x_min,dx,ind)[1]
+        x = get_x(x_min,dx,ind)
         indm = ind - 1
         indp = ind + 1
-        mat_explicit[ind,ind] += diag # always we have it 1/dt
+        mat_explicit[ind,ind] += t_diag # always we have it 1/dt
         if !isnothing(get_coeff_0)
             mat_explicit[ind,ind] += get_coeff_0(nothing,x) # always we have it discount term
         end
@@ -80,21 +80,21 @@ function get_mat_explicit(n_dof,dt;get_coeff_0=nothing,get_coeff_1=nothing,get_c
     return mat_explicit
 end
 
-function get_mat_implicit(n_dof,dt;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
-    mat_implicit = -get_mat_explicit(n_dof,dt;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2) # reuse code
+function get_mat_implicit(n_dof,x_min::Real,dx::Real,dt::Real;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
+    mat_implicit = -get_mat_explicit(n_dof,x_min,dx,dt;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2) # reuse code
     for ind in 1:size(mat_implicit,1) # row index
         mat_implicit[ind,ind] += 2.0/dt
     end
     return mat_implicit
 end
 
-function gat_mat_CN(n_dof,dt;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
+function gat_mat_CN(n_dof,x_min::Real,dx::Real,dt::Real;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
     mat_next = la.Tridiagonal(zeros(n_dof-1),zeros(n_dof),zeros(n_dof-1)) # matrix LHS
     mat_current = la.Tridiagonal(zeros(n_dof-1),zeros(n_dof),zeros(n_dof-1)) # matrix for RHS
     t_diag = 1.0/dt # diagonal matrix for next step
     num_rows = size(mat_next,1)
     for ind in 1:num_rows # row index
-        x = get_x(x_min,dx,ind)[1]
+        x = get_x(x_min,dx,ind)
         indm = ind - 1
         indp = ind + 1
         mat_next[ind,ind] += t_diag # always we have it 1/dt
@@ -139,137 +139,140 @@ Todo
 2. Discretization calculator
 
 =#
+function main()
+    params = Dict(
+    # contract params
+        :T => 30, # test
+    # Treasury
+        :l0 => 0.0,
+        :ve => 0.0027646771594520936,
+        :ka => 0.06491552810007564, 
+        :si => 0.03362592979733442, 
+        :x0 => 0.022, # test
+    # harzard rate process (PSA params)
+    # ho(t) parameters
+        :a => 0.0,
+        :b => 0.0, 
+        :gamma => 20.0,
+        :gamma => 0.0,
+        :k => 0.02, # prepayment strike
+        # :k => 0.015, # prepayment strike
+        :T_asterisk => 1000.0, # prepayment date test # test
+        )
 
-params = Dict(
-# contract params
-    :T => 30, # test
-# Treasury
-    :l0 => 0.0,
-    :ve => 0.0027646771594520936,
-    :ka => 0.06491552810007564, 
-    :si => 0.03362592979733442, 
-    :x0 => 0.022, # test
-# harzard rate process (PSA params)
-# ho(t) parameters
-    :a => 0.0,
-    :b => 0.0, 
-    :gamma => 20.0,
-    :gamma => 0.0,
-    :k => 0.02, # prepayment strike
-    # :k => 0.015, # prepayment strike
-    :T_asterisk => 1000.0, # prepayment date test # test
+    grid_d = Dict(
+        :Nt => params[:T]*12, # num of timesteps
+        :Nt => params[:T]*12*5*7, # num of timesteps
+        # :Nx => [3,3,3], # num of state variables
+        :Nx => 64, # num of state variables
+        :Nx => 256, # num of state variables
+        # :Nx => 512, # num of state variables. Dont work for explicit
+        # :Nx => 1024, # num of state variables. Dont work for explicit
+        # :Nx => [128,128,32], # num of state variables
+        :x_min => 0.0000001,
+        :x_max => 0.6,
     )
+        
 
-grid_d = Dict(
-    :Nt => params[:T]*12, # num of timesteps
-    :Nt => params[:T]*12*5*7, # num of timesteps
-    # :Nx => [3,3,3], # num of state variables
-    :Nx => 64, # num of state variables
-    :Nx => 256, # num of state variables
-    # :Nx => 512, # num of state variables. Dont work for explicit
-    # :Nx => 1024, # num of state variables. Dont work for explicit
-    # :Nx => [128,128,32], # num of state variables
-    :x_min => 0.0000001,
-    :x_max => 0.6,
-)
-    
+    ka = params[:ka]
+    si = params[:si]
+    ve = params[:ve]
+    x0 = params[:x0]
+    gamma = params[:gamma]
+    k = params[:k]
 
-ka = params[:ka]
-si = params[:si]
-ve = params[:ve]
-x0 = params[:x0]
-gamma = params[:gamma]
-k = params[:k]
-
-dx = (grid_d[:x_max] - grid_d[:x_min]) / (grid_d[:Nx] - 1.0)
-dt = params[:T] / grid_d[:Nt]
-Nx = grid_d[:Nx]
-x_min = grid_d[:x_min]
+    dx = (grid_d[:x_max] - grid_d[:x_min]) / (grid_d[:Nx] - 1.0)
+    dt = params[:T] / grid_d[:Nt]
+    Nx = grid_d[:Nx]
+    x_min = grid_d[:x_min]
 
 
-# compose the explicit scheme
-n_dof = Nx[1]
-diag = 1.0/dt # diagonal matrix for next step
+    # compose the explicit scheme
+    n_dof = Nx[1]
+    diag = 1.0/dt # diagonal matrix for next step
 
-# coefficients depending on a model
-get_coeff_2(t,x) = 0.5*si^2*x # 2nd order coefficient
-get_coeff_1(t,x) = ve - ka*x
-function get_coeff_0(t,x)
-    if x <= k
-        res = -(x + gamma*(k-x))
-    else
-        res = -x
+    # coefficients depending on a model
+    get_coeff_2(t,x) = 0.5*si^2*x # 2nd order coefficient
+    get_coeff_1(t,x) = ve - ka*x
+    function get_coeff_0(t,x)
+        if x <= k
+            res = -(x + gamma*(k-x))
+        else
+            res = -x
+        end
+        return res
     end
-    return res
-end
 
-# matrices for Crank-Nicolson scheme
+    # matrices for Crank-Nicolson scheme
 
 
-T = params[:T]
-tau_space = collect(0.0:dt:T)
+    T = params[:T]
+    tau_space = collect(0.0:dt:T)
 
-# Try to solve it using an iterative IterativeSolvers
+    # Try to solve it using an iterative IterativeSolvers
 
-# 1. fQ(ru) = 1
-fQ(ru) = 1.0
-Q0 = zeros(Nx[1]) # initial value
-Qn = zeros(Nx[1]) # next
-for (ind,elem) in enumerate(Q0)
-    Q0[ind] = fQ(elem)
-end
-
-mat_explicit = get_mat_explicit(n_dof,dt;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2)
-Qc = deepcopy(Q0) # current
-for (ind,tau) in enumerate(tau_space)
-    if ind == length(tau_space)
-        continue
+    # 1. fQ(ru) = 1
+    fQ(ru) = 1.0
+    Q0 = zeros(Nx[1]) # initial value
+    Qn = zeros(Nx[1]) # next
+    for (ind,elem) in enumerate(Q0)
+        Q0[ind] = fQ(elem)
     end
-    Qn .= dt*mat_explicit*Qc
-    Qc .= Qn
-end
 
-# compute_fd!(Qc,Qn,matc,mat,0.0,T,dt)
-# Q value
-x0_ind = get_x_ind(x0,x_min,dx)
-println("Explicit scheme: Qn at t=0 ", Qn[x0_ind]) # It is quite sensitive to discretizaitons
-
-# Implicit scheme
-mat_implicit = get_mat_implicit(n_dof,dt;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2)
-Qc = deepcopy(Q0) # current
-for (ind,tau) in enumerate(tau_space)
-    if ind == length(tau_space)
-        continue
+    mat_explicit = get_mat_explicit(n_dof,x_min,dx,dt;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2)
+    Qc = deepcopy(Q0) # current
+    for (ind,tau) in enumerate(tau_space)
+        if ind == length(tau_space)
+            continue
+        end
+        Qn .= dt*mat_explicit*Qc
+        Qc .= Qn
     end
-    Qn .= mat_implicit\(Qc/dt)
-    Qc .= Qn
-end
-# Q value
-x0_ind = get_x_ind(x0,x_min,dx)
-println("Implicit scheme: Qn at t=0 ", Qn[x0_ind])
 
-# Crank-Nicolson scheme. I need to check...
-mat_next, mat_current = gat_mat_CN(n_dof,dt;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2)
-Qc = deepcopy(Q0) # current
-for (ind,tau) in enumerate(tau_space)
-    if ind == length(tau_space)
-        continue
+    # compute_fd!(Qc,Qn,matc,mat,0.0,T,dt)
+    # Q value
+    x0_ind = get_x_ind(x0,x_min,dx)
+    println("Explicit scheme: Qn at t=0 ", Qn[x0_ind]) # It is quite sensitive to discretizaitons
+
+    # Implicit scheme
+    mat_implicit = get_mat_implicit(n_dof,x_min,dx,dt;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2)
+    Qc = deepcopy(Q0) # current
+    for (ind,tau) in enumerate(tau_space)
+        if ind == length(tau_space)
+            continue
+        end
+        Qn .= mat_implicit\(Qc/dt)
+        Qc .= Qn
     end
-    Qn .= (mat_next)\(mat_current*Qc) # explicit
-    Qc .= Qn
+    # Q value
+    x0_ind = get_x_ind(x0,x_min,dx)
+    println("Implicit scheme: Qn at t=0 ", Qn[x0_ind])
+
+    # Crank-Nicolson scheme. I need to check...
+    mat_next, mat_current = gat_mat_CN(n_dof,x_min,dx,dt;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2)
+    Qc = deepcopy(Q0) # current
+    for (ind,tau) in enumerate(tau_space)
+        if ind == length(tau_space)
+            continue
+        end
+        Qn .= (mat_next)\(mat_current*Qc) # explicit
+        Qc .= Qn
+    end
+    # Q value
+    x0_ind = get_x_ind(x0,x_min,dx)
+    println("CN scheme: Qn at t=0 ", Qn[x0_ind])
+
+
+    # Analytic Q
+    dl = 1
+    ka = params[:ka]
+    si = params[:si]
+    th = params[:ve] ./ params[:ka]
+    tau = T
+    A = r_a_aux0(dl,th,ka,si,tau)
+    B =r_b_aux0(dl,ka,si,tau)
+    bond_price = exp(sum(A+B*x0))
+    println("Analytic solution for bond price: ",bond_price)
 end
-# Q value
-x0_ind = get_x_ind(x0,x_min,dx)
-println("CN scheme: Qn at t=0 ", Qn[x0_ind])
 
-
-# Analytic Q
-dl = 1
-ka = params[:ka]
-si = params[:si]
-th = params[:ve] ./ params[:ka]
-tau = T
-A = r_a_aux0(dl,th,ka,si,tau)
-B =r_b_aux0(dl,ka,si,tau)
-bond_price = exp(sum(A+B*x0))
-println("Analytic solution for bond price: ",bond_price)
+main()
