@@ -7,10 +7,8 @@ import SparseArrays; sp = SparseArrays
 import IterativeSolvers; is = IterativeSolvers
 import LinearAlgebra; la = LinearAlgebra
 import Interpolations; ip = Interpolations
-import ForwardDiff
 
 include("cir_functions.jl")
-
 
 """
 Takes real and vector inputs
@@ -45,8 +43,8 @@ function get_fx(dx::Real,order=2)
     return res
 end
 
-function get_mat_explicit(n_dof,x_min::Real,dx::Real,dt::Real;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
-    mat_explicit = la.Tridiagonal(zeros(n_dof-1),zeros(n_dof),zeros(n_dof-1)) # matrix for nodes at current step
+function get_mat_explicit!(mat_explicit::la.Tridiagonal,x_min::Real,dx::Real,dt::Real,t=nothing;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
+    mat_explicit .= 0.0
     t_diag = 1.0/dt # diagonal matrix for next step
     num_rows = size(mat_explicit,1)
     for ind in 1:num_rows # row index
@@ -55,43 +53,52 @@ function get_mat_explicit(n_dof,x_min::Real,dx::Real,dt::Real;get_coeff_0=nothin
         indp = ind + 1
         mat_explicit[ind,ind] += t_diag # always we have it 1/dt
         if !isnothing(get_coeff_0)
-            mat_explicit[ind,ind] += get_coeff_0(nothing,x) # always we have it discount term
+            mat_explicit[ind,ind] += get_coeff_0(t,x) # always we have it discount term
         end
         if ind == 1 # bc
             # zero gamma: coeff_2 = 0
             # fx
             if !isnothing(get_coeff_1)
-                mat_explicit[ind,ind:indp] .+= get_coeff_1(nothing,x) * get_fx(dx,1)
+                mat_explicit[ind,ind:indp] .+= get_coeff_1(t,x) * get_fx(dx,1)
             end
         elseif ind == num_rows # bc
             # zero gamma: coeff_2 = 0
             # fx
             if !isnothing(get_coeff_1)
-                mat_explicit[ind,indm:ind] .+= get_coeff_1(nothing,x) * get_fx(dx,1)
+                mat_explicit[ind,indm:ind] .+= get_coeff_1(t,x) * get_fx(dx,1)
             end
         else # inner node
             if !isnothing(get_coeff_2)
-                mat_explicit[ind,indm:indp] .+= get_coeff_2(nothing,x) * get_fxx(dx)
+                mat_explicit[ind,indm:indp] .+= get_coeff_2(t,x) * get_fxx(dx)
             end
             if !isnothing(get_coeff_1)
-                mat_explicit[ind,indm:indp] .+= get_coeff_1(nothing,x) * get_fx(dx) 
+                mat_explicit[ind,indm:indp] .+= get_coeff_1(t,x) * get_fx(dx) 
             end
         end
     end
+end
+
+function get_mat_explicit(n_dof,x_min::Real,dx::Real,dt::Real,t=nothing;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
+    mat_explicit = la.Tridiagonal(zeros(n_dof-1),zeros(n_dof),zeros(n_dof-1)) # matrix for nodes at current step
+    get_mat_explicit!(mat_explicit,x_min,dx,dt,t;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2)
     return mat_explicit
 end
 
-function get_mat_implicit(n_dof,x_min::Real,dx::Real,dt::Real;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
-    mat_implicit = -get_mat_explicit(n_dof,x_min,dx,dt;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2) # reuse code
+function get_mat_implicit!(mat_implicit::la.Tridiagonal,x_min::Real,dx::Real,dt::Real,t=nothing;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
+    get_mat_explicit!(mat_implicit,x_min,dx,dt,t;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2)
+    mat_implicit .= -mat_implicit
     for ind in 1:size(mat_implicit,1) # row index
         mat_implicit[ind,ind] += 2.0/dt
     end
+end
+
+function get_mat_implicit(n_dof,x_min::Real,dx::Real,dt::Real,t=nothing;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
+    mat_implicit = la.Tridiagonal(zeros(n_dof-1),zeros(n_dof),zeros(n_dof-1)) # matrix for nodes at current step
+    get_mat_implicit!(mat_implicit,x_min,dx,dt,t;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2) # reuse code
     return mat_implicit
 end
 
-function gat_mat_CN(n_dof,x_min::Real,dx::Real,dt::Real;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
-    mat_next = la.Tridiagonal(zeros(n_dof-1),zeros(n_dof),zeros(n_dof-1)) # matrix LHS
-    mat_current = la.Tridiagonal(zeros(n_dof-1),zeros(n_dof),zeros(n_dof-1)) # matrix for RHS
+function gat_mat_CN!(mat_next,mat_current,x_min::Real,dx::Real,dt::Real,t=nothing;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
     t_diag = 1.0/dt # diagonal matrix for next step
     num_rows = size(mat_next,1)
     for ind in 1:num_rows # row index
@@ -100,30 +107,36 @@ function gat_mat_CN(n_dof,x_min::Real,dx::Real,dt::Real;get_coeff_0=nothing,get_
         indp = ind + 1
         mat_next[ind,ind] += t_diag # always we have it 1/dt
         mat_current[ind,ind] += t_diag # always we have it 1/dt
-        tmp = get_coeff_0(nothing,x)
+        tmp = get_coeff_0(t,x)
         mat_next[ind,ind] += -0.5*tmp # always we have it discount term
         mat_current[ind,ind] += 0.5*tmp # always we have it discount term
         if ind == 1 # bc
             # zero gamma: coeff_2 = 0
             # fx
-            tmp = get_coeff_1(nothing,x) * get_fx(dx,1)
+            tmp = get_coeff_1(t,x) * get_fx(dx,1)
             mat_next[ind,ind:indp] .+= -0.5*tmp
             mat_current[ind,ind:indp] .+= 0.5*tmp
         elseif ind == num_rows # bc
             # zero gamma: coeff_2 = 0
             # fx
-            tmp = get_coeff_1(nothing,x) * get_fx(dx,1)
+            tmp = get_coeff_1(t,x) * get_fx(dx,1)
             mat_next[ind,indm:ind] .+= -0.5*tmp
             mat_current[ind,indm:ind] .+= 0.5*tmp
         else # inner node
-            tmp = get_coeff_2(nothing,x) * get_fxx(dx)
+            tmp = get_coeff_2(t,x) * get_fxx(dx)
             mat_next[ind,indm:indp] .+= -0.5*tmp
             mat_current[ind,indm:indp] .+= 0.5*tmp
-            tmp = get_coeff_1(nothing,x) * get_fx(dx)
+            tmp = get_coeff_1(t,x) * get_fx(dx)
             mat_next[ind,indm:indp] .+= -0.5*tmp 
             mat_current[ind,indm:indp] .+= 0.5*tmp
         end
     end
+end
+
+function gat_mat_CN(n_dof,x_min::Real,dx::Real,dt::Real,t=nothing;get_coeff_0=nothing,get_coeff_1=nothing,get_coeff_2=nothing)
+    mat_next = la.Tridiagonal(zeros(n_dof-1),zeros(n_dof),zeros(n_dof-1)) # matrix LHS
+    mat_current = la.Tridiagonal(zeros(n_dof-1),zeros(n_dof),zeros(n_dof-1)) # matrix for RHS
+    gat_mat_CN!(mat_next, mat_current,x_min,dx,dt,t;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2)
     return mat_next, mat_current
 end
 
@@ -163,12 +176,13 @@ function main()
 
     grid_d = Dict(
         :Nt => params[:T]*12, # num of timesteps
-        # :Nt => params[:T]*12*5*7, # num of timesteps
+        :Nt => params[:T]*12*5*7, # num of timesteps
         # :Nx => [3,3,3], # num of state variables
-        :Nx => 64, # num of state variables
-        :Nx => 256, # num of state variables
+        :Nx => 8, # num of state variables
+        # :Nx => 64, # num of state variables
+        :Nx => 256, # num of state variables 
         # :Nx => 512, # num of state variables. Dont work for explicit
-        :Nx => 1024, # num of state variables. Dont work for explicit
+        # :Nx => 1024, # num of state variables. Dont work for explicit
         # :Nx => [128,128,32], # num of state variables
         :x_min => 0.0000001,
         :x_max => 0.6,
@@ -190,7 +204,6 @@ function main()
 
     # compose the explicit scheme
     n_dof = Nx[1]
-    diag = 1.0/dt # diagonal matrix for next step
 
     # coefficients depending on a model
     get_coeff_2(t,x) = 0.5*si^2*x # 2nd order coefficient
@@ -338,4 +351,4 @@ function main()
 
 end
 
-main()
+# main()
