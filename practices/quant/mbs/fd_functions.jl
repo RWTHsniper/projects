@@ -7,6 +7,7 @@ import SparseArrays; sp = SparseArrays
 import IterativeSolvers; is = IterativeSolvers
 import LinearAlgebra; la = LinearAlgebra
 import Interpolations; ip = Interpolations
+import ForwardDiff
 
 include("cir_functions.jl")
 
@@ -162,12 +163,12 @@ function main()
 
     grid_d = Dict(
         :Nt => params[:T]*12, # num of timesteps
-        :Nt => params[:T]*12*5*7, # num of timesteps
+        # :Nt => params[:T]*12*5*7, # num of timesteps
         # :Nx => [3,3,3], # num of state variables
         :Nx => 64, # num of state variables
         :Nx => 256, # num of state variables
         # :Nx => 512, # num of state variables. Dont work for explicit
-        # :Nx => 1024, # num of state variables. Dont work for explicit
+        :Nx => 1024, # num of state variables. Dont work for explicit
         # :Nx => [128,128,32], # num of state variables
         :x_min => 0.0000001,
         :x_max => 0.6,
@@ -229,7 +230,6 @@ function main()
         Qc .= Qn
     end
 
-    # compute_fd!(Qc,Qn,matc,mat,0.0,T,dt)
     # Q value
     x0_ind = get_x_ind(x0,x_min,dx)
     println("Explicit scheme: Qn at t=0 ", Qn[x0_ind]) # It is quite sensitive to discretizaitons
@@ -248,7 +248,7 @@ function main()
     x0_ind = get_x_ind(x0,x_min,dx)
     println("Implicit scheme: Qn at t=0 ", Qn[x0_ind])
 
-    # Crank-Nicolson scheme. I need to check...
+    # Crank-Nicolson scheme.
     mat_next, mat_current = gat_mat_CN(n_dof,x_min,dx,dt;get_coeff_0=get_coeff_0,get_coeff_1=get_coeff_1,get_coeff_2=get_coeff_2)
     Qc = deepcopy(Q0) # current
     for (ind,tau) in enumerate(tau_space)
@@ -273,6 +273,69 @@ function main()
     B =r_b_aux0(dl,ka,si,tau)
     bond_price = exp(sum(A+B*x0))
     println("Analytic solution for bond price: ",bond_price)
+
+
+    # R
+    fR(ru) = ru
+    R0 = zeros(Nx) # initial value
+    Rn = zeros(Nx) # next
+    for (ind,elem) in enumerate(R0)
+        x_ind = get_x(x_min,dx,ind)
+        R0[ind] = fR(x_ind)
+    end
+
+    # explicit
+    Rc = deepcopy(R0) # current
+    for (ind,tau) in enumerate(tau_space)
+        if ind == length(tau_space)
+            continue
+        end
+        Rn .= dt*mat_explicit*Rc
+        Rc .= Rn
+    end
+    x0_ind = get_x_ind(x0,x_min,dx)
+    println("Explicit scheme: Rn at t=0 ", Rn[x0_ind])
+
+    # implicit
+    Rc = deepcopy(R0) # current
+    for (ind,tau) in enumerate(tau_space)
+        if ind == length(tau_space)
+            continue
+        end
+        Rn .= mat_implicit\(Rc/dt)
+        Rc .= Rn
+    end
+    # Q value
+    x0_ind = get_x_ind(x0,x_min,dx)
+    println("Implicit scheme: Rn at t=0 ", Rn[x0_ind])
+
+    # CN scheme
+    Rc = deepcopy(R0) # current
+    for (ind,tau) in enumerate(tau_space)
+        if ind == length(tau_space)
+            continue
+        end
+        Rn .= (mat_next)\(mat_current*Rc) # explicit
+        Rc .= Rn
+    end
+    # Q value
+    x0_ind = get_x_ind(x0,x_min,dx)
+    println("CN scheme: Rn at t=0 ", Rn[x0_ind])
+
+    # Analytic R
+    dl = 1.0
+    ka = params[:ka]
+    si = params[:si]
+    th = params[:ve] ./ params[:ka]
+    tau = T
+    A = r_a_aux0(dl,th,ka,si,tau)
+    A_du = r_a_aux0_du(dl,th,ka,si,tau)
+    B =r_b_aux0(dl,ka,si,tau)
+    B_du = r_b_aux0_du(dl,ka,si,tau)
+    bond_price = exp(sum(A+B*x0))
+    R_anal = (A_du + B_du*x0)*bond_price
+    println("Analytic solution for R: ", R_anal)
+
 end
 
 main()
