@@ -17,17 +17,18 @@ tot_params = Dict(
 # Treasury
     :l0 => -0.127061,
     :l0 => 0.0, # test
-    :ve => [0.0027646771594520936], # test
+    :ve => [0.0027646771594520936], # th: 0.0425888418436647
     :ka => [0.06491552810007564], # test
     :si => [0.03362592979733442], # test
-    :x0 => [0.022], # test
+    :x0 => [0.0022], # When x0 is below k and close to zero, it does not work well
+    # :x0 => [0.1], # When x0 is above k, it works.
 # harzard rate process (PSA params)
 # ho(t) parameters
     :a => 0.0,
     :b => 0.0, # test 
     :gamma => 20.0,
     :k => 0.02, # prepayment strike
-    # :k => 0.015, # prepayment strike test
+    # :k => 0.0022, # prepayment strike test
     :T_asterisk => 1000.0, # prepayment date test # test
     # MC params
     :annual_steps => 1, # annual
@@ -166,6 +167,7 @@ compute!(mbs_model)
 
 annualtimes = vcat([0.25,0.5,1,2,3,4,5,7,8,9,10,15,20,25,30]) # times at which you want to calculate the nortgage rate Q ,R for the ouptput
 tm = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+tm = tm[tm.<=params[:T]]
 Q_mc = get_Q(mbs_model.t_sim,mbs_model.t_sim,mbs_model.T,mbs_model.neg_int_r_h)
 Q_f = ip.LinearInterpolation(mbs_model.t_sim,Q_mc) # Q function
 Q_tm = Q_f(tm) # Q value at tm

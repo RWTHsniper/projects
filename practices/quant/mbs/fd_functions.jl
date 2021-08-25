@@ -145,18 +145,19 @@ function main()
         :T => 30, # test
     # Treasury
         :l0 => 0.0,
-        :ve => 0.0027646771594520936,
-        :ka => 0.06491552810007564, 
-        :si => 0.03362592979733442, 
-        :x0 => 0.022, # test
+        :ve => 0.0027646771594520936, # th: 0.0425888418436647
+        :ka => 0.06491552810007564,
+        :si => 0.03362592979733442,
+        :x0 => 0.0022, # When x0 is below k and close to zero, it does not work well
+        # :x0 => 0.1, # When x0 is above k, it works.
     # harzard rate process (PSA params)
     # ho(t) parameters
         :a => 0.0,
-        :b => 0.0, 
+        :b => 0.0,
         :gamma => 20.0,
-        :gamma => 0.0,
+        # :gamma => 0.0,
         :k => 0.02, # prepayment strike
-        # :k => 0.015, # prepayment strike
+        # :k => 0.0022, # prepayment strike test
         :T_asterisk => 1000.0, # prepayment date test # test
         )
 
@@ -166,9 +167,9 @@ function main()
         # :Nx => [3,3,3], # num of state variables
         :Nx => 8, # num of state variables
         # :Nx => 64, # num of state variables
-        :Nx => 256, # num of state variables 
+        # :Nx => 256, # num of state variables 
         # :Nx => 512, # num of state variables. Dont work for explicit
-        # :Nx => 1024, # num of state variables. Dont work for explicit
+        :Nx => 1024, # num of state variables. Dont work for explicit
         # :Nx => [128,128,32], # num of state variables
         :x_min => 0.0000001,
         :x_max => 0.6,
@@ -194,17 +195,16 @@ function main()
     # coefficients depending on a model
     get_coeff_2(t,x) = 0.5*si^2*x # 2nd order coefficient
     get_coeff_1(t,x) = ve - ka*x
+    soft_max(x,alp) = 0.5*(x + sqrt(x^2 + alp))
+    # get_coeff_0(t,x) = -x - soft_max(gamma*(k-x),0.004) # smoothed maximum function
     function get_coeff_0(t,x)
         if x <= k
-            res = -(x + gamma*(k-x))
+            res = -(x + gamma*(k-x)) # -x -max(0,gamma(k-x))
         else
             res = -x
         end
         return res
     end
-
-    # matrices for Crank-Nicolson scheme
-
 
     T = params[:T]
     tau_space = collect(0.0:dt:T)
@@ -271,7 +271,7 @@ function main()
     A = r_a_aux0(dl,th,ka,si,tau)
     B =r_b_aux0(dl,ka,si,tau)
     bond_price = exp(sum(A+B*x0))
-    println("Analytic solution for bond price: ",bond_price)
+    println("Risk-free analytic solution for bond price: ",bond_price)
 
 
     # R
@@ -333,7 +333,7 @@ function main()
     B_du = r_b_aux0_du(dl,ka,si,tau)
     bond_price = exp(sum(A+B*x0))
     R_anal = (A_du + B_du*x0)*bond_price
-    println("Analytic solution for R: ", R_anal)
+    println("Risk-free analytic solution for R: ", R_anal)
 
 end
 
