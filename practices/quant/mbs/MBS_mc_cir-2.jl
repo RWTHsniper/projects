@@ -28,6 +28,7 @@ tot_params = Dict(
     :b => 0.0, # test 
     :gamma => 20.0,
     :k => 0.02, # prepayment strike
+    # :k => 1.0, # prepayment strike test
     # :k => 0.0022, # prepayment strike test
     :T_asterisk => 1000.0, # prepayment date test # test
     # MC params
@@ -35,6 +36,7 @@ tot_params = Dict(
     :annual_steps => 12, # monthly
     # :annual_steps => 52, # weekly
     :num_paths => 15000,
+    # :num_paths => 5, # teset
     )
 
 # we are going to only work on the last term

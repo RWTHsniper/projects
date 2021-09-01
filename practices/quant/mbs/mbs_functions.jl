@@ -185,14 +185,16 @@ function get_inter_h0_1!(inter_h0_1,t_sim,T_asterisk)
 end
 
 function get_inter_h_r!(inter_h0_2,t_sim,k,r)
-    @. inter_h0_2 = max(0.0,k -r) # k-r(s)
+   @. inter_h0_2 = max(0.0,k -r) # max(0,k-r(s))
     num_paths = size(inter_h0_2,1)
     # compute ∫(k-r(s))ds 
     for jdx in 1:length(t_sim)-1 # exclude the last
         for idx in 1:num_paths
-            inter_h0_2[idx,jdx] += ni.integrate(@view(t_sim[jdx:end]), @view(inter_h0_2[idx,jdx:end]))
+            # inter_h0_2[idx,jdx] += ni.integrate(@view(t_sim[jdx:end]), @view(inter_h0_2[idx,jdx:end])) # I guess it is wrong
+            inter_h0_2[idx,jdx] = ni.integrate(@view(t_sim[jdx:end]), @view(inter_h0_2[idx,jdx:end]))
         end
     end
+    # @show inter_h0_2;    error()
     return inter_h0_2
 end
 
@@ -211,9 +213,11 @@ end
 
 function get_int_h!(int_h, ab, gamma, inter_h0_1, inter_h0_2)
     int_h .= gamma * inter_h0_2
-    tmp = ab*inter_h0_1
-    for idx in 1:size(int_h,1) # for each path
-        int_h[idx,:] .+= tmp
+    if ab != 0.0
+        tmp = ab*inter_h0_1
+        for idx in 1:size(int_h,1) # for each path
+            int_h[idx,:] .+= tmp
+        end
     end
 end
 

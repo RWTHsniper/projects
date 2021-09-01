@@ -126,6 +126,23 @@ function gat_mat_CN(n_dof,x_min::Real,dx::Real,dt::Real,t=nothing;get_coeff_0=no
     return mat_next, mat_current
 end
 
+function align_grid!(grid, axis)
+    dx = (grid[:x_max] - grid[:x_min]) / (grid[:Nx] - 1.0)
+    k_ind = get_x_ind(axis,grid[:x_min],dx)
+    diff = axis - get_x(grid[:x_min],dx,k_ind)
+    grid[:x_min] += diff
+    grid[:x_max] += diff    
+    if grid[:x_min] < 0.0
+        for i in 1:10 # iterate until grid[:x_min] becomes positive
+            grid[:x_min] += dx
+            grid[:x_max] += dx
+            if grid[:x_min] >= 0.0
+                break
+            end
+        end
+    end
+end
+
 #=
 Supported discretization schemes
 
@@ -139,7 +156,8 @@ Todo
 2. Discretization calculator
 
 =#
-function main()
+
+#function main()
     params = Dict(
     # contract params
         :T => 30, # test
@@ -157,6 +175,7 @@ function main()
         :gamma => 20.0,
         # :gamma => 0.0,
         :k => 0.02, # prepayment strike
+        # :k => 1.0, # prepayment strike test
         # :k => 0.0022, # prepayment strike test
         :T_asterisk => 1000.0, # prepayment date test # test
         )
@@ -165,16 +184,16 @@ function main()
         :Nt => params[:T]*12, # num of timesteps
         :Nt => params[:T]*12*5*7, # num of timesteps
         # :Nx => [3,3,3], # num of state variables
-        :Nx => 8, # num of state variables
+        # :Nx => 8, # num of state variables
         # :Nx => 64, # num of state variables
         # :Nx => 256, # num of state variables 
         # :Nx => 512, # num of state variables. Dont work for explicit
-        :Nx => 1024, # num of state variables. Dont work for explicit
+        :Nx => 2^10, # num of state variables. Dont work for explicit
+        # :Nx => 2^15, # num of state variables. Dont work for explicit
         # :Nx => [128,128,32], # num of state variables
-        :x_min => 0.0000001,
+        :x_min => 0.0,
         :x_max => 0.6,
     )
-        
 
     ka = params[:ka]
     si = params[:si]
@@ -183,11 +202,13 @@ function main()
     gamma = params[:gamma]
     k = params[:k]
 
-    dx = (grid_d[:x_max] - grid_d[:x_min]) / (grid_d[:Nx] - 1.0)
-    dt = params[:T] / grid_d[:Nt]
-    Nx = grid_d[:Nx]
+    # adjust x_min, x_max so that the grid is aligned with x=k
+    align_grid!(grid_d, k)
     x_min = grid_d[:x_min]
-
+    x_max = grid_d[:x_max]
+    Nx = grid_d[:Nx]
+    dx = (x_max - x_min) / (Nx - 1.0)
+    dt = params[:T] / grid_d[:Nt]
 
     # compose the explicit scheme
     n_dof = Nx[1]
@@ -335,6 +356,6 @@ function main()
     R_anal = (A_du + B_du*x0)*bond_price
     println("Risk-free analytic solution for R: ", R_anal)
 
-end
+#end
 
 # main()
