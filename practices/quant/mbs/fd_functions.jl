@@ -160,14 +160,15 @@ Todo
 #function main()
     params = Dict(
     # contract params
-        :T => 30, # test
+        :T => 30,
+        :T => 5, # test
     # Treasury
         :l0 => 0.0,
         :ve => 0.0027646771594520936, # th: 0.0425888418436647
         :ka => 0.06491552810007564,
         :si => 0.03362592979733442,
-        :x0 => 0.0022, # When x0 is below k and close to zero, it does not work well
-        # :x0 => 0.1, # When x0 is above k, it works.
+        :x0 => 0.0022,
+        :x0 => 0.000100914,
     # harzard rate process (PSA params)
     # ho(t) parameters
         :a => 0.0,
