@@ -57,7 +57,7 @@ end
 function get_pos(Nx, ind)
     effective_dim = 0
     pos = ones(size(Nx))
-    if ind <= Nx[1] 
+    if ind <= Nx[1]
         effective_dim = 1
         pos[1] = ind
         return pos
