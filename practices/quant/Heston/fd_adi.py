@@ -57,6 +57,10 @@ def get_pos(Nx,ind,order='C'):
         
     return pos
 
+def align_grid(axis,dx,x_min):
+    pos_x0 = get_x_ind(axis,dx,x_min)
+    diff = axis - get_x(dx,pos_x0,x_min)
+    x_min += diff
 
 def get_x(dx,pos,x_min):
     return dx*pos + x_min
@@ -65,8 +69,13 @@ def get_v(dx,pos):
     return dx[1]*pos[1]
 
 def get_x_ind(x,dx,x_min):
-    ind = round((x-x_min)/dx)
-    return int(ind)
+    if type(x) == np.ndarray or type(x) == tuple:
+        ind = np.floor((x-x_min)/dx)
+        ind = ind.astype(int)
+    else:
+#     ind = np.floor((x-x_min)/dx)
+        ind = int(round((x-x_min)/dx))
+    return ind
 
 # My sparse matrix format
 
