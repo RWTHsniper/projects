@@ -1,10 +1,11 @@
 #include "sde.hpp"
 
-SDE::SDE(std::map<std::string, double>& arg_inp_params,  std::vector<drift>& arg_drift_vec, std::vector<volatility>& arg_volatility_vec){
+SDE::SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg_x0_vec, std::vector<drift>& arg_drift_vec, std::vector<volatility>& arg_volatility_vec){
     std::cout << "Initialize SDE" << std::endl;
     T = static_cast<double>(arg_inp_params["T"]);
     Nt = static_cast<size_t>(arg_inp_params["Nt"]);
     dt = T/static_cast<double>(Nt);
+    sqrt_dt = std::sqrt(dt);
     num_paths = static_cast<size_t>(arg_inp_params["num_paths"]);
     drift_vec = arg_drift_vec;
     volatility_vec = arg_volatility_vec;
@@ -13,11 +14,33 @@ SDE::SDE(std::map<std::string, double>& arg_inp_params,  std::vector<drift>& arg
         if (drift_vec[i].lhs_sv > num_sv){num_sv = drift_vec[i].lhs_sv;}; 
     }
     num_sv += 1;
+    x0_vec = arg_x0_vec;
+    if (num_sv != x0_vec.size()){
+        std::cout << "Mismatch between num_sv and x0_vec.size()!" << std::endl;
+    }
+    t_vec.resize(Nt+1,0.0);
+    for (size_t i=0; i<t_vec.size();i++){t_vec[i] = i*dt;};
     x.resize(Nt+1);
+    dW.resize(Nt);
+    std::default_random_engine generator;
+    std::normal_distribution<double> distribution(0.0,1.0);
     for (std::size_t i = 0; i < x.size(); ++i) {
         x[i].resize(num_sv);
+        if (i < dW.size()){dW[i].resize(num_sv);};
         for (std::size_t j = 0; j < num_sv; ++j) {
             x[i][j].resize(num_paths, 0.0);
+            if (i < dW.size()){
+                dW[i][j].resize(num_paths);
+                for (std::size_t k=0; k<num_paths;++k){
+                    dW[i][j][k] = distribution(generator);
+                }
+            }
+        }
+    }
+    // Set initial value x0 to x
+    for (std::size_t j = 0; j < num_sv; ++j) {
+        for (std::size_t k=0; k<num_paths;++k){
+            x[0][j][k] = x0_vec[j];
         }
     }
     //  std::fill(v.begin(), v.end(), c);
@@ -29,6 +52,17 @@ SDE::SDE(std::map<std::string, double>& arg_inp_params,  std::vector<drift>& arg
     }
     std::cout << "Initialization complete " << std::endl;
 
+}
+
+void SDE::info(){
+    std::cout << "Simulation Information" << std::endl;
+    std::cout << "Maturity " << T << std::endl;
+    std::cout << "Number of time steps " << Nt << std::endl;
+    std::cout << "Time step size " << dt << std::endl; 
+    std::cout << "Number of paths " << num_paths << std::endl; 
+    std::cout << "x0: " ;  for (double x0: x0_vec){std::cout<<x0<<" ";}; std::cout << std::endl; 
+    
+    std::cout << std::endl; 
 }
 
 void SDE::compute_drift(size_t ind_t){
@@ -55,4 +89,29 @@ void SDE::compute_volatility(size_t ind_t){
             }
         }
     }
+}
+
+void SDE::simulate(){
+    std::cout << "Start simulation" << std::endl;
+    for (size_t ind_t=0; ind_t<t_vec.size()-1;ind_t++){
+        this->compute_drift(ind_t); // compute drift
+        this->compute_volatility(ind_t); // compute volatility
+        // accumulate
+        for (size_t ind_sv=0; ind_sv<num_sv; ind_sv++){
+            for (size_t ind_path=0; ind_path<num_paths; ind_path++){
+                x[ind_t+1][ind_sv][ind_path] = x[ind_t][ind_sv][ind_path];
+                x[ind_t+1][ind_sv][ind_path] += drift_buffer[ind_sv][ind_path]*dt;
+                x[ind_t+1][ind_sv][ind_path] += volatility_buffer[ind_sv][ind_path]*dW[ind_t][ind_sv][ind_path]*sqrt_dt;
+            }
+        }
+    }
+
+    // Print result
+        for (size_t ind_sv=0; ind_sv<num_sv; ind_sv++){
+            std::cout << ind_sv << "-th state variable's paths" << std::endl;
+            for (size_t ind_path=0; ind_path<num_paths; ind_path++){
+                std::cout << x[Nt][ind_sv][ind_path] << std::endl;
+            }
+        }
+
 }

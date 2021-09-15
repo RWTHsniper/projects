@@ -34,13 +34,14 @@ int main(int, char**) {
     // std::vector<size_t, std::tuple<double, size_t, double> > drift_vec;
     std::vector<drift> drift_vec;
     std::vector<volatility> volatility_vec;
+    std::vector<double> x0_vec;
     std::map<std::string, double> inp_params;
     for (size_t i=0; i<inp_text.size(); i++){
         std::vector<std::string> &line_str = inp_text[i];
         auto key = line_str[0];
         std::cout << key << std::endl;
+        std::vector<std::string> params = std::vector<std::string>(line_str.begin() + 1, line_str.end());
         if (key=="drift"){
-            std::vector<std::string> params = std::vector<std::string>(line_str.begin() + 1, line_str.end());
             for (size_t j=0; j<params.size();j++){
                 auto p = tokenize(params[j],",");
                 drift_vec.emplace_back(drift(p));
@@ -51,8 +52,7 @@ int main(int, char**) {
                 std::cout<< drift_vec[idx].order << std::endl;
             }
         }
-        else if (line_str[0]=="volatility"){
-            std::vector<std::string> params = std::vector<std::string>(line_str.begin() + 1, line_str.end());
+        else if (key=="volatility"){
             for (size_t j=0; j<params.size();j++){
                 auto p = tokenize(params[j],",");
                 volatility_vec.emplace_back(volatility(p));
@@ -61,6 +61,11 @@ int main(int, char**) {
                 std::cout<< volatility_vec[idx].coeff << " ";
                 std::cout<< volatility_vec[idx].rhs_sv << " ";
                 std::cout<< volatility_vec[idx].order << std::endl;
+            }
+        }
+        else if (key=="x0"){
+            for (size_t j=0; j<params.size();j++){
+                x0_vec.emplace_back(stod(params[j]));
             }
         }
         else{
@@ -72,9 +77,11 @@ int main(int, char**) {
     for (auto const &pair: inp_params) {
         std::cout << "{" << pair.first << ": " << pair.second << "}\n";
     }
-    SDE sde = SDE(inp_params, drift_vec, volatility_vec);
-    sde.compute_drift(0);
-    sde.compute_volatility(0);
+    SDE sde = SDE(inp_params, x0_vec, drift_vec, volatility_vec);
+    // sde.compute_drift(0);
+    // sde.compute_volatility(0);
+    sde.info();
+    sde.simulate();
     // drift d_tmp = drift_vec[0];
     // std::cout << d_tmp.lhs_sv << " " << d_tmp.coeff << std::endl;
 

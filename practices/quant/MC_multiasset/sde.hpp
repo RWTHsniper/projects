@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include <cmath>
+#include <random>
 
 struct drift{
     size_t lhs_sv;
@@ -52,17 +53,23 @@ private:
     double T;
     size_t Nt;
     double dt;
+    double sqrt_dt;
     size_t num_paths;
     size_t num_sv; // number of state variables for each model
+    std::vector<double> t_vec;
+    std::vector<double> x0_vec;
     std::vector<drift> drift_vec;
     std::vector<volatility> volatility_vec;
     std::vector<std::vector<std::vector<double>>> x; // state variables at each step and path (Nt+1, num_sv, num_paths)
+    std::vector<std::vector<std::vector<double>>> dW; // Brownian motions at each step and path (Nt, num_sv, num_paths)
     std::vector<std::vector<double>> drift_buffer;
     std::vector<std::vector<double>> volatility_buffer;
 public:
-	SDE(std::map<std::string, double>& arg_inp_params,  std::vector<drift>& arg_drift_vec, std::vector<volatility>& arg_volatility_vec);
+	SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg_x0_vec, std::vector<drift>& arg_drift_vec, std::vector<volatility>& arg_volatility_vec);
+    void info();
     void compute_drift(size_t ind_t);
     void compute_volatility(size_t ind_t);
+    void simulate();
 	virtual ~SDE(){}; // empty destructor for a virtual class
 };
  
