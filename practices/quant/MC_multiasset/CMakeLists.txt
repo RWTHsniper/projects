@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 3.0.0)
+project(MultiAsset VERSION 0.1.0)
+
+include(CTest)
+enable_testing()
+
+add_executable(MultiAsset main.cpp utils.cpp models.cpp)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -DNO_DEBUG")
+
+set(CPACK_PROJECT_NAME ${PROJECT_NAME})
+set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
+include(CPack)
