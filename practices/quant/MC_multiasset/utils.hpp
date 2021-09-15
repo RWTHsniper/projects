@@ -11,7 +11,11 @@
 #include <vector>
 #include <iostream>
 
+// Strings
+const std::string WHITESPACE = " \n\r\t\f\v";
+std::string ltrim(const std::string &s);
+std::string rtrim(const std::string &s);
+std::string trim(const std::string &s);
 std::vector<std::string> tokenize(std::string s, std::string del = " ");
-
 
 #endif /* UTILS_HPP_ */

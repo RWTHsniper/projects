@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/MultiAsset.dir/main.cpp.o"
   "CMakeFiles/MultiAsset.dir/utils.cpp.o"
-  "CMakeFiles/MultiAsset.dir/models.cpp.o"
+  "CMakeFiles/MultiAsset.dir/sde.cpp.o"
   "MultiAsset.pdb"
   "MultiAsset"
 )

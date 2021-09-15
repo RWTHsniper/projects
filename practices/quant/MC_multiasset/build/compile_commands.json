@@ -1,17 +1,17 @@
 [
 {
   "directory": "/Users/jungjaeyong/projects/practices/quant/MC_multiasset/build",
-  "command": "/usr/bin/clang++     -std=c++11 -stdlib=libc++ -DNO_DEBUG -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk   -o CMakeFiles/MultiAsset.dir/main.cpp.o -c /Users/jungjaeyong/projects/practices/quant/MC_multiasset/main.cpp",
+  "command": "/usr/bin/clang++     -std=c++14 -stdlib=libc++ -DNO_DEBUG -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk   -o CMakeFiles/MultiAsset.dir/main.cpp.o -c /Users/jungjaeyong/projects/practices/quant/MC_multiasset/main.cpp",
   "file": "/Users/jungjaeyong/projects/practices/quant/MC_multiasset/main.cpp"
 },
 {
   "directory": "/Users/jungjaeyong/projects/practices/quant/MC_multiasset/build",
-  "command": "/usr/bin/clang++     -std=c++11 -stdlib=libc++ -DNO_DEBUG -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk   -o CMakeFiles/MultiAsset.dir/utils.cpp.o -c /Users/jungjaeyong/projects/practices/quant/MC_multiasset/utils.cpp",
+  "command": "/usr/bin/clang++     -std=c++14 -stdlib=libc++ -DNO_DEBUG -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk   -o CMakeFiles/MultiAsset.dir/utils.cpp.o -c /Users/jungjaeyong/projects/practices/quant/MC_multiasset/utils.cpp",
   "file": "/Users/jungjaeyong/projects/practices/quant/MC_multiasset/utils.cpp"
 },
 {
   "directory": "/Users/jungjaeyong/projects/practices/quant/MC_multiasset/build",
-  "command": "/usr/bin/clang++     -std=c++11 -stdlib=libc++ -DNO_DEBUG -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk   -o CMakeFiles/MultiAsset.dir/models.cpp.o -c /Users/jungjaeyong/projects/practices/quant/MC_multiasset/models.cpp",
-  "file": "/Users/jungjaeyong/projects/practices/quant/MC_multiasset/models.cpp"
+  "command": "/usr/bin/clang++     -std=c++14 -stdlib=libc++ -DNO_DEBUG -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk   -o CMakeFiles/MultiAsset.dir/sde.cpp.o -c /Users/jungjaeyong/projects/practices/quant/MC_multiasset/sde.cpp",
+  "file": "/Users/jungjaeyong/projects/practices/quant/MC_multiasset/sde.cpp"
 }
 ]
