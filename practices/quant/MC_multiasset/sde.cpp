@@ -66,26 +66,26 @@ void SDE::info(){
 }
 
 void SDE::compute_drift(size_t ind_t){
-    std::cout << "Test compute drift" << std::endl;
+    // std::cout << "Test compute drift" << std::endl;
     for (size_t ind_drift=0; ind_drift< drift_vec.size(); ind_drift++){
         drift& elem = drift_vec[ind_drift];
         for (size_t ind_sv=0; ind_sv<num_sv; ind_sv++){
             for (size_t ind_path=0; ind_path<num_paths; ind_path++){
                 drift_buffer[elem.lhs_sv][ind_path]  = elem.coeff*std::pow(x[ind_t][elem.rhs_sv][ind_path],elem.order);
-                std::cout << "Drift "<< drift_buffer[elem.lhs_sv][ind_path] << std::endl;
+                // std::cout << "Drift "<< drift_buffer[elem.lhs_sv][ind_path] << std::endl;
             }
         }
     }
 }
 
 void SDE::compute_volatility(size_t ind_t){
-    std::cout << "Test compute volatility" << std::endl;
+    // std::cout << "Test compute volatility" << std::endl;
     for (size_t ind_volatility=0; ind_volatility< volatility_vec.size(); ind_volatility++){
         volatility& elem = volatility_vec[ind_volatility];
         for (size_t ind_sv=0; ind_sv<num_sv; ind_sv++){
             for (size_t ind_path=0; ind_path<num_paths; ind_path++){
                 volatility_buffer[elem.lhs_sv][ind_path]  = elem.coeff*std::pow(x[ind_t][elem.rhs_sv][ind_path],elem.order);
-                std::cout << "Volatility "<< volatility_buffer[elem.lhs_sv][ind_path] << std::endl;
+                // std::cout << "Volatility "<< volatility_buffer[elem.lhs_sv][ind_path] << std::endl;
             }
         }
     }
@@ -105,13 +105,34 @@ void SDE::simulate(){
             }
         }
     }
-
     // Print result
-        for (size_t ind_sv=0; ind_sv<num_sv; ind_sv++){
-            std::cout << ind_sv << "-th state variable's paths" << std::endl;
-            for (size_t ind_path=0; ind_path<num_paths; ind_path++){
-                std::cout << x[Nt][ind_sv][ind_path] << std::endl;
+        // for (size_t ind_sv=0; ind_sv<num_sv; ind_sv++){
+        //     std::cout << ind_sv << "-th state variable's paths" << std::endl;
+        //     for (size_t ind_path=0; ind_path<num_paths; ind_path++){
+        //         std::cout << x[Nt][ind_sv][ind_path] << std::endl;
+        //     }
+        // }
+}
+
+void SDE::write_result(std::string& path){
+
+    // Write output of x
+    for (size_t ind_sv=0; ind_sv<num_sv; ind_sv++){
+        std::string colname = "x"+std::to_string(ind_sv);
+        std::string filename = path+colname+".csv";
+        // Create an output filestream object
+        std::ofstream myFile(filename);
+        
+        // Send data to the stream
+        for (size_t ind_path=0; ind_path<num_paths; ind_path++){
+            for (size_t ind_t=0; ind_t<t_vec.size(); ind_t++){
+                myFile << x[ind_t][ind_sv][ind_path]; 
+                if (ind_t<t_vec.size()-1){myFile << ",";};
             }
+            myFile << "\n";
         }
+        // Close the file
+        myFile.close();
+    }
 
 }

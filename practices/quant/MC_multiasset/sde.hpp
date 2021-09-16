@@ -2,6 +2,7 @@
 #define SDE_HPP_
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <map>
 #include <string>
@@ -70,6 +71,7 @@ public:
     void compute_drift(size_t ind_t);
     void compute_volatility(size_t ind_t);
     void simulate();
+    void write_result(std::string& filename);
 	virtual ~SDE(){}; // empty destructor for a virtual class
 };
  
