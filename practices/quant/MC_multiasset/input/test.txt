@@ -3,4 +3,5 @@ volatility 0,0.1,0,0 1,0.05,1,0
 x0 0.0 0.0
 T 1
 Nt 60
-num_paths 5000
+num_paths 5
+correlation 0,0,1.0

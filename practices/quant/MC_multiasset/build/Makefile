@@ -520,6 +520,33 @@ Experimental/fast:
 	$(MAKE) -f CMakeFiles/Experimental.dir/build.make CMakeFiles/Experimental.dir/build
 .PHONY : Experimental/fast
 
+MyTensor.o: MyTensor.cpp.o
+
+.PHONY : MyTensor.o
+
+# target to build an object file
+MyTensor.cpp.o:
+	$(MAKE) -f CMakeFiles/MultiAsset.dir/build.make CMakeFiles/MultiAsset.dir/MyTensor.cpp.o
+.PHONY : MyTensor.cpp.o
+
+MyTensor.i: MyTensor.cpp.i
+
+.PHONY : MyTensor.i
+
+# target to preprocess a source file
+MyTensor.cpp.i:
+	$(MAKE) -f CMakeFiles/MultiAsset.dir/build.make CMakeFiles/MultiAsset.dir/MyTensor.cpp.i
+.PHONY : MyTensor.cpp.i
+
+MyTensor.s: MyTensor.cpp.s
+
+.PHONY : MyTensor.s
+
+# target to generate assembly for a file
+MyTensor.cpp.s:
+	$(MAKE) -f CMakeFiles/MultiAsset.dir/build.make CMakeFiles/MultiAsset.dir/MyTensor.cpp.s
+.PHONY : MyTensor.cpp.s
+
 main.o: main.cpp.o
 
 .PHONY : main.o
@@ -641,6 +668,9 @@ help:
 	@echo "... ExperimentalMemCheck"
 	@echo "... Continuous"
 	@echo "... Experimental"
+	@echo "... MyTensor.o"
+	@echo "... MyTensor.i"
+	@echo "... MyTensor.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

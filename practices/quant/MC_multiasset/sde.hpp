@@ -9,6 +9,8 @@
 #include <cmath>
 #include <random>
 
+#include "MyTensor.hpp"
+
 struct drift{
     size_t lhs_sv;
     double coeff;
@@ -26,6 +28,9 @@ struct drift{
         coeff = b;
         rhs_sv = r;
         order = o;
+    }
+    double compute(double& sv){
+        return coeff*std::pow(sv,order);
     }
 };
 
@@ -47,6 +52,16 @@ struct volatility{
         rhs_sv = r;
         order = o;
     }
+    double compute(double& sv){
+        return coeff*std::pow(sv,order);
+    }
+};
+
+struct correlation{
+    size_t sv_1;
+    size_t sv_2;
+    double corr;
+    correlation(size_t asv_1, size_t asv_2, double acorr):sv_1(asv_1),sv_2(asv_2),corr(acorr) {};
 };
 
 class SDE {
@@ -61,12 +76,14 @@ private:
     std::vector<double> x0_vec;
     std::vector<drift> drift_vec;
     std::vector<volatility> volatility_vec;
+    std::vector<MyTensor<double>> cholesky_mat; // use vector to store correlation_mat class. Vector of size 0 or 1.
     std::vector<std::vector<std::vector<double>>> x; // state variables at each step and path (Nt+1, num_sv, num_paths)
     std::vector<std::vector<std::vector<double>>> dW; // Brownian motions at each step and path (Nt, num_sv, num_paths)
     std::vector<std::vector<double>> drift_buffer;
     std::vector<std::vector<double>> volatility_buffer;
 public:
-	SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg_x0_vec, std::vector<drift>& arg_drift_vec, std::vector<volatility>& arg_volatility_vec);
+	SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg_x0_vec, std::vector<drift>& arg_drift_vec, std::vector<volatility>& arg_volatility_vec \
+    , std::vector<correlation>& arg_correlation_vec);
     void info();
     void compute_drift(size_t ind_t);
     void compute_volatility(size_t ind_t);
