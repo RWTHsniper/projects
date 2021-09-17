@@ -22,7 +22,7 @@ SDE::SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg
     t_vec.resize(Nt+1,0.0);
     for (size_t i=0; i<t_vec.size();i++){t_vec[i] = i*dt;};
     x.resize(Nt+1);
-    std::default_random_engine generator;
+    std::default_random_engine generator{0}; // Seed 0
     std::normal_distribution<double> distribution(0.0,1.0);
     for (std::size_t i = 0; i < x.size(); ++i) {
         x[i].resize(num_sv);
@@ -30,13 +30,21 @@ SDE::SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg
             x[i][j].resize(num_paths, 0.0);
         }
     }
-    dW.resize(Nt);
-    for (std::size_t i = 0; i < dW.size(); ++i) {
-        dW[i].resize(num_sv);
+    this->dW_indep = std::unique_ptr<MyTensor<double>>(new MyTensor<double>(Nt,num_sv, num_paths, 0.0));
+    for (std::size_t i = 0; i < Nt; ++i) {
         for (std::size_t j = 0; j < num_sv; ++j) {
-            dW[i][j].resize(num_paths);
             for (std::size_t k=0; k<num_paths;++k){
-                dW[i][j][k] = distribution(generator);
+                this->dW_indep->get(i,j,k) = distribution(generator);
+            }
+        }
+    }
+    // Normalize dW_indep by trnasformation
+    for (std::size_t i = 0; i < Nt; ++i) {
+        for (std::size_t j = 0; j < num_sv; ++j) {
+            double m = this->dW_indep->mean(i,j,0,i,j,num_paths-1);
+            double s = this->dW_indep->std(i,j,0,i,j,num_paths-1);
+            for (std::size_t k=0; k<num_paths;++k){
+                this->dW_indep->get(i,j,k) = (this->dW_indep->get(i,j,k) - m)/s; // almost exact normal distribution
             }
         }
     }
@@ -46,16 +54,16 @@ SDE::SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg
             x[0][j][k] = x0_vec[j];
         }
     }
-    //  std::fill(v.begin(), v.end(), c);
+    //  drift and volatility buffer initialization
     drift_buffer.resize(num_sv);
     volatility_buffer.resize(num_sv); 
     for (std::size_t j = 0; j < num_sv; ++j) {
         drift_buffer[j].resize(num_paths, 0.0);
         volatility_buffer[j].resize(num_paths, 0.0);
     }
-
     // Cholesky matrix
     if ((arg_correlation_vec.size()>0) && (num_sv>1)){
+        use_cholesky = true;
         MyTensor correlation_mat = MyTensor(num_sv,num_sv,0.0);
         for (size_t i=0; i<num_sv; i++){correlation_mat.get(i,i) = 1.0;}; // set diagonal terms
         // arg_correlation_vec;
@@ -65,10 +73,28 @@ SDE::SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg
         }
         std::cout << "Correlaiton matrix" << std::endl;
         correlation_mat.print();
-        cholesky_mat.emplace_back(correlation_mat.get_cholesky_lower());
-        cholesky_mat[0].print();
+        this->cholesky_ptr = std::unique_ptr<MyTensor<double>>(new MyTensor(correlation_mat.get_cholesky_lower()));
     }
+    else{use_cholesky=false;}
 
+    // Assign dW
+    this->dW = std::unique_ptr<MyTensor<double>>(new MyTensor<double>(Nt,num_sv, num_paths, 0.0));
+    for (size_t ind_t=0; ind_t<Nt; ind_t++){
+        for (size_t ind_path=0; ind_path<num_paths; ind_path++){
+            for (size_t i=0; i<num_sv; i++){ // index for dW
+                for (size_t j=0; j<num_sv; j++){ // index for dW_indep
+                    if (use_cholesky){
+                        this->dW->get(ind_t,i,ind_path) += this->cholesky_ptr->get(i,j)*dW_indep->get(ind_t,j,ind_path);
+                        // this->dW->get(ind_t,i,ind_path) += this->cholesky_ptr->get(i,j)*dW_indep[ind_t][j][ind_path];
+                    }
+                    else{
+                        this->dW->get(ind_t,i,ind_path) += dW_indep->get(ind_t,j,ind_path);
+                        // this->dW->get(ind_t,i,ind_path) += dW_indep[ind_t][j][ind_path];
+                    }
+                }
+            }
+        }
+    }
 
     std::cout << "Initialization complete " << std::endl;
 
@@ -79,11 +105,11 @@ void SDE::info(){
     std::cout << "Simulation Information" << std::endl;
     std::cout << "Maturity " << T << std::endl;
     std::cout << "Number of time steps " << Nt << std::endl;
-    std::cout << "Time step size " << dt << std::endl; 
+    std::cout << "Time step size " << dt << std::endl;
     std::cout << "Number of paths " << num_paths << std::endl; 
     std::cout << "x0: " ;  for (double x0: x0_vec){std::cout<<x0<<" ";}; std::cout << std::endl; 
     std::cout << "Cholesky lower matrix" << std::endl;
-    cholesky_mat[0].print();
+    this->cholesky_ptr->print();
     
     std::cout << std::endl; 
 }
@@ -128,7 +154,7 @@ void SDE::simulate(){
             for (size_t ind_path=0; ind_path<num_paths; ind_path++){
                 x[ind_t+1][ind_sv][ind_path] = x[ind_t][ind_sv][ind_path];
                 x[ind_t+1][ind_sv][ind_path] += drift_buffer[ind_sv][ind_path]*dt;
-                x[ind_t+1][ind_sv][ind_path] += volatility_buffer[ind_sv][ind_path]*dW[ind_t][ind_sv][ind_path]*sqrt_dt;
+                x[ind_t+1][ind_sv][ind_path] += volatility_buffer[ind_sv][ind_path]*this->dW->get(ind_t,ind_sv,ind_path)*sqrt_dt;
             }
         }
     }

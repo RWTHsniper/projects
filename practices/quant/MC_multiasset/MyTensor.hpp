@@ -27,7 +27,18 @@ public:
     T& get(size_t i,size_t j,size_t k);
     T& get(size_t i,size_t j,size_t k,size_t l);
     T& get(size_t i,size_t j,size_t k,size_t l,size_t m);
+    T mean(size_t i, size_t j, size_t k, size_t ii, size_t jj, size_t kk);
+    T std(size_t i, size_t j, size_t k, size_t ii, size_t jj, size_t kk);
+    std::vector<size_t>& size();
     MyTensor<T> get_cholesky_lower();
+    MyTensor<T>& operator=(const MyTensor<T>& other){
+    if (this != &other){ // not a self-assignment
+        this->dim = other.dim;
+        this->data = other.data;
+        this->check = other.check;
+        }
+        return *this;
+    }
     void print();
     virtual ~MyTensor(){};
 };
@@ -192,6 +203,44 @@ void MyTensor<T>::print(){
             std::cout << std::endl;
         }
     }
+}
+
+template <class T> 
+std::vector<size_t>& MyTensor<T>::size(){
+    return dim;
+}
+
+template <class T> 
+T MyTensor<T>::mean(size_t i, size_t j, size_t k, size_t ii, size_t jj, size_t kk){
+    size_t s = i*dim[1]*dim[2] + j*dim[2] + k;
+    size_t e = ii*dim[1]*dim[2] + jj*dim[2] + kk;
+    if (e <= s){
+        std::cout << "Wrong index for MyTensor<T>::mean" << std::endl;
+        exit(-1);
+    }
+    T sum = std::accumulate(&data[s], &data[e+1], static_cast<T>(0.0));
+    T mean = sum / static_cast<T>(e-s+1);
+    // std::cout << data[s] << " " << data[e]  << std::endl;
+    // std::cout << sum << " " << mean << " " << s << " " << e << std::endl;
+    return mean;
+}
+
+template <class T> 
+T MyTensor<T>::std(size_t i, size_t j, size_t k, size_t ii, size_t jj, size_t kk){
+    size_t s = i*dim[1]*dim[2] + j*dim[2] + k;
+    size_t e = ii*dim[1]*dim[2] + jj*dim[2] + kk;
+    if (e <= s){
+        std::cout << "Wrong index for MyTensor<T>::mean" << std::endl;
+        exit(-1);
+    }
+    T m = this->mean(i,j,k,ii,jj,kk);
+
+    T sq_sum = std::inner_product(&data[s], &data[e+1], &data[s], static_cast<T>(0.0));
+    T stdev = std::sqrt(sq_sum/static_cast<T>(e-s+1) - m*m);
+
+    // std::cout << data[s] << " " << data[e]  << std::endl;
+    // std::cout << sum << " " << mean << " " << s << " " << e << std::endl;
+    return stdev;
 }
 
 #endif /* MYTENSOR_HPP_ */

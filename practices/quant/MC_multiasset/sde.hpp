@@ -8,6 +8,8 @@
 #include <string>
 #include <cmath>
 #include <random>
+#include <memory> // for std::unique_ptr
+#include <utility> // for std::move
 
 #include "MyTensor.hpp"
 
@@ -76,9 +78,12 @@ private:
     std::vector<double> x0_vec;
     std::vector<drift> drift_vec;
     std::vector<volatility> volatility_vec;
-    std::vector<MyTensor<double>> cholesky_mat; // use vector to store correlation_mat class. Vector of size 0 or 1.
+    std::unique_ptr<MyTensor<double>> cholesky_ptr;
+    bool use_cholesky;
     std::vector<std::vector<std::vector<double>>> x; // state variables at each step and path (Nt+1, num_sv, num_paths)
-    std::vector<std::vector<std::vector<double>>> dW; // Brownian motions at each step and path (Nt, num_sv, num_paths)
+    std::unique_ptr<MyTensor<double>> dW; // Brownian motions at each step and path (Nt, num_sv, num_paths)
+    std::unique_ptr<MyTensor<double>> dW_indep; // Independent Brownian motions at each step and path (Nt, num_sv, num_paths)
+    // std::vector<std::vector<std::vector<double>>> dW_indep; // Independent Brownian motions at each step and path (Nt, num_sv, num_paths)
     std::vector<std::vector<double>> drift_buffer;
     std::vector<std::vector<double>> volatility_buffer;
 public:

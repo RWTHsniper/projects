@@ -72,23 +72,11 @@ int main(int, char**) {
     std::string path  ="../output/";
     sde.write_result(path);
 
-    // drift d_tmp = drift_vec[0];
-    // std::cout << d_tmp.lhs_sv << " " << d_tmp.coeff << std::endl;
-    // std::map<std::string, double> test;
-    // test.insert(std::pair<std::string, double>("test", 2.0));
-    // std::cout << test["test"] << std::endl;
-
-    // Cholesky test
-    MyTensor test = MyTensor(static_cast<size_t>(3),static_cast<size_t>(3),0.0);
-    test.get(0,0)=4.0; test.get(0,1)=12.0; test.get(0,2)=-16.0;
-    test.get(1,0)=12.0; test.get(1,1)=37.0; test.get(1,2)=-43.0;
-    test.get(2,0)=-16.0; test.get(2,1)=-43.0; test.get(2,2)=98.0;
-    test.print(); std::cout << std::endl;
-    MyTensor chol_res = test.get_cholesky_lower();
-    // *MyTensor<double> chol_res;
-    // chol_res.emplace_back(test.get_cholesky_lower());
-    
-    chol_res.print();
+    MyTensor<double> test = MyTensor<double>(3,3,3,2.0);
+    // std::cout << test.mean(0,1,1,1,1,2) << std::endl;
+    test.get(1,1,1) = 10.0; test.get(1,1,2) = 30.0;
+    // std::cout << test.mean(1,1,1,1,1,2) << std::endl;
+    // std::cout << test.std(1,1,1,1,1,2) << std::endl;
 
     return 0;
 }
