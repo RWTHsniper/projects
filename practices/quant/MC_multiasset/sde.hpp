@@ -78,14 +78,13 @@ private:
     std::vector<double> x0_vec;
     std::vector<drift> drift_vec;
     std::vector<volatility> volatility_vec;
-    std::unique_ptr<MyTensor<double>> cholesky_ptr;
+    MyTensor<double> cholesky_lower; // Cholesky lower matrix
     bool use_cholesky;
-    std::vector<std::vector<std::vector<double>>> x; // state variables at each step and path (Nt+1, num_sv, num_paths)
-    std::unique_ptr<MyTensor<double>> dW; // Brownian motions at each step and path (Nt, num_sv, num_paths)
-    std::unique_ptr<MyTensor<double>> dW_indep; // Independent Brownian motions at each step and path (Nt, num_sv, num_paths)
-    // std::vector<std::vector<std::vector<double>>> dW_indep; // Independent Brownian motions at each step and path (Nt, num_sv, num_paths)
-    std::vector<std::vector<double>> drift_buffer;
-    std::vector<std::vector<double>> volatility_buffer;
+    MyTensor<double> x; // state variables at each step and path (Nt+1, num_sv, num_paths)
+    MyTensor<double> dW; // Brownian motions at each step and path (Nt, num_sv, num_paths)
+    MyTensor<double> dW_indep; // Independent Brownian motions at each step and path (Nt, num_sv, num_paths)
+    MyTensor<double>  drift_buffer;
+    MyTensor<double>  volatility_buffer;
 public:
 	SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg_x0_vec, std::vector<drift>& arg_drift_vec, std::vector<volatility>& arg_volatility_vec \
     , std::vector<correlation>& arg_correlation_vec);
@@ -94,6 +93,7 @@ public:
     void compute_volatility(size_t ind_t);
     void simulate();
     void write_result(std::string& filename);
+    void print_result();
 	virtual ~SDE(){}; // empty destructor for a virtual class
 };
  

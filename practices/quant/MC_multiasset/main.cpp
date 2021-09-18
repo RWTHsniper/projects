@@ -71,6 +71,7 @@ int main(int, char**) {
     sde.simulate();
     std::string path  ="../output/";
     sde.write_result(path);
+    sde.print_result();
 
     MyTensor<double> test = MyTensor<double>(3,3,3,2.0);
     // std::cout << test.mean(0,1,1,1,1,2) << std::endl;

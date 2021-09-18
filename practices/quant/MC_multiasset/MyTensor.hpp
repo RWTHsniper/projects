@@ -7,6 +7,8 @@
 #include <numeric>
 #include <cmath>
 
+static bool default_check = false; // set true when you are developing a model
+
 template <class T>
 class MyTensor{
 private:
@@ -16,12 +18,14 @@ private:
     void error_message();
 
 public:
-	MyTensor(std::vector<size_t>& arg_dim, const T& c=0.0, bool arg_check=true);
-	MyTensor(size_t i, const T& c=0.0, bool arg_check=true);
-	MyTensor(size_t i, size_t j, const T& c=0.0, bool arg_check=true);
-	MyTensor(size_t i, size_t j, size_t k, const T& c=0.0, bool arg_check=true);
-	MyTensor(size_t i, size_t j, size_t k, size_t l, const T& c=0.0, bool arg_check=true);
-	MyTensor(size_t i, size_t j, size_t k, size_t l, size_t m, const T& c=0.0, bool arg_check=true);
+	MyTensor(); // default constructor
+	MyTensor(const std::vector<size_t>& arg_dim, const T& c=0.0, const bool arg_check=default_check);
+	MyTensor(size_t i, const T& c=0.0, bool arg_check=default_check);
+	MyTensor(size_t i, size_t j, const T& c=0.0, bool arg_check=default_check);
+	MyTensor(size_t i, size_t j, size_t k, const T& c=0.0, bool arg_check=default_check);
+	MyTensor(size_t i, size_t j, size_t k, size_t l, const T& c=0.0, bool arg_check=default_check);
+	MyTensor(size_t i, size_t j, size_t k, size_t l, size_t m, const T& c=0.0, bool arg_check=default_check);
+	void resize(const std::vector<size_t>& arg_dim, const T& c=0.0, const bool arg_check=default_check);
     T& get(size_t i);
     T& get(size_t i,size_t j);
     T& get(size_t i,size_t j,size_t k);
@@ -44,7 +48,22 @@ public:
 };
 
 template <class T>
-MyTensor<T>::MyTensor(std::vector<size_t>& arg_dim, const T& c, bool arg_check){
+MyTensor<T>::MyTensor(){
+    dim.resize(0);
+    check = true;
+    data.resize(0);
+}
+
+template <class T>
+MyTensor<T>::MyTensor(const std::vector<size_t>& arg_dim, const T& c, const bool arg_check){
+    dim = arg_dim;
+    check = arg_check;
+    size_t multi = std::accumulate(dim.begin(), dim.end(), 1, std::multiplies<size_t>());
+    data.resize(multi, c);
+}
+
+template <class T>
+void MyTensor<T>::resize(const std::vector<size_t>& arg_dim, const T& c, const bool arg_check){
     dim = arg_dim;
     check = arg_check;
     size_t multi = std::accumulate(dim.begin(), dim.end(), 1, std::multiplies<size_t>());
