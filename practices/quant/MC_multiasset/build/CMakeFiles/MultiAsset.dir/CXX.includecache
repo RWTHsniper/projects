@@ -6,10 +6,6 @@
 
 #IncludeRegexTransform: 
 
-/Users/jungjaeyong/projects/practices/quant/MC_multiasset/MyTensor.cpp
-MyTensor.hpp
-/Users/jungjaeyong/projects/practices/quant/MC_multiasset/MyTensor.hpp
-
 /Users/jungjaeyong/projects/practices/quant/MC_multiasset/MyTensor.hpp
 iostream
 -
@@ -55,10 +51,6 @@ iostream
 -
 vector
 -
-
-/Users/jungjaeyong/projects/practices/quant/MC_multiasset/sde.cpp
-sde.hpp
-/Users/jungjaeyong/projects/practices/quant/MC_multiasset/sde.hpp
 
 /Users/jungjaeyong/projects/practices/quant/MC_multiasset/sde.hpp
 iostream
