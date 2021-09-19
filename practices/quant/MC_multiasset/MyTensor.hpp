@@ -16,16 +16,18 @@ private:
 	std::vector<T> data;
     bool check;
     void error_message();
+    T get_data_ind(const std::vector<size_t> arg_ind);
 
 public:
 	MyTensor(); // default constructor
-	MyTensor(const std::vector<size_t>& arg_dim, const T& c=0.0, const bool arg_check=default_check);
+	MyTensor(const std::vector<size_t>& arg_dim, const T& c=0.0, const bool& arg_check=default_check);
 	MyTensor(size_t i, const T& c=0.0, bool arg_check=default_check);
 	MyTensor(size_t i, size_t j, const T& c=0.0, bool arg_check=default_check);
 	MyTensor(size_t i, size_t j, size_t k, const T& c=0.0, bool arg_check=default_check);
 	MyTensor(size_t i, size_t j, size_t k, size_t l, const T& c=0.0, bool arg_check=default_check);
 	MyTensor(size_t i, size_t j, size_t k, size_t l, size_t m, const T& c=0.0, bool arg_check=default_check);
-	void resize(const std::vector<size_t>& arg_dim, const T& c=0.0, const bool arg_check=default_check);
+	void resize(const std::vector<size_t>& arg_dim, const T& c=0.0, const bool& arg_check=default_check);
+    T& get(const std::vector<size_t>& arg_dim);
     T& get(size_t i);
     T& get(size_t i,size_t j);
     T& get(size_t i,size_t j,size_t k);
@@ -33,6 +35,8 @@ public:
     T& get(size_t i,size_t j,size_t k,size_t l,size_t m);
     T mean(size_t i, size_t j, size_t k, size_t ii, size_t jj, size_t kk);
     T std(size_t i, size_t j, size_t k, size_t ii, size_t jj, size_t kk);
+    T mean(const std::vector<size_t>& sv, const std::vector<size_t>& ev);
+    T std(const std::vector<size_t>& sv, const std::vector<size_t>& ev);
     std::vector<size_t>& size();
     MyTensor<T> get_cholesky_lower();
     MyTensor<T>& operator=(const MyTensor<T>& other){
@@ -47,6 +51,25 @@ public:
     virtual ~MyTensor(){};
 };
 
+// Private methods
+template <class T>
+T MyTensor<T>::get_data_ind(const std::vector<size_t> arg_ind){
+    size_t data_ind = 0;
+    size_t multiplier = 1;
+    for (size_t pntr = arg_ind.size(); pntr --> 0;){
+        if (check){
+            if (arg_ind[pntr]>=this->dim[pntr]){
+                this->error_message();
+            }
+        }
+        data_ind += multiplier*arg_ind[pntr];
+        multiplier *= this->dim[pntr];
+    }    
+    return data_ind;
+}
+
+// Public methods
+
 template <class T>
 MyTensor<T>::MyTensor(){
     dim.resize(0);
@@ -55,7 +78,7 @@ MyTensor<T>::MyTensor(){
 }
 
 template <class T>
-MyTensor<T>::MyTensor(const std::vector<size_t>& arg_dim, const T& c, const bool arg_check){
+MyTensor<T>::MyTensor(const std::vector<size_t>& arg_dim, const T& c, const bool& arg_check){
     dim = arg_dim;
     check = arg_check;
     size_t multi = std::accumulate(dim.begin(), dim.end(), 1, std::multiplies<size_t>());
@@ -63,7 +86,7 @@ MyTensor<T>::MyTensor(const std::vector<size_t>& arg_dim, const T& c, const bool
 }
 
 template <class T>
-void MyTensor<T>::resize(const std::vector<size_t>& arg_dim, const T& c, const bool arg_check){
+void MyTensor<T>::resize(const std::vector<size_t>& arg_dim, const T& c, const bool& arg_check){
     dim = arg_dim;
     check = arg_check;
     size_t multi = std::accumulate(dim.begin(), dim.end(), 1, std::multiplies<size_t>());
@@ -126,6 +149,11 @@ void MyTensor<T>::error_message(){
     exit(1);
 }
 
+template <class T>
+T& MyTensor<T>::get(const std::vector<size_t>& arg_ind){
+    return data[get_data_ind(arg_ind)];
+}
+    
 template <class T> 
 T& MyTensor<T>::get(size_t i){
     if (check){
@@ -172,7 +200,7 @@ T& MyTensor<T>::get(size_t i,size_t j,size_t k,size_t l,size_t m){
         if ((i>=dim[0])||(j>=dim[1])||(k>=dim[2])||(l=dim[3])||(m=dim[4])){
             error_message();
         }
-    } 
+    }
     return data[i*dim[1]*dim[2]*dim[3]*dim[4]+j*dim[2]*dim[3]*dim[4]+k*dim[3]*dim[4]+l*dim[4]+m];
 }
 
@@ -261,5 +289,39 @@ T MyTensor<T>::std(size_t i, size_t j, size_t k, size_t ii, size_t jj, size_t kk
     // std::cout << sum << " " << mean << " " << s << " " << e << std::endl;
     return stdev;
 }
+
+template <class T>
+T MyTensor<T>::mean(const std::vector<size_t>& sv, const std::vector<size_t>& ev){
+    size_t s = get_data_ind(sv);
+    size_t e = get_data_ind(ev);
+    if (e <= s){
+        std::cout << "Wrong index for MyTensor<T>::mean" << std::endl;
+        exit(-1);
+    }
+    T sum = std::accumulate(&data[s], &data[e+1], static_cast<T>(0.0));
+    T mean = sum / static_cast<T>(e-s+1);
+    // // std::cout << data[s] << " " << data[e]  << std::endl;
+    // // std::cout << sum << " " << mean << " " << s << " " << e << std::endl;
+    return mean;
+}
+
+template <class T>
+T MyTensor<T>::std(const std::vector<size_t>& sv, const std::vector<size_t>& ev){
+    size_t s = get_data_ind(sv);
+    size_t e = get_data_ind(ev);
+    if (e <= s){
+        std::cout << "Wrong index for MyTensor<T>::mean" << std::endl;
+        exit(-1);
+    }
+    T m = this->mean(sv, ev);
+
+    T sq_sum = std::inner_product(&data[s], &data[e+1], &data[s], static_cast<T>(0.0));
+    T stdev = std::sqrt(sq_sum/static_cast<T>(e-s+1) - m*m);
+
+    // std::cout << data[s] << " " << data[e]  << std::endl;
+    // std::cout << sum << " " << mean << " " << s << " " << e << std::endl;
+    return stdev;
+}
+
 
 #endif /* MYTENSOR_HPP_ */

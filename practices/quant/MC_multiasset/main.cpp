@@ -42,11 +42,20 @@ int main(int, char**) {
     sde.write_result(path);
     sde.print_result();
 
-    MyTensor<double> test = MyTensor<double>(3,3,3,2.0);
+    if(false){
+    MyTensor<double> test = MyTensor<double>(3,3,3,2.0,true);
     // std::cout << test.mean(0,1,1,1,1,2) << std::endl;
     test.get(1,1,1) = 10.0; test.get(1,1,2) = 30.0;
-    // std::cout << test.mean(1,1,1,1,1,2) << std::endl;
-    // std::cout << test.std(1,1,1,1,1,2) << std::endl;
+    std::cout << test.get(1,1,2) << std::endl;
+    std::cout << test.get(std::vector<std::size_t>{1,1,2}) << std::endl;
+    test.get(std::vector<std::size_t>{2,1,2}) = 25;
+    // std::cout << test.get(std::vector<std::size_t>{2,3,2}) << std::endl;
+
+    std::cout << test.mean(1,1,1,1,1,2) << std::endl;
+    std::cout << test.mean(std::vector<std::size_t>{1,1,1},std::vector<std::size_t>{1,1,2}) << std::endl;
+    std::cout << test.std(1,1,1,1,1,2) << std::endl;
+    std::cout << test.std(std::vector<std::size_t>{1,1,1},std::vector<std::size_t>{1,1,2}) << std::endl;
+    }
 
     return 0;
 }
