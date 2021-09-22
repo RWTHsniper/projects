@@ -5,7 +5,6 @@ drift 1,0.015,0,0 1,-0.3,1,1 # volatility
 volatility 0,1.0,1,0.5 1,0.5,1,0.5
 x0 0.0 0.04
 T 1
-Nt 4
-num_paths 3
+Nt 365
+num_paths 10000
 correlation 0,1,-0.6
-constraint min,1,0.0

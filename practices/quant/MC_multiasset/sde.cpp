@@ -1,7 +1,23 @@
 #include "sde.hpp"
 
+Constraint Contraint_factory(std::vector<std::string>& arg_params){
+    auto& type = arg_params[0];
+    if (type=="min"){
+        // return std::make_unique<constraint_min>(static_cast<size_t>(stoi(arg_params[1])), stod(arg_params[2]));
+        // return constraint_min(static_cast<size_t>(stoi(arg_params[1])), stod(arg_params[2]));
+    }
+    else if (type=="max"){
+        // return std::make_unique<constraint_max>(static_cast<size_t>(stoi(arg_params[1])), stod(arg_params[2]));
+        // return constraint_max(static_cast<size_t>(stoi(arg_params[1])), stod(arg_params[2]));
+    }
+    else{
+        std::cout << "Wrong constraint type is given " << std::endl;
+        exit(-1);
+    }
+}
+
 SDE::SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg_x0_vec, std::vector<drift>& arg_drift_vec, std::vector<volatility>& arg_volatility_vec \
-, std::vector<correlation>& arg_correlation_vec){
+, std::vector<correlation>& arg_correlation_vec, std::vector<Constraint>& arg_constraint_vec){
     std::cout << "Initialize SDE" << std::endl;
     bool use_bound_check = false;
     T = static_cast<double>(arg_inp_params["T"]);
@@ -11,6 +27,7 @@ SDE::SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg
     num_paths = static_cast<size_t>(arg_inp_params["num_paths"]);
     drift_vec = arg_drift_vec;
     volatility_vec = arg_volatility_vec;
+    constraint_vec = arg_constraint_vec;
     // Compute num_sv from drift_vec
     num_sv = 0;
     for(std::size_t i = 0; i < drift_vec.size(); ++i) {
@@ -108,10 +125,8 @@ void SDE::compute_drift(size_t ind_t){
     // std::cout << "Test compute drift" << std::endl;
     for (size_t ind_drift=0; ind_drift< drift_vec.size(); ind_drift++){
         drift& elem = drift_vec[ind_drift];
-        for (size_t ind_sv=0; ind_sv<num_sv; ind_sv++){
-            for (size_t ind_path=0; ind_path<num_paths; ind_path++){
-                drift_buffer.get(elem.lhs_sv,ind_path)  = elem.compute(x.get(ind_t, elem.rhs_sv, ind_path));
-            }
+        for (size_t ind_path=0; ind_path<num_paths; ind_path++){
+            drift_buffer.get(elem.lhs_sv,ind_path) = elem.compute(x.get(ind_t, elem.rhs_sv, ind_path),dt);
         }
     }
 }
@@ -120,11 +135,11 @@ void SDE::compute_volatility(size_t ind_t){
     // std::cout << "Test compute volatility" << std::endl;
     for (size_t ind_volatility=0; ind_volatility< volatility_vec.size(); ind_volatility++){
         volatility& elem = volatility_vec[ind_volatility];
-        for (size_t ind_sv=0; ind_sv<num_sv; ind_sv++){
-            for (size_t ind_path=0; ind_path<num_paths; ind_path++){
-                volatility_buffer.get(elem.lhs_sv,ind_path)  = elem.compute(x.get(ind_t, elem.rhs_sv, ind_path));
-                // std::cout << "Volatility "<< volatility_buffer[elem.lhs_sv][ind_path] << std::endl;
-            }
+        for (size_t ind_path=0; ind_path<num_paths; ind_path++){
+            // volatility_buffer.get(elem.lhs_sv,ind_path)  = elem.compute(x.get(ind_t, elem.rhs_sv, ind_path),dt); // conventional
+            // Milstein scheme
+            double dW_t = dW.get(ind_t,elem.lhs_sv,ind_path)*sqrt_dt;
+            volatility_buffer.get(elem.lhs_sv,ind_path) = elem.compute_milstein(x.get(ind_t, elem.rhs_sv, ind_path),dW_t,dt); // conventional
         }
     }
 }
@@ -138,10 +153,24 @@ void SDE::simulate(){
         for (size_t ind_sv=0; ind_sv<num_sv; ind_sv++){
             for (size_t ind_path=0; ind_path<num_paths; ind_path++){
                 x.get(ind_t+1,ind_sv,ind_path) = x.get(ind_t,ind_sv,ind_path);
-                x.get(ind_t+1,ind_sv,ind_path) += drift_buffer.get(ind_sv,ind_path)*dt;
-                x.get(ind_t+1,ind_sv,ind_path) += volatility_buffer.get(ind_sv,ind_path)*dW.get(ind_t,ind_sv,ind_path)*sqrt_dt;
+                x.get(ind_t+1,ind_sv,ind_path) += drift_buffer.get(ind_sv,ind_path);
+                // x.get(ind_t+1,ind_sv,ind_path) += volatility_buffer.get(ind_sv,ind_path)*dW.get(ind_t,ind_sv,ind_path)*sqrt_dt;
+                x.get(ind_t+1,ind_sv,ind_path) += volatility_buffer.get(ind_sv,ind_path);
             }
         }
+        // Apply constraints
+        // if (constraint_vec.size() > 0){
+        //     for (size_t ind_constraint=0; ind_constraint< constraint_vec.size(); ind_constraint++){
+        //         Constraint& elem = constraint_vec[ind_constraint];
+        //         for (size_t ind_sv=0; ind_sv<num_sv; ind_sv++){
+        //             if(elem.check_index(ind_sv)){
+        //                 for (size_t ind_path=0; ind_path<num_paths; ind_path++){
+        //                     x.get(ind_t+1,ind_sv,ind_path) = elem.compute(x.get(ind_t+1,ind_sv,ind_path));
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
     }
     std::cout << "Simulation is complete" << std::endl;
     // Print result

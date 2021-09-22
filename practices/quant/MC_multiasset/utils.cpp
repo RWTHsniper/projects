@@ -11,7 +11,17 @@ std::string rtrim(const std::string &s)
     size_t end = s.find_last_not_of(WHITESPACE);
     return (end == std::string::npos) ? "" : s.substr(0, end + 1);
 }
- 
+
+std::string remove_comment(const std::string &s, const std::string delimiter){   
+    if(s.find(delimiter) == std::string::npos){
+        return s;
+    }
+    else{
+        // std::cout << s.find(delimiter) << " # found" << std::endl;
+    return s.substr(0, s.find(delimiter)); // token is "scott"
+    }
+}
+
 std::string trim(const std::string &s) {
     return rtrim(ltrim(s));
 }

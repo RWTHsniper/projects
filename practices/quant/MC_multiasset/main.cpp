@@ -16,6 +16,9 @@ int main(int, char**) {
     std::vector<std::vector<std::string> > inp_text;
     while (std::getline(inFile, line))
     {
+        std::cout<<line<<std::endl;
+        line = remove_comment(line, "#"); // skip comments
+        std::cout<<line<<std::endl;
         inp_text.emplace_back(tokenize(line));
     }
     // close the file stream
@@ -30,10 +33,12 @@ int main(int, char**) {
     std::vector<volatility> volatility_vec;
     std::vector<double> x0_vec;
     std::vector<correlation> correlation_vec;
+    std::vector<Constraint> constraint_vec;
+    // std::vector<std::unique_ptr<Constraint>> constraint_vec;
     std::map<std::string, double> inp_params;
 
-    extract_inputs(drift_vec, volatility_vec, x0_vec, correlation_vec, inp_params, inp_text);
-    SDE sde = SDE(inp_params, x0_vec, drift_vec, volatility_vec, correlation_vec);
+    extract_inputs(drift_vec, volatility_vec, x0_vec, correlation_vec, constraint_vec, inp_params, inp_text);
+    SDE sde = SDE(inp_params, x0_vec, drift_vec, volatility_vec, correlation_vec, constraint_vec);
     // sde.compute_drift(0);
     // sde.compute_volatility(0);
     sde.info();
@@ -43,18 +48,18 @@ int main(int, char**) {
     sde.print_result();
 
     if(false){
-    MyTensor<double> test = MyTensor<double>(3,3,3,2.0,true);
-    // std::cout << test.mean(0,1,1,1,1,2) << std::endl;
-    test.get(1,1,1) = 10.0; test.get(1,1,2) = 30.0;
-    std::cout << test.get(1,1,2) << std::endl;
-    std::cout << test.get(std::vector<std::size_t>{1,1,2}) << std::endl;
-    test.get(std::vector<std::size_t>{2,1,2}) = 25;
-    // std::cout << test.get(std::vector<std::size_t>{2,3,2}) << std::endl;
+        MyTensor<double> test = MyTensor<double>(3,3,3,2.0,true);
+        // std::cout << test.mean(0,1,1,1,1,2) << std::endl;
+        test.get(1,1,1) = 10.0; test.get(1,1,2) = 30.0;
+        std::cout << test.get(1,1,2) << std::endl;
+        std::cout << test.get(std::vector<std::size_t>{1,1,2}) << std::endl;
+        test.get(std::vector<std::size_t>{2,1,2}) = 25;
+        // std::cout << test.get(std::vector<std::size_t>{2,3,2}) << std::endl;
 
-    std::cout << test.mean(1,1,1,1,1,2) << std::endl;
-    std::cout << test.mean(std::vector<std::size_t>{1,1,1},std::vector<std::size_t>{1,1,2}) << std::endl;
-    std::cout << test.std(1,1,1,1,1,2) << std::endl;
-    std::cout << test.std(std::vector<std::size_t>{1,1,1},std::vector<std::size_t>{1,1,2}) << std::endl;
+        std::cout << test.mean(1,1,1,1,1,2) << std::endl;
+        std::cout << test.mean(std::vector<std::size_t>{1,1,1},std::vector<std::size_t>{1,1,2}) << std::endl;
+        std::cout << test.std(1,1,1,1,1,2) << std::endl;
+        std::cout << test.std(std::vector<std::size_t>{1,1,1},std::vector<std::size_t>{1,1,2}) << std::endl;
     }
 
     return 0;

@@ -31,8 +31,8 @@ struct drift{
         rhs_sv = r;
         order = o;
     }
-    double compute(double& sv){
-        return coeff*std::pow(sv,order);
+    double compute(double& sv, double& dt){
+        return coeff*std::pow(sv,order)*dt;
     }
 };
 
@@ -54,9 +54,23 @@ struct volatility{
         rhs_sv = r;
         order = o;
     }
-    double compute(double& sv){
-        return coeff*std::pow(sv,order);
+    double compute(double& sv, const double& dt){
+        return coeff*std::pow(sv,order)*dt;
     }
+    double compute_milstein(const double& sv, const double& dW_t, const double& dt){
+        // std::cout << "sv " << sv << " order " << order << std::endl;
+        // std::cout << std::pow(coeff,2)<< " 1 " << std::endl;
+        // std::cout << std::pow(sv,2*order-1) << " 2 " << std::endl;
+        // std::cout << (std::pow(dW_t,2)-dt) << " 3 " << std::endl;
+        double ret;
+        if(order==0){
+            ret = coeff*dW_t;
+        }
+        else{
+            ret = coeff*std::pow(sv,order)*dW_t + 0.5*std::pow(coeff,2)*order*std::pow(sv,2*order-1)*(std::pow(dW_t,2)-dt);
+        }
+        return ret;
+    }    
 };
 
 struct correlation{
@@ -65,6 +79,46 @@ struct correlation{
     double corr;
     correlation(size_t asv_1, size_t asv_2, double acorr):sv_1(asv_1),sv_2(asv_2),corr(acorr) {};
 };
+
+class Constraint {
+public:
+    bool check_index(const size_t& arg_ind){return true;};
+    double compute(const double& x){
+        std::cout << "parent compute" << std::endl;
+        return 0.0;};
+};
+
+class constraint_max: public Constraint {
+private:
+    size_t ind; // Constraint on ind-th state variable
+	double max_value; // minimum value for a constraint
+public:
+    constraint_max(const size_t arg_ind, double arg_value):ind(arg_ind),max_value(arg_value){};
+    bool check_index(const size_t& arg_ind){
+        return (ind==arg_ind);
+    }
+    double compute(const double& x){
+        return std::min(x, max_value); // returned value should be less than min_value
+    };
+	~constraint_max(){};
+};
+
+class constraint_min: public Constraint {
+private:
+    size_t ind; // Constraint on ind-th state variable
+	double min_value; // minimum value for a constraint
+public:
+    constraint_min(const size_t arg_ind, double arg_value):ind(arg_ind),min_value(arg_value){};
+    bool check_index(const size_t& arg_ind){
+        return (ind==arg_ind);
+    }
+    double compute(const double& x){
+        return std::max(x, min_value); // returned value should be larger than min_value
+    };
+	~constraint_min(){};
+};
+
+Constraint Contraint_factory(std::vector<std::string>& arg_params);
 
 class SDE {
 private:
@@ -78,16 +132,17 @@ private:
     std::vector<double> x0_vec;
     std::vector<drift> drift_vec;
     std::vector<volatility> volatility_vec;
+    std::vector<Constraint> constraint_vec;
     MyTensor<double> cholesky_lower; // Cholesky lower matrix
     bool use_cholesky;
     MyTensor<double> x; // state variables at each step and path (Nt+1, num_sv, num_paths)
     MyTensor<double> dW; // Brownian motions at each step and path (Nt, num_sv, num_paths)
     MyTensor<double> dW_indep; // Independent Brownian motions at each step and path (Nt, num_sv, num_paths)
-    MyTensor<double>  drift_buffer;
-    MyTensor<double>  volatility_buffer;
+    MyTensor<double> drift_buffer;
+    MyTensor<double> volatility_buffer;
 public:
 	SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg_x0_vec, std::vector<drift>& arg_drift_vec, std::vector<volatility>& arg_volatility_vec \
-    , std::vector<correlation>& arg_correlation_vec);
+    , std::vector<correlation>& arg_correlation_vec, std::vector<Constraint>& arg_constraint_vec);
     void info();
     void compute_drift(size_t ind_t);
     void compute_volatility(size_t ind_t);
