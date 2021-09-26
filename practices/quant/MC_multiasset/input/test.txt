@@ -1,11 +1,11 @@
 # r=0.0, 
 # theta = 0.05; kappa = 0.3; sigma = 0.5; rho = -0.6; v0 = 0.04
-drift 0,0.0,0,0 0,-0.5,1,1 # log-price
-drift 1,0.015,0,0 1,-0.3,1,1 # volatility
-volatility 0,1.0,1,0.5 1,0.5,1,0.5
+drift 0,0.0,0,0 0,-0.5,1,1 # log-price. (0-.5*v)
+drift 1,0.015,1,0 1,-0.3,1,1 # volatility 0.015 - 0.3*v
+volatility 0,1.0,1,0.5 1,0.5,1,0.5 # sqrt(v), 0.5*sqrt(v)
 x0 0.0 0.04
 T 1
-Nt 4
-num_paths 3
+Nt 365
+num_paths 20000
 correlation 0,1,-0.6
 constraint min,1,0.0

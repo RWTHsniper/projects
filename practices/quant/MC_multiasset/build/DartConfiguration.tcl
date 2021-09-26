@@ -14,7 +14,7 @@ CostDataFile:
 Site: jeongjaonguiMBP
 
 # Build name is osname-revision-compiler, i.e. Linux-2.4.2-2smp-c++
-BuildName: Darwin-clang++
+BuildName: Darwin-g++
 
 # Subprojects
 LabelsForSubprojects: 
@@ -72,8 +72,8 @@ UpdateOptions:
 UpdateType: 
 
 # Compiler info
-Compiler: /usr/bin/clang++
-CompilerVersion: 11.0.0.11000033
+Compiler: /usr/local/bin/g++
+CompilerVersion: 11.2.0
 
 # Dynamic analysis (MemCheck)
 PurifyCommand: 

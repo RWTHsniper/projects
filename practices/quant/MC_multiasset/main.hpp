@@ -11,12 +11,11 @@
 #include <memory> // for std::unique_ptr
 
 #include "utils.hpp"
-#include "models.hpp"
 #include "sde.hpp"
 #include "MyTensor.hpp"
 
 void extract_inputs(std::vector<drift>& drift_vec, std::vector<volatility>& volatility_vec,
-    std::vector<double>& x0_vec, std::vector<correlation>& correlation_vec, std::vector<Constraint>& constraint_vec, 
+    std::vector<double>& x0_vec, std::vector<correlation>& correlation_vec, std::vector<std::unique_ptr<Constraint>>& constraint_vec, 
     std::map<std::string, double>& inp_params, const std::vector<std::vector<std::string>>& inp_text){
 
     for (size_t i=0; i<inp_text.size(); i++){
@@ -58,7 +57,8 @@ void extract_inputs(std::vector<drift>& drift_vec, std::vector<volatility>& vola
         else if (key=="constraint"){
             for (size_t j=0; j<params.size();j++){
                 auto p = tokenize(params[j],",");
-                constraint_vec.emplace_back(Contraint_factory(p));
+                // constraint_vec.emplace_back(Contraint_factory(p));
+                constraint_vec.push_back(Contraint_factory(p));
             }
         }
         else{

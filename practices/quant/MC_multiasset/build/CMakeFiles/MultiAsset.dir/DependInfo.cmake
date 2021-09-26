@@ -9,7 +9,7 @@ set(CMAKE_DEPENDS_CHECK_CXX
   "/Users/jungjaeyong/projects/practices/quant/MC_multiasset/sde.cpp" "/Users/jungjaeyong/projects/practices/quant/MC_multiasset/build/CMakeFiles/MultiAsset.dir/sde.cpp.o"
   "/Users/jungjaeyong/projects/practices/quant/MC_multiasset/utils.cpp" "/Users/jungjaeyong/projects/practices/quant/MC_multiasset/build/CMakeFiles/MultiAsset.dir/utils.cpp.o"
   )
-set(CMAKE_CXX_COMPILER_ID "AppleClang")
+set(CMAKE_CXX_COMPILER_ID "GNU")
 
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH

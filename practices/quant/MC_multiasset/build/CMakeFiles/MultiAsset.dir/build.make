@@ -60,54 +60,54 @@ include CMakeFiles/MultiAsset.dir/flags.make
 CMakeFiles/MultiAsset.dir/main.cpp.o: CMakeFiles/MultiAsset.dir/flags.make
 CMakeFiles/MultiAsset.dir/main.cpp.o: ../main.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jungjaeyong/projects/practices/quant/MC_multiasset/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/MultiAsset.dir/main.cpp.o"
-	/usr/bin/clang++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/MultiAsset.dir/main.cpp.o -c /Users/jungjaeyong/projects/practices/quant/MC_multiasset/main.cpp
+	/usr/local/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/MultiAsset.dir/main.cpp.o -c /Users/jungjaeyong/projects/practices/quant/MC_multiasset/main.cpp
 
 CMakeFiles/MultiAsset.dir/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/MultiAsset.dir/main.cpp.i"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jungjaeyong/projects/practices/quant/MC_multiasset/main.cpp > CMakeFiles/MultiAsset.dir/main.cpp.i
+	/usr/local/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jungjaeyong/projects/practices/quant/MC_multiasset/main.cpp > CMakeFiles/MultiAsset.dir/main.cpp.i
 
 CMakeFiles/MultiAsset.dir/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/MultiAsset.dir/main.cpp.s"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jungjaeyong/projects/practices/quant/MC_multiasset/main.cpp -o CMakeFiles/MultiAsset.dir/main.cpp.s
+	/usr/local/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jungjaeyong/projects/practices/quant/MC_multiasset/main.cpp -o CMakeFiles/MultiAsset.dir/main.cpp.s
 
 CMakeFiles/MultiAsset.dir/utils.cpp.o: CMakeFiles/MultiAsset.dir/flags.make
 CMakeFiles/MultiAsset.dir/utils.cpp.o: ../utils.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jungjaeyong/projects/practices/quant/MC_multiasset/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/MultiAsset.dir/utils.cpp.o"
-	/usr/bin/clang++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/MultiAsset.dir/utils.cpp.o -c /Users/jungjaeyong/projects/practices/quant/MC_multiasset/utils.cpp
+	/usr/local/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/MultiAsset.dir/utils.cpp.o -c /Users/jungjaeyong/projects/practices/quant/MC_multiasset/utils.cpp
 
 CMakeFiles/MultiAsset.dir/utils.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/MultiAsset.dir/utils.cpp.i"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jungjaeyong/projects/practices/quant/MC_multiasset/utils.cpp > CMakeFiles/MultiAsset.dir/utils.cpp.i
+	/usr/local/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jungjaeyong/projects/practices/quant/MC_multiasset/utils.cpp > CMakeFiles/MultiAsset.dir/utils.cpp.i
 
 CMakeFiles/MultiAsset.dir/utils.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/MultiAsset.dir/utils.cpp.s"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jungjaeyong/projects/practices/quant/MC_multiasset/utils.cpp -o CMakeFiles/MultiAsset.dir/utils.cpp.s
+	/usr/local/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jungjaeyong/projects/practices/quant/MC_multiasset/utils.cpp -o CMakeFiles/MultiAsset.dir/utils.cpp.s
 
 CMakeFiles/MultiAsset.dir/sde.cpp.o: CMakeFiles/MultiAsset.dir/flags.make
 CMakeFiles/MultiAsset.dir/sde.cpp.o: ../sde.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jungjaeyong/projects/practices/quant/MC_multiasset/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/MultiAsset.dir/sde.cpp.o"
-	/usr/bin/clang++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/MultiAsset.dir/sde.cpp.o -c /Users/jungjaeyong/projects/practices/quant/MC_multiasset/sde.cpp
+	/usr/local/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/MultiAsset.dir/sde.cpp.o -c /Users/jungjaeyong/projects/practices/quant/MC_multiasset/sde.cpp
 
 CMakeFiles/MultiAsset.dir/sde.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/MultiAsset.dir/sde.cpp.i"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jungjaeyong/projects/practices/quant/MC_multiasset/sde.cpp > CMakeFiles/MultiAsset.dir/sde.cpp.i
+	/usr/local/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jungjaeyong/projects/practices/quant/MC_multiasset/sde.cpp > CMakeFiles/MultiAsset.dir/sde.cpp.i
 
 CMakeFiles/MultiAsset.dir/sde.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/MultiAsset.dir/sde.cpp.s"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jungjaeyong/projects/practices/quant/MC_multiasset/sde.cpp -o CMakeFiles/MultiAsset.dir/sde.cpp.s
+	/usr/local/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jungjaeyong/projects/practices/quant/MC_multiasset/sde.cpp -o CMakeFiles/MultiAsset.dir/sde.cpp.s
 
 CMakeFiles/MultiAsset.dir/MyTensor.cpp.o: CMakeFiles/MultiAsset.dir/flags.make
 CMakeFiles/MultiAsset.dir/MyTensor.cpp.o: ../MyTensor.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jungjaeyong/projects/practices/quant/MC_multiasset/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/MultiAsset.dir/MyTensor.cpp.o"
-	/usr/bin/clang++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/MultiAsset.dir/MyTensor.cpp.o -c /Users/jungjaeyong/projects/practices/quant/MC_multiasset/MyTensor.cpp
+	/usr/local/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/MultiAsset.dir/MyTensor.cpp.o -c /Users/jungjaeyong/projects/practices/quant/MC_multiasset/MyTensor.cpp
 
 CMakeFiles/MultiAsset.dir/MyTensor.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/MultiAsset.dir/MyTensor.cpp.i"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jungjaeyong/projects/practices/quant/MC_multiasset/MyTensor.cpp > CMakeFiles/MultiAsset.dir/MyTensor.cpp.i
+	/usr/local/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jungjaeyong/projects/practices/quant/MC_multiasset/MyTensor.cpp > CMakeFiles/MultiAsset.dir/MyTensor.cpp.i
 
 CMakeFiles/MultiAsset.dir/MyTensor.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/MultiAsset.dir/MyTensor.cpp.s"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jungjaeyong/projects/practices/quant/MC_multiasset/MyTensor.cpp -o CMakeFiles/MultiAsset.dir/MyTensor.cpp.s
+	/usr/local/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jungjaeyong/projects/practices/quant/MC_multiasset/MyTensor.cpp -o CMakeFiles/MultiAsset.dir/MyTensor.cpp.s
 
 # Object files for target MultiAsset
 MultiAsset_OBJECTS = \

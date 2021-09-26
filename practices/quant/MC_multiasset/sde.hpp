@@ -10,6 +10,7 @@
 #include <random>
 #include <memory> // for std::unique_ptr
 #include <utility> // for std::move
+#include <omp.h> // openmp
 
 #include "MyTensor.hpp"
 
@@ -18,14 +19,14 @@ struct drift{
     double coeff;
     size_t rhs_sv;
     double order;
-    drift(std::vector<std::string> p){
+    drift(std::vector<std::string>& p){
         if (p.size() != 4){ std::cout << "Input for drift should be length of 4";};
         lhs_sv = static_cast<size_t>(stoi(p[0]));
         coeff = stod(p[1]);
         rhs_sv = static_cast<size_t>(stoi(p[2]));
         order = stod(p[3]);
     }
-    drift(size_t l, double b, size_t r, double o){
+    drift(const size_t l, const double b, const size_t r, const double o){
         lhs_sv = l;
         coeff = b;
         rhs_sv = r;
@@ -41,27 +42,23 @@ struct volatility{
     double coeff;
     size_t rhs_sv;
     double order;
-    volatility(std::vector<std::string> p){
+    volatility(std::vector<std::string>& p){
         if (p.size() != 4){ std::cout << "Input for drift should be length of 4";};
         lhs_sv = static_cast<size_t>(stoi(p[0]));
         coeff = stod(p[1]);
         rhs_sv = static_cast<size_t>(stoi(p[2]));
         order = stod(p[3]);
     }
-    volatility(size_t l, double b, size_t r, double o){
+    volatility(const size_t l, const double b, const size_t r, const double o){
         lhs_sv = l;
         coeff = b;
         rhs_sv = r;
         order = o;
     }
-    double compute(double& sv, const double& dt){
+    double compute(const double& sv, const double& dt){
         return coeff*std::pow(sv,order)*dt;
     }
     double compute_milstein(const double& sv, const double& dW_t, const double& dt){
-        // std::cout << "sv " << sv << " order " << order << std::endl;
-        // std::cout << std::pow(coeff,2)<< " 1 " << std::endl;
-        // std::cout << std::pow(sv,2*order-1) << " 2 " << std::endl;
-        // std::cout << (std::pow(dW_t,2)-dt) << " 3 " << std::endl;
         double ret;
         if(order==0){
             ret = coeff*dW_t;
@@ -81,9 +78,12 @@ struct correlation{
 };
 
 class Constraint {
+protected:
+    size_t ind;
 public:
-    bool check_index(const size_t& arg_ind){return true;};
-    double compute(const double& x){
+    virtual bool check_index(const size_t& arg_ind){return true;};
+    virtual const size_t& get_index(){return ind;};
+    virtual double compute(const double& x){
         std::cout << "parent compute" << std::endl;
         return 0.0;};
 };
@@ -94,6 +94,7 @@ private:
 	double max_value; // minimum value for a constraint
 public:
     constraint_max(const size_t arg_ind, double arg_value):ind(arg_ind),max_value(arg_value){};
+    const size_t& get_index(){return ind;};
     bool check_index(const size_t& arg_ind){
         return (ind==arg_ind);
     }
@@ -109,16 +110,18 @@ private:
 	double min_value; // minimum value for a constraint
 public:
     constraint_min(const size_t arg_ind, double arg_value):ind(arg_ind),min_value(arg_value){};
+    const size_t& get_index(){return ind;};
     bool check_index(const size_t& arg_ind){
         return (ind==arg_ind);
     }
-    double compute(const double& x){
+    double compute(const double& x) {
+        // std::cout << "x "<<x<< " val "<<min_value << " returning " << std::max(x,min_value) << std::endl;
         return std::max(x, min_value); // returned value should be larger than min_value
     };
 	~constraint_min(){};
 };
 
-Constraint Contraint_factory(std::vector<std::string>& arg_params);
+std::unique_ptr<Constraint> Contraint_factory(std::vector<std::string>& arg_params);
 
 class SDE {
 private:
@@ -132,7 +135,7 @@ private:
     std::vector<double> x0_vec;
     std::vector<drift> drift_vec;
     std::vector<volatility> volatility_vec;
-    std::vector<Constraint> constraint_vec;
+    std::vector<std::unique_ptr<Constraint>> constraint_vec;
     MyTensor<double> cholesky_lower; // Cholesky lower matrix
     bool use_cholesky;
     MyTensor<double> x; // state variables at each step and path (Nt+1, num_sv, num_paths)
@@ -142,7 +145,7 @@ private:
     MyTensor<double> volatility_buffer;
 public:
 	SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg_x0_vec, std::vector<drift>& arg_drift_vec, std::vector<volatility>& arg_volatility_vec \
-    , std::vector<correlation>& arg_correlation_vec, std::vector<Constraint>& arg_constraint_vec);
+    , std::vector<correlation>& arg_correlation_vec, std::vector<std::unique_ptr<Constraint>>& arg_constraint_vec);
     void info();
     void compute_drift(size_t ind_t);
     void compute_volatility(size_t ind_t);
