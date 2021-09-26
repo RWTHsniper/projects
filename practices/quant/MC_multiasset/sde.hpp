@@ -10,7 +10,8 @@
 #include <random>
 #include <memory> // for std::unique_ptr
 #include <utility> // for std::move
-#include <omp.h> // openmp
+#include <omp.h> // openmp -fopenmp
+#include <chrono> // measure time
 
 #include "MyTensor.hpp"
 
@@ -131,6 +132,7 @@ private:
     double sqrt_dt;
     size_t num_paths;
     size_t num_sv; // number of state variables for each model
+    size_t num_threads; // openmp threads
     std::vector<double> t_vec;
     std::vector<double> x0_vec;
     std::vector<drift> drift_vec;

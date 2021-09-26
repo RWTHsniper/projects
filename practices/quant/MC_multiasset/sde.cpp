@@ -38,6 +38,14 @@ SDE::SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg
     if (num_sv != x0_vec.size()){
         std::cout << "Mismatch between num_sv and x0_vec.size()!" << std::endl;
     }
+    // num_threads assignment
+    if (arg_inp_params.count("num_threads")) {
+        num_threads = std::max(static_cast<size_t>(1), static_cast<size_t>(arg_inp_params["num_threads"])); // prevent non-positive thread num
+    }
+    else {
+        num_threads = static_cast<size_t>(1); // In case num_threads is not given, use it.
+    }
+    // assign time steps in simulations
     t_vec.resize(Nt+1,0.0);
     for (size_t i=0; i<t_vec.size();i++){t_vec[i] = i*dt;};
     // Initialization for the state variable x
@@ -108,7 +116,7 @@ SDE::SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg
 }
 
 void SDE::info(){
-    std::cout << "Simulation Information" << std::endl;
+    std::cout << "----- Simulation Information -----" << std::endl;
     std::cout << "Maturity " << T << std::endl;
     std::cout << "Number of time steps " << Nt << std::endl;
     std::cout << "Time step size " << dt << std::endl;
@@ -116,6 +124,9 @@ void SDE::info(){
     std::cout << "x0: " ;  for (double x0: x0_vec){std::cout<<x0<<" ";}; std::cout << std::endl; 
     std::cout << "Cholesky lower matrix" << std::endl;
     cholesky_lower.print(); std::cout << std::endl; 
+    std::cout << "Number of threads " << num_threads << std::endl;
+
+    std::cout << std::endl;
 }
 
 void SDE::compute_drift(size_t ind_t){
@@ -123,6 +134,7 @@ void SDE::compute_drift(size_t ind_t){
     drift_buffer = static_cast<double>(0.0); // initialization
     for (size_t ind_drift=0; ind_drift< drift_vec.size(); ind_drift++){
         drift& elem = drift_vec[ind_drift];
+        #pragma omp parallel for schedule(static)
         for (size_t ind_path=0; ind_path<num_paths; ind_path++){
             drift_buffer.get(elem.lhs_sv,ind_path) += elem.compute(x.get(ind_t, elem.rhs_sv, ind_path),dt);
         }
@@ -134,6 +146,7 @@ void SDE::compute_volatility(size_t ind_t){
     volatility_buffer = double(0.0); // initialization
     for (size_t ind_volatility=0; ind_volatility< volatility_vec.size(); ind_volatility++){
         volatility& elem = volatility_vec[ind_volatility];
+        #pragma omp parallel for schedule(static)
         for (size_t ind_path=0; ind_path<num_paths; ind_path++){
             // Use Milstein scheme
             double dW_t = dW.get(ind_t,elem.lhs_sv,ind_path)*sqrt_dt;
@@ -143,19 +156,20 @@ void SDE::compute_volatility(size_t ind_t){
 }
 
 void SDE::simulate(){
-    omp_set_num_threads(2);
-    #pragma omp parallel
-    {
-        int tid = omp_get_thread_num();
-    std::cout << "I am " << tid << std::endl;
-    }
-
-
+    omp_set_num_threads(num_threads);
+    // #pragma omp parallel
+    // {
+    //     int tid = omp_get_thread_num();
+    //     std::cout << "I am " << tid << std::endl;
+    // }
     std::cout << "Start simulation" << std::endl;
+	auto time_start = std::chrono::high_resolution_clock::now();
     for (size_t ind_t=0; ind_t<t_vec.size()-1;ind_t++){
         this->compute_drift(ind_t); // compute drift
         this->compute_volatility(ind_t); // compute volatility
         // accumulate
+        // #pragma omp parallel for schedule(static)
+        #pragma omp parallel for schedule(dynamic)
         for (size_t ind_sv=0; ind_sv<num_sv; ind_sv++){
             for (size_t ind_path=0; ind_path<num_paths; ind_path++){
                 x.get(ind_t+1,ind_sv,ind_path) = x.get(ind_t,ind_sv,ind_path);
@@ -172,7 +186,10 @@ void SDE::simulate(){
             }
         }
     }
+	auto time_end = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(time_end - time_start);
     std::cout << "Simulation is complete" << std::endl;
+	std::cout << "Time for running simulations " << (duration.count()/1000.0) << " sec" << std::endl;
     // Print result
         // for (size_t ind_sv=0; ind_sv<num_sv; ind_sv++){
         //     std::cout << ind_sv << "-th state variable's paths" << std::endl;
