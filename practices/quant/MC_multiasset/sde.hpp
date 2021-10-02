@@ -87,6 +87,9 @@ public:
     virtual double compute(const double& x){
         std::cout << "parent compute" << std::endl;
         return 0.0;};
+    virtual void compute_omp(MyTensor<double>& x, const size_t& ind_t, const size_t& num_paths){
+        std::cout << "parent compute_omp" << std::endl;
+    };
 };
 
 class constraint_max: public Constraint {
@@ -115,9 +118,21 @@ public:
     bool check_index(const size_t& arg_ind){
         return (ind==arg_ind);
     }
-    double compute(const double& x) {
+    double compute(const double& x) override{
         // std::cout << "x "<<x<< " val "<<min_value << " returning " << std::max(x,min_value) << std::endl;
         return std::max(x, min_value); // returned value should be larger than min_value
+    };
+    void compute_omp(MyTensor<double>& x, const size_t& ind_t, const size_t& num_paths) override{ // slower than single thread
+        // std::cout << "Start compute_omp" << std::endl;
+        // auto time_start = std::chrono::high_resolution_clock::now();
+        #pragma omp parallel for schedule(static)
+        for (size_t ind_path=0; ind_path<num_paths; ind_path++){
+            // x.get(ind_t+1,ind,ind_path) = compute(x.get(ind_t+1,ind,ind_path));
+            x.get(ind_t+1,ind,ind_path) = std::max(x.get(ind_t+1,ind,ind_path), min_value);
+        }
+    //     auto time_end = std::chrono::high_resolution_clock::now();
+    //     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+    //     std::cout << "Time for running compute_omp " << (duration.count()) << " micro sec" << std::endl;
     };
 	~constraint_min(){};
 };

@@ -9,3 +9,4 @@ Nt 365
 num_paths 20000
 correlation 0,1,-0.6
 constraint min,1,0.0
+num_threads 4

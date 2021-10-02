@@ -41,6 +41,11 @@
         "utility": "cpp",
         "any": "cpp",
         "iterator": "cpp",
-        "memory": "cpp"
+        "memory": "cpp",
+        "bit": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "map": "cpp",
+        "numbers": "cpp"
     }
 }

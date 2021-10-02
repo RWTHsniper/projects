@@ -183,6 +183,7 @@ void SDE::simulate(){
                 for (size_t ind_path=0; ind_path<num_paths; ind_path++){
                     x.get(ind_t+1,ind_sv,ind_path) = constraint_vec[i_c]->compute(x.get(ind_t+1,ind_sv,ind_path));
                 }
+                // constraint_vec[i_c]->compute_omp(x, ind_t, num_paths); // parallelization is slower
             }
         }
     }

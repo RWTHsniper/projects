@@ -36,7 +36,7 @@ int main(int, char**) {
     sde.info();
     sde.simulate();
     std::string path  ="../output/";
-    sde.write_result(path);
+    // sde.write_result(path);
     sde.print_result();
 
     if(false){ // Playground for testing classes
