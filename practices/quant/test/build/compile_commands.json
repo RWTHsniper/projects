@@ -1,0 +1,22 @@
+[
+{
+  "directory": "/Users/jungjaeyong/projects/practices/quant/test/build",
+  "command": "/usr/local/bin/g++     -O3 -std=c++17 -fopenmp -DNO_DEBUG -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX11.3.sdk   -o CMakeFiles/MultiAsset.dir/main.cpp.o -c /Users/jungjaeyong/projects/practices/quant/test/main.cpp",
+  "file": "/Users/jungjaeyong/projects/practices/quant/test/main.cpp"
+},
+{
+  "directory": "/Users/jungjaeyong/projects/practices/quant/test/build",
+  "command": "/usr/local/bin/g++     -O3 -std=c++17 -fopenmp -DNO_DEBUG -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX11.3.sdk   -o CMakeFiles/MultiAsset.dir/utils.cpp.o -c /Users/jungjaeyong/projects/practices/quant/test/utils.cpp",
+  "file": "/Users/jungjaeyong/projects/practices/quant/test/utils.cpp"
+},
+{
+  "directory": "/Users/jungjaeyong/projects/practices/quant/test/build",
+  "command": "/usr/local/bin/g++     -O3 -std=c++17 -fopenmp -DNO_DEBUG -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX11.3.sdk   -o CMakeFiles/MultiAsset.dir/sde.cpp.o -c /Users/jungjaeyong/projects/practices/quant/test/sde.cpp",
+  "file": "/Users/jungjaeyong/projects/practices/quant/test/sde.cpp"
+},
+{
+  "directory": "/Users/jungjaeyong/projects/practices/quant/test/build",
+  "command": "/usr/local/bin/g++     -O3 -std=c++17 -fopenmp -DNO_DEBUG -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX11.3.sdk   -o CMakeFiles/MultiAsset.dir/MyTensor.cpp.o -c /Users/jungjaeyong/projects/practices/quant/test/MyTensor.cpp",
+  "file": "/Users/jungjaeyong/projects/practices/quant/test/MyTensor.cpp"
+}
+]

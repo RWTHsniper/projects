@@ -2,10 +2,32 @@
 
 #include "main.hpp"
 
-int main(int, char**) {
+int main(int argc, char** argv) {
+
+    std::string inp_file("../input/test.inp");
+    std::string str_inp(".inp"); // string containing input
+    printf("Program Name Is: %s", argv[0]);
+    if(argc==1)
+        printf("\nNo Extra Command Line Argument Passed Other Than Program Name");
+    if(argc>=2){
+        printf("\nNumber Of Arguments Passed: %d", argc);
+        printf("\n----Following Are The Command Line Arguments Passed----");
+        for(int counter=0; counter<argc; counter++){
+            printf("\nargv[%d]: %s\n", counter, argv[counter]);
+            std::string str_arg(argv[counter]);
+            if (str_arg.find(str_inp) != std::string::npos) { // the name for an input file
+                std::cout << "input file is given! " << str_arg << std::endl;
+                inp_file = str_arg;
+            } 
+        }
+    }
+    std::cout << std::endl;
+
+    // Start importing an input file
     std::ifstream inFile;
     // open the file stream
-    inFile.open("../input/test.txt"); 
+    inFile.open(inp_file); 
+    // inFile.open("../input/test.txt"); 
     // check if opening a file failed
     if (inFile.fail()) {
         std::cerr << "Error opeing a file" << std::endl;

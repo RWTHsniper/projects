@@ -1,0 +1,12 @@
+# x0: r=-0.1, sig=0.01 
+# x1: r=-0.2, sig=0.05
+drift 0,-0.105,0,0 
+drift 1,-0.20125,1,0
+volatility 0,0.1,0,0
+volatility 1,0.05,1,0
+x0 0.0 0.0
+T 1
+Nt 365
+num_paths 10000
+correlation 0,1,0.75
+constraint min 1,0.0
