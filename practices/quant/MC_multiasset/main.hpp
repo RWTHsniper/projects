@@ -15,7 +15,7 @@
 #include "MyTensor.hpp"
 
 void extract_inputs(std::vector<drift>& drift_vec, std::vector<volatility>& volatility_vec,
-    std::vector<double>& x0_vec, std::vector<correlation>& correlation_vec, std::vector<std::unique_ptr<Constraint>>& constraint_vec, 
+    std::vector<double>& x0_vec, std::vector<correlation>& correlation_vec, std::vector<PoissonProcess>& poisson_vec, std::vector<std::unique_ptr<Constraint>>& constraint_vec, 
     std::map<std::string, double>& inp_params, const std::vector<std::vector<std::string>>& inp_text){
 
     for (size_t i=0; i<inp_text.size(); i++){
@@ -53,6 +53,12 @@ void extract_inputs(std::vector<drift>& drift_vec, std::vector<volatility>& vola
                 auto p = tokenize(params[j],",");
                 correlation_vec.emplace_back(correlation(stoi(p[0]),stoi(p[1]),stod(p[2])));
             }
+        }
+        else if (key=="poisson"){
+            for (size_t j=0; j<params.size();j++){
+                auto p = tokenize(params[j],",");
+                poisson_vec.emplace_back(PoissonProcess(stoi(p[0]),stod(p[1]),stod(p[2])));
+            }            
         }
         else if (key=="constraint"){
             for (size_t j=0; j<params.size();j++){

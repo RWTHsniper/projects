@@ -94,10 +94,12 @@ public:
 
 class constraint_max: public Constraint {
 private:
-    size_t ind; // Constraint on ind-th state variable
 	double max_value; // minimum value for a constraint
 public:
-    constraint_max(const size_t arg_ind, double arg_value):ind(arg_ind),max_value(arg_value){};
+    constraint_max(const size_t arg_ind, double arg_value){
+        ind = arg_ind;
+        max_value = arg_value;
+    };
     const size_t& get_index(){return ind;};
     bool check_index(const size_t& arg_ind){
         return (ind==arg_ind);
@@ -110,10 +112,12 @@ public:
 
 class constraint_min: public Constraint {
 private:
-    size_t ind; // Constraint on ind-th state variable
 	double min_value; // minimum value for a constraint
 public:
-    constraint_min(const size_t arg_ind, double arg_value):ind(arg_ind),min_value(arg_value){};
+    constraint_min(const size_t arg_ind, double arg_value){
+        ind = arg_ind;
+        min_value = arg_value;
+    };
     const size_t& get_index(){return ind;};
     bool check_index(const size_t& arg_ind){
         return (ind==arg_ind);
@@ -139,6 +143,35 @@ public:
 
 std::unique_ptr<Constraint> Contraint_factory(std::vector<std::string>& arg_params);
 
+class PoissonProcess {
+    private:
+        double coeff;
+        double intensity; // intensity
+        double mean; // intensity*dt
+        double dt;
+    public:
+        size_t lhs_sv;
+        PoissonProcess(std::vector<std::string>& p){
+            if (p.size() != 3){ std::cout << "Input for drift should be length of 3";};
+            lhs_sv = static_cast<size_t>(stoi(p[0]));
+            coeff = stod(p[1]);
+            intensity = stod(p[2]);
+        }
+        PoissonProcess(const size_t l, const double& c, const double& in) : lhs_sv(l), coeff(c), intensity(in) {};
+        void set_dt(const double& arg_dt){
+            dt = arg_dt;
+        }
+        double get_intensity(){return intensity;}
+        double compute(){
+            return coeff;
+        }
+        double compute(const double& arg_dt){
+            mean = intensity*arg_dt;
+            return coeff;
+        }
+        ~PoissonProcess(){};
+};
+
 class SDE {
 private:
     double T;
@@ -147,22 +180,25 @@ private:
     double sqrt_dt;
     size_t num_paths;
     size_t num_sv; // number of state variables for each model
+    size_t num_poisson;
     size_t num_threads; // openmp threads
     std::vector<double> t_vec;
     std::vector<double> x0_vec;
     std::vector<drift> drift_vec;
     std::vector<volatility> volatility_vec;
+    std::vector<PoissonProcess> poisson_vec;
     std::vector<std::unique_ptr<Constraint>> constraint_vec;
     MyTensor<double> cholesky_lower; // Cholesky lower matrix
     bool use_cholesky;
     MyTensor<double> x; // state variables at each step and path (Nt+1, num_sv, num_paths)
     MyTensor<double> dW; // Brownian motions at each step and path (Nt, num_sv, num_paths)
     MyTensor<double> dW_indep; // Independent Brownian motions at each step and path (Nt, num_sv, num_paths)
+    MyTensor<double> dN; // Poisson process at each step and path (Nt, num_sv, num_paths)
     MyTensor<double> drift_buffer;
     MyTensor<double> volatility_buffer;
 public:
 	SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg_x0_vec, std::vector<drift>& arg_drift_vec, std::vector<volatility>& arg_volatility_vec \
-    , std::vector<correlation>& arg_correlation_vec, std::vector<std::unique_ptr<Constraint>>& arg_constraint_vec);
+    , std::vector<correlation>& arg_correlation_vec, std::vector<PoissonProcess>& arg_poisson_vec, std::vector<std::unique_ptr<Constraint>>& arg_constraint_vec);
     void info();
     void compute_drift(size_t ind_t);
     void compute_volatility(size_t ind_t);

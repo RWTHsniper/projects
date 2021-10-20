@@ -15,7 +15,7 @@ std::unique_ptr<Constraint> Contraint_factory(std::vector<std::string>& arg_para
 }
 
 SDE::SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg_x0_vec, std::vector<drift>& arg_drift_vec, std::vector<volatility>& arg_volatility_vec \
-, std::vector<correlation>& arg_correlation_vec, std::vector<std::unique_ptr<Constraint>>& arg_constraint_vec){
+, std::vector<correlation>& arg_correlation_vec, std::vector<PoissonProcess>& arg_poisson_vec, std::vector<std::unique_ptr<Constraint>>& arg_constraint_vec){
     std::cout << "Initialize SDE" << std::endl;
     bool use_bound_check = false;
     T = static_cast<double>(arg_inp_params["T"]);
@@ -25,6 +25,7 @@ SDE::SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg
     num_paths = static_cast<size_t>(arg_inp_params["num_paths"]);
     drift_vec = arg_drift_vec;
     volatility_vec = arg_volatility_vec;
+    poisson_vec = arg_poisson_vec;
     for (size_t i=0; i<arg_constraint_vec.size(); i++){
         constraint_vec.emplace_back(std::move(arg_constraint_vec[i]));
     }
@@ -37,6 +38,11 @@ SDE::SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg
     x0_vec = arg_x0_vec;
     if (num_sv != x0_vec.size()){
         std::cout << "Mismatch between num_sv and x0_vec.size()!" << std::endl;
+    }
+    // Compute num_poisson
+    num_poisson = 0;
+    for(std::size_t i = 0; i < poisson_vec.size(); ++i) {
+        if (poisson_vec[i].lhs_sv > num_poisson){num_poisson = poisson_vec[i].lhs_sv;}; 
     }
     // num_threads assignment
     if (arg_inp_params.count("num_threads")) {
@@ -57,13 +63,14 @@ SDE::SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg
         }
     }
     // Initialization for Brownian motion
-    std::default_random_engine generator{0}; // Seed 0
-    std::normal_distribution<double> distribution(0.0,1.0);
+    unsigned int seed_id = 0; // Seed 0
+    std::default_random_engine norm_generator{seed_id};
+    std::normal_distribution<double> norm_distribution(0.0,1.0);
     dW_indep.resize(std::vector<size_t>{Nt, num_sv, num_paths});
     for (std::size_t i = 0; i < Nt; ++i) {
         for (std::size_t j = 0; j < num_sv; ++j) {
             for (std::size_t k=0; k<num_paths;++k){
-                dW_indep.get(i,j,k) = distribution(generator);
+                dW_indep.get(i,j,k) = norm_distribution(norm_generator);
             }
         }
     }
@@ -77,6 +84,21 @@ SDE::SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg
             }
         }
     }
+    // Poisson process as a jump process is initialized
+    dN.resize(std::vector<size_t>{Nt, num_poisson, num_paths}); 
+    std::default_random_engine pois_generator{seed_id}; // random number generator for poisson
+    for(std::size_t i = 0; i < poisson_vec.size(); ++i) {
+        auto poisson_mean = poisson_vec[i].get_intensity()*dt;
+        std::poisson_distribution<int> pois_distribution(poisson_mean); // mean value is passed
+        for (std::size_t i = 0; i < Nt; ++i) {
+            for (std::size_t j = 0; j < num_poisson; ++j) {
+                for (std::size_t k=0; k<num_paths; ++k){
+                    dN.get(i,j,k) = pois_distribution(pois_generator);
+                }
+            }
+        }
+    }
+
     //  drift and volatility buffer initialization
     drift_buffer.resize(std::vector<size_t>{num_sv, num_paths});
     volatility_buffer.resize(std::vector<size_t>{num_sv, num_paths});
@@ -125,6 +147,7 @@ void SDE::info(){
     std::cout << "Cholesky lower matrix" << std::endl;
     cholesky_lower.print(); std::cout << std::endl; 
     std::cout << "Number of threads " << num_threads << std::endl;
+    std::cout << "Number of Poisson processes " << num_poisson << std::endl;
 
     std::cout << std::endl;
 }

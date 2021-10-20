@@ -49,10 +49,11 @@ int main(int argc, char** argv) {
     std::vector<double> x0_vec;
     std::vector<correlation> correlation_vec;
     std::vector<std::unique_ptr<Constraint>> constraint_vec;
+    std::vector<PoissonProcess> poisson_vec;
     std::map<std::string, double> inp_params;
 
-    extract_inputs(drift_vec, volatility_vec, x0_vec, correlation_vec, constraint_vec, inp_params, inp_text);
-    SDE sde = SDE(inp_params, x0_vec, drift_vec, volatility_vec, correlation_vec, constraint_vec);
+    extract_inputs(drift_vec, volatility_vec, x0_vec, correlation_vec, poisson_vec, constraint_vec, inp_params, inp_text);
+    SDE sde = SDE(inp_params, x0_vec, drift_vec, volatility_vec, correlation_vec, poisson_vec, constraint_vec);
     // sde.compute_drift(0);
     // sde.compute_volatility(0);
     sde.info();
