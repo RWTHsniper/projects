@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "atomic": "cpp",
+        "bitset": "cpp",
+        "__locale": "cpp",
+        "ios": "cpp",
+        "functional": "cpp",
+        "chrono": "cpp"
+    }
+}

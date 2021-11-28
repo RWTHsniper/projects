@@ -1,0 +1,6 @@
+example.cpp
+setup.py
+python_cpp_example.egg-info/PKG-INFO
+python_cpp_example.egg-info/SOURCES.txt
+python_cpp_example.egg-info/dependency_links.txt
+python_cpp_example.egg-info/top_level.txt
