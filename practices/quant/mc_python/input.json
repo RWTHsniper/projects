@@ -11,7 +11,7 @@
 #            "drift": ["prod", ["const", 2], ["sum", ["const",2], ["const",1]]], # drift term
 #            "drift": ["sum", ["const", 2], ["sum", ["const",2], ["const",1]]], # drift term
 #            "drift": ["sum", ["const", 2], ["const", 5], ["poly", 0.0,0,2]], # drift term
-            "vol": ["const",1] # volatility
+            "vol": [[0, ["const",1.0]]] # one volatility term
         }
     }
 }
