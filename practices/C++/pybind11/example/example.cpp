@@ -127,6 +127,11 @@ void add_arrays_D(py::array_t<double> result, py::array_t<double> input1, py::ar
         r(i) = i1(i) + i2(i);
 }
 
+void print_list(py::list my_list) {
+    for (auto item : my_list)
+        py::print("item ",item);
+        // std::cout << item << " ";
+}
 
 PYBIND11_MODULE(example, m) {
     m.doc() = "pybind11 example plugin"; // optional module docstring
@@ -150,6 +155,7 @@ PYBIND11_MODULE(example, m) {
     m.def("add_arrays_test", &add_arrays_test);
     m.def("add_arrays", py::overload_cast<py::array_t<double>, py::array_t<double>, py::array_t<double>>(&add_arrays));
     m.def("add_arrays_D", py::overload_cast<py::array_t<double>, py::array_t<double>, py::array_t<double>>(&add_arrays));
+    m.def("print_list", &print_list);
 
 }
 
