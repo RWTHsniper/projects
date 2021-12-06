@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
             if (str_arg.find(str_inp) != std::string::npos) { // the name for an input file
                 std::cout << "input file is given! " << str_arg << std::endl;
                 inp_file = str_arg;
-            } 
+            }
         }
     }
     std::cout << std::endl;

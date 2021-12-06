@@ -105,7 +105,7 @@ SDE::SDE(std::map<std::string, double>& arg_inp_params, std::vector<double>& arg
     // Cholesky matrix
     if ((arg_correlation_vec.size()>0) && (num_sv>1)){
         use_cholesky = true;
-        MyTensor correlation_mat = MyTensor(num_sv,num_sv,0.0);
+        MyTensor<double> correlation_mat(num_sv,num_sv,0.0);
         for (size_t i=0; i<num_sv; i++){correlation_mat.get(i,i) = 1.0;}; // set diagonal terms
         // arg_correlation_vec;
         for (auto & elem : arg_correlation_vec) {

@@ -9,6 +9,7 @@
 #include <map>
 #include <any>
 #include <memory> // for std::unique_ptr
+#include <Eigen/Dense>
 
 #include "utils.hpp"
 #include "sde.hpp"

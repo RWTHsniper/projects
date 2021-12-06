@@ -22,7 +22,7 @@ int* createArr(int n) {
 }
 
 int* resizeArr(int* ptr, int size, int ex_value) {
-	int* new_ptr = int[size + ex_value];
+	int* new_ptr = new int[size + ex_value];
 
 	for (int i = 0; i < size; i++) new_ptr[i] = ptr[i];
 
@@ -42,5 +42,9 @@ int main() {
 	std::cout << "created array: " << std::endl;
 	for (int i = 0; i < size; i++) std::cout << ptr[i] << std::endl;
 
-	std::
+	ptr = resizeArr(ptr, size, size+5);
+	std::cout << "resized array: " << std::endl;
+	for (int i = 0; i < size+5; i++) std::cout << ptr[i] << std::endl;
+
+
 }

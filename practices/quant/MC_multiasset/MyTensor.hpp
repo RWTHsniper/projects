@@ -48,11 +48,9 @@ public:
         return *this;
     }
     MyTensor<T>& operator=(const T& other){
-        // std::cout << "Called " << other << std::endl;
         for (size_t i=0; i<this->data.size(); i++){
             data[i] = other;
         }
-        // std::cout << "Done " << other << std::endl;
         return *this;
     }
     void print();
