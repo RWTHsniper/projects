@@ -9,7 +9,7 @@
 #include <map>
 #include <any>
 #include <memory> // for std::unique_ptr
-#include <Eigen/Dense>
+// #include <Eigen/Dense> # Eigen can be used in the future
 
 #include "utils.hpp"
 #include "sde.hpp"

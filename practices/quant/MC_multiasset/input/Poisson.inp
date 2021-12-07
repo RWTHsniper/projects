@@ -9,4 +9,4 @@ T 1
 Nt 365
 num_paths 10000
 correlation 0,1,0.75
-constraint min 1,0.0
+constraint min,1,0.0
