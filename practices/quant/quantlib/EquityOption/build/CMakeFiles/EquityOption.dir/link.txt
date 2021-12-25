@@ -1,0 +1,1 @@
+g++  -O3 -std=c++17 -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.1.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/EquityOption.dir/main.cpp.o -o EquityOption  /usr/local/lib/libQuantLib.dylib 

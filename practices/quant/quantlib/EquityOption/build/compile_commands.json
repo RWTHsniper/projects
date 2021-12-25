@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/Users/jungjaeyong/projects/practices/quant/quantlib/EquityOption/build",
+  "command": "g++  -I/usr/local/include  -O3 -std=c++17 -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.1.sdk -o CMakeFiles/EquityOption.dir/main.cpp.o -c /Users/jungjaeyong/projects/practices/quant/quantlib/EquityOption/main.cpp",
+  "file": "/Users/jungjaeyong/projects/practices/quant/quantlib/EquityOption/main.cpp"
+}
+]
