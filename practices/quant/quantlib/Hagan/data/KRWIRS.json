@@ -1,0 +1,247 @@
+{
+"seqnbr": 3196749,
+"name": "D@KRW IRS PAR_LongTerm",
+"crncy": "KRW",
+"base_date": "2021-12-14",
+"frequency": "",
+"day_count_method": "",
+"day_count_libor_method": "",
+"reset_gap": "",
+"holiday_method": "",
+"receive_fix_freq": "",
+"pay_float_reset_freq": "",
+"business_day_convention": "",
+"round_off_yn": null,
+"rcvry_rt": 0.0,
+"size": 20,
+"tenor_types": [
+    "NONE",
+    "NONE",
+    "NONE",
+    "NONE",
+    "NONE",
+    "NONE",
+    "NONE",
+    "NONE",
+    "NONE",
+    "NONE",
+    "NONE",
+    "NONE",
+    "NONE",
+    "NONE",
+    "NONE",
+    "NONE",
+    "NONE",
+    "NONE",
+    "NONE",
+    "NONE"
+],
+"tenors": [
+    "1d",
+    "3m",
+    "6m",
+    "9m",
+    "1y",
+    "18m",
+    "2y",
+    "3y",
+    "4y",
+    "5y",
+    "6y",
+    "7y",
+    "8y",
+    "9y",
+    "10y",
+    "12y",
+    "15y",
+    "20y",
+    "25y",
+    "30y"
+],
+"tenor_dates": [
+    "2021-12-15",
+    "2022-03-14",
+    "2022-06-14",
+    "2022-09-14",
+    "2022-12-14",
+    "2023-06-14",
+    "2023-12-14",
+    "2024-12-14",
+    "2025-12-14",
+    "2026-12-14",
+    "2027-12-14",
+    "2028-12-14",
+    "2029-12-14",
+    "2030-12-14",
+    "2031-12-14",
+    "2033-12-14",
+    "2036-12-14",
+    "2041-12-14",
+    "2046-12-14",
+    "2051-12-14"
+],
+"rates": [
+    0.01,
+    0.0127,
+    0.0139,
+    0.014875,
+    0.015825,
+    0.017025,
+    0.01765,
+    0.018225,
+    0.01835,
+    0.018325,
+    0.01825,
+    0.0181,
+    0.01805,
+    0.018075,
+    0.018075,
+    0.018025,
+    0.01715,
+    0.0157,
+    0.0158,
+    0.0158
+],
+"bcmks": [
+    {
+        "ins_addr": {
+            "address": 65,
+            "id": "KRW CALL"
+        },
+        "tenor": "1d"
+    },
+    {
+        "ins_addr": {
+            "address": 14,
+            "id": "KRW CD91"
+        },
+        "tenor": "3m"
+    },
+    {
+        "ins_addr": {
+            "address": 144,
+            "id": "KRW IRS 6m"
+        },
+        "tenor": "6m"
+    },
+    {
+        "ins_addr": {
+            "address": 146,
+            "id": "KRW IRS 9m"
+        },
+        "tenor": "9m"
+    },
+    {
+        "ins_addr": {
+            "address": 139,
+            "id": "KRW IRS 1y"
+        },
+        "tenor": "1y"
+    },
+    {
+        "ins_addr": {
+            "address": 103486,
+            "id": "KRW IRS 1.5y"
+        },
+        "tenor": "18m"
+    },
+    {
+        "ins_addr": {
+            "address": 140,
+            "id": "KRW IRS 2y"
+        },
+        "tenor": "2y"
+    },
+    {
+        "ins_addr": {
+            "address": 141,
+            "id": "KRW IRS 3y"
+        },
+        "tenor": "3y"
+    },
+    {
+        "ins_addr": {
+            "address": 142,
+            "id": "KRW IRS 4y"
+        },
+        "tenor": "4y"
+    },
+    {
+        "ins_addr": {
+            "address": 143,
+            "id": "KRW IRS 5y"
+        },
+        "tenor": "5y"
+    },
+    {
+        "ins_addr": {
+            "address": 709,
+            "id": "KRW IRS 6y"
+        },
+        "tenor": "6y"
+    },
+    {
+        "ins_addr": {
+            "address": 145,
+            "id": "KRW IRS 7y"
+        },
+        "tenor": "7y"
+    },
+    {
+        "ins_addr": {
+            "address": 710,
+            "id": "KRW IRS 8y"
+        },
+        "tenor": "8y"
+    },
+    {
+        "ins_addr": {
+            "address": 711,
+            "id": "KRW IRS 9y"
+        },
+        "tenor": "9y"
+    },
+    {
+        "ins_addr": {
+            "address": 138,
+            "id": "KRW IRS 10y"
+        },
+        "tenor": "10y"
+    },
+    {
+        "ins_addr": {
+            "address": 110274,
+            "id": "KRW IRS 12y"
+        },
+        "tenor": "12y"
+    },
+    {
+        "ins_addr": {
+            "address": 110275,
+            "id": "KRW IRS 15y"
+        },
+        "tenor": "15y"
+    },
+    {
+        "ins_addr": {
+            "address": 110276,
+            "id": "KRW IRS 20y"
+        },
+        "tenor": "20y"
+    },
+    {
+        "ins_addr": {
+            "address": 555351,
+            "id": "KRW IRS 25y"
+        },
+        "tenor": "25y"
+    },
+    {
+        "ins_addr": {
+            "address": 555352,
+            "id": "KRW IRS 30y"
+        },
+        "tenor": "30y"
+    }
+]
+}

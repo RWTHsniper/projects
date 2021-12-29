@@ -1,0 +1,25 @@
+{
+    "files.associations": {
+        "new": "cpp",
+        "__bit_reference": "cpp",
+        "__functional_base": "cpp",
+        "__node_handle": "cpp",
+        "algorithm": "cpp",
+        "bitset": "cpp",
+        "chrono": "cpp",
+        "deque": "cpp",
+        "__memory": "cpp",
+        "functional": "cpp",
+        "iterator": "cpp",
+        "limits": "cpp",
+        "optional": "cpp",
+        "random": "cpp",
+        "ratio": "cpp",
+        "system_error": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "vector": "cpp",
+        "array": "cpp",
+        "utility": "cpp"
+    }
+}

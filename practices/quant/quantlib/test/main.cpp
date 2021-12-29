@@ -2,25 +2,25 @@
 #include <ql/quantlib.hpp>
 
 
-#include <ql/qldefines.hpp>
-#if !defined(BOOST_ALL_NO_LIB) && defined(BOOST_MSVC)
-#  include <ql/auto_link.hpp>
-#endif
-#include <ql/instruments/vanillaoption.hpp>
-#include <ql/pricingengines/vanilla/binomialengine.hpp>
-#include <ql/pricingengines/vanilla/analyticeuropeanengine.hpp>
-#include <ql/pricingengines/vanilla/analytichestonengine.hpp>
-#include <ql/pricingengines/vanilla/baroneadesiwhaleyengine.hpp>
-#include <ql/pricingengines/vanilla/bjerksundstenslandengine.hpp>
-#include <ql/pricingengines/vanilla/batesengine.hpp>
-#include <ql/pricingengines/vanilla/integralengine.hpp>
-#include <ql/pricingengines/vanilla/fdblackscholesvanillaengine.hpp>
-#include <ql/pricingengines/vanilla/mceuropeanengine.hpp>
-#include <ql/pricingengines/vanilla/mcamericanengine.hpp>
-#include <ql/pricingengines/vanilla/analyticeuropeanvasicekengine.hpp>
-#include <ql/time/calendars/target.hpp>
-#include <ql/utilities/dataformatters.hpp>
-#include <ql/models/shortrate/onefactormodels/vasicek.hpp>
+// #include <ql/qldefines.hpp>
+// #if !defined(BOOST_ALL_NO_LIB) && defined(BOOST_MSVC)
+// #  include <ql/auto_link.hpp>
+// #endif
+// #include <ql/instruments/vanillaoption.hpp>
+// #include <ql/pricingengines/vanilla/binomialengine.hpp>
+// #include <ql/pricingengines/vanilla/analyticeuropeanengine.hpp>
+// #include <ql/pricingengines/vanilla/analytichestonengine.hpp>
+// #include <ql/pricingengines/vanilla/baroneadesiwhaleyengine.hpp>
+// #include <ql/pricingengines/vanilla/bjerksundstenslandengine.hpp>
+// #include <ql/pricingengines/vanilla/batesengine.hpp>
+// #include <ql/pricingengines/vanilla/integralengine.hpp>
+// #include <ql/pricingengines/vanilla/fdblackscholesvanillaengine.hpp>
+// #include <ql/pricingengines/vanilla/mceuropeanengine.hpp>
+// #include <ql/pricingengines/vanilla/mcamericanengine.hpp>
+// #include <ql/pricingengines/vanilla/analyticeuropeanvasicekengine.hpp>
+// #include <ql/time/calendars/target.hpp>
+// #include <ql/utilities/dataformatters.hpp>
+// #include <ql/models/shortrate/onefactormodels/vasicek.hpp>
 
 
 namespace ql = QuantLib;
