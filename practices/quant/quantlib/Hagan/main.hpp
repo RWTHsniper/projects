@@ -9,11 +9,13 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <ql/quantlib.hpp>
+#include <ql/time/calendar.hpp>
 #include <ql/pricingengine.hpp>
 #include <ql/pricingengines/swaption/blackswaptionengine.hpp>
 #include <ql/utilities/dataparsers.hpp>
 #include <ql/termstructures/yield/ratehelpers.hpp>
 #include <ql/termstructures/yield/flatforward.hpp>
+#include <ql/termstructures/volatility/swaption/swaptionvolmatrix.hpp>
 
 #include "utils.hpp"
 
@@ -35,7 +37,6 @@ Arguments
     Real payer_val{0.0};
     // Since the goal is to compute ATM swaption, R_swap(t) = K
     Real sqrt_t = sqrt(T0-t); // sqrt of time to expiry
-    // Real pdf_0{0.2419707245191433497978}; // pdf of Gaussian distribution at 0
     Real pdf_0{0.3989422804014327}; // pdf of Gaussian distribution at 0
     payer_val = std::accumulate(discountFactors.begin(), discountFactors.end(), 0.0);
     payer_val *= notional * tau * sig * sqrt_t * pdf_0;

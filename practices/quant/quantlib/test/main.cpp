@@ -146,6 +146,11 @@ int main(int, char**) {
     std::cout << "European Option Price = " << europeanOption.NPV() << std::endl;
 
     testSolver1();
+
+
+    std::cout << "I am going to test Matrix" << std::endl;
+
+    ql::Matrix(3,3);
     
     return 0;
  
