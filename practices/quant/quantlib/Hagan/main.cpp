@@ -46,12 +46,12 @@ int main(int, char* []) {
     std::vector<Date> tenorDates;
     tenorDates.reserve(swap_size);
     for (const pt::ptree::value_type &tenor_date : KRWIRS.get_child("tenor_dates")){
-        tenorDates.emplace_back(Date(DateParser::parseFormatted(tenor_date.second.data(),"%Y-%m-%d")));
+        tenorDates.emplace_back(DateParser::parseFormatted(tenor_date.second.data(),"%Y-%m-%d"));
     }
     std::vector<Period> tenors;
     tenors.reserve(swap_size);
     for (const pt::ptree::value_type &tenor : KRWIRS.get_child("tenors")){
-        tenors.emplace_back(Period(PeriodParser::parse(tenor.second.data())));
+        tenors.emplace_back(PeriodParser::parse(tenor.second.data()));
     }
     std::vector<double> rates;
     rates.reserve(swap_size);
@@ -75,14 +75,79 @@ int main(int, char* []) {
     // ext::shared_ptr<YieldTermStructure> yieldCurve(new PiecewiseYieldCurve<Discount, Cubic>(todaysDate, swapHelpers, Actual365Fixed(),PiecewiseYieldCurve<Discount, Cubic>::bootstrap_type(tolerance)));
     // ext::shared_ptr<YieldTermStructure> yieldCurve(new PiecewiseYieldCurve<Discount, LogLinear>(todaysDate, swapHelpers, Actual365Fixed(),PiecewiseYieldCurve<Discount, LogLinear>::bootstrap_type(tolerance)));
     ext::shared_ptr<YieldTermStructure> yieldCurve(new PiecewiseYieldCurve<Discount, Linear>(todaysDate, swapHelpers, Actual365Fixed(),PiecewiseYieldCurve<Discount, Linear>::bootstrap_type(tolerance)));
-    std::cout << yieldCurve->discount(tenorDates[5]) << std::endl;
     for (size_t i=0; i<tenorDates.size(); i++){
         const auto& date = tenorDates[i];
         std::cout << date << " " << yieldCurve->discount(date) << std::endl;
     }
 
-    // Black's normal volatility model in QuantLib
-    
+    // Bachilier's normal volatility model in QuantLib
+    Swap::Type swapType = Swap::Payer;
+    // Swap::Type swapType = Swap::Receiver;
+    // Make a discount factor vector
+    std::vector<Real> discountFactors;
+    discountFactors.reserve(4);
+    discountFactors.emplace_back(yieldCurve->discount(6.25));
+    discountFactors.emplace_back(yieldCurve->discount(6.5));
+    discountFactors.emplace_back(yieldCurve->discount(6.75));
+    discountFactors.emplace_back(yieldCurve->discount(7.0));
+    std::cout << "discount factors " << std::endl;
+    for (const auto& df : discountFactors){
+        std::cout << "df " << df << std::endl;
+    }
+    std::cout << "df at 6: " << yieldCurve->discount(6.0) << std::endl;
+    std::vector<Real> prices;
+    prices.reserve(5);
+    prices.emplace_back(bachelierATMSwaption(0.0, 6, 0.25, 0.0, swapType, discountFactors));
+    prices.emplace_back(bachelierATMSwaption(0.0, 6, 0.25, 0.05, swapType, discountFactors));
+    prices.emplace_back(bachelierATMSwaption(0.0, 6, 0.25, 0.10, swapType, discountFactors));
+    prices.emplace_back(bachelierATMSwaption(0.0, 6, 0.25, 0.15, swapType, discountFactors));
+    prices.emplace_back(bachelierATMSwaption(0.0, 6, 0.25, 0.20, swapType, discountFactors));
+    for (const auto& p : prices){
+        std::cout << "p " << p << std::endl;
+    }
+
+    ext::shared_ptr<Quote> vol(new SimpleQuote(0.2));
+    // 0.018078112385949145
+    InterestRate fwdRate = yieldCurve->forwardRate(0.0,6.0,Simple); // compute forward rate from the yield curve
+    ext::shared_ptr<Quote> flatRate(new SimpleQuote(fwdRate.rate())); // discounting
+    Handle<YieldTermStructure> rhTermStructure(
+    ext::make_shared<FlatForward>(
+                todaysDate, Handle<Quote>(flatRate), // assume todaysDate = settlementDate
+                                Actual365Fixed()));
+    ext::shared_ptr<IborIndex> indexThreeMonths(new Euribor3M(rhTermStructure));
+    ext::shared_ptr<BlackCalibrationHelper> swaption(new SwaptionHelper(
+                                Period(6, Years), // maturity Period
+                                Period(1, Years), // length Period
+                                Handle<Quote>(vol), // 
+                                indexThreeMonths,
+                                indexThreeMonths->tenor(),
+                                Actual365Fixed(), // Actual365Fixed() is more exact than indexThreeMonths->dayCounter()
+                                Actual365Fixed(), // Actual365Fixed()
+                                rhTermStructure,
+                                BlackCalibrationHelper::RelativePriceError,
+                                Null<Real>(),
+                                1.0,
+                                Normal));
+    // ext::shared_ptr<PricingEngine> bachelierEngine(new BachelierSwaptionEngine(rhTermStructure, Handle<Quote>(ext::shared_ptr<Quote>(new SimpleQuote(0.5)))));
+    ext::shared_ptr<PricingEngine> bachelierEngine(new BachelierSwaptionEngine(rhTermStructure, Handle<Quote>(ext::shared_ptr<Quote>(vol))));
+    swaption->setPricingEngine(bachelierEngine);
+    // ext::shared_ptr<G2> modelG2(new G2(rhTermStructure));
+    // swaption->setPricingEngine(ext::shared_ptr<PricingEngine>(
+                // new G2SwaptionEngine(modelG2, 6.0, 16)));
+
+    Real npv = swaption->modelValue();
+    std::cout << "npv: " << npv << std::endl;
+    Volatility myImplied = swaption->impliedVolatility(0.173506, 1e-4,1000, 0.05, 0.50);
+    std::cout << "myImplied: " << myImplied << std::endl;
+    Volatility implied = swaption->impliedVolatility(npv, 1e-4,1000, 0.05, 0.50);
+    std::cout << "ivol: " << implied << std::endl;
+
+    // Create a root
+    pt::ptree swaption_vol;
+    // Load the json file in this ptree
+    pt::read_json(data_dir+"swaption_vol.json", swaption_vol); // expiry: option. tenor: swap
+
+
 
     // SwapRateHelper()
     /* 
@@ -122,11 +187,7 @@ bool 	endOfMonth = false
 
 
 
-    // // Create a root
-    // pt::ptree swaption_vol;
-    // // Load the json file in this ptree
-    // pt::read_json(data_dir+"swaption_vol.json", swaption_vol);
-    // expiry: option. tenor: swap
+
 
 
     /*
