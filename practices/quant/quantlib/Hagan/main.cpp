@@ -20,6 +20,7 @@
 #include "main.hpp"
 
 namespace ql = QuantLib;
+namespace pt = boost::property_tree;
 using namespace QuantLib;
 
 int main(int, char* []) {
@@ -31,7 +32,6 @@ int main(int, char* []) {
     std::string data_dir(source_dir+"data/");
 
     // Short alias for this namespace
-    namespace pt = boost::property_tree;
     // Create a root
     pt::ptree KRWIRS;
     // Load the json file in this ptree
@@ -60,23 +60,29 @@ int main(int, char* []) {
     }
 
     // Term-structure in QuantLib
-    std::vector<ext::shared_ptr<RateHelper> > swapHelpers;
+    std::vector<ext::shared_ptr<RateHelper>> swapHelpers;
     swapHelpers.reserve(swap_size);
     for (size_t i=0; i<tenors.size(); i++){
-        std::cout << "te " << tenors[i] << std::endl;
-        ext::shared_ptr<SwapIndex> swapInd(new EuriborSwapIsdaFixA(tenors[i]));
+        // I tried EuriborSwapIsdaFixA, GbpLiborSwapIsdaFix, and JpyLiborSwapIsdaFixAm
+        // The maximum difference is 13.26 bp. Thus, I just choose EuriborSwapIsdaFixA tentatively.
+        ext::shared_ptr<SwapIndex> swapInd(new EuriborSwapIsdaFixA(tenors[i])); // tentatively chosen.
         ext::shared_ptr<RateHelper> helper(new SwapRateHelper(rates[i],swapInd));
         swapHelpers.emplace_back(helper);
     }
     // Discount: the rate which should be constructed
-    ext::shared_ptr<YieldTermStructure> yieldCurve(new PiecewiseYieldCurve<Discount, Cubic>(todaysDate, swapHelpers, Actual365Fixed(),PiecewiseYieldCurve<Discount, Cubic>::bootstrap_type(1e-8)));
+    // Possible interpolators: Cubic, LogLinear, Linear
+    double tolerance = 1.0e-15;
+    // ext::shared_ptr<YieldTermStructure> yieldCurve(new PiecewiseYieldCurve<Discount, Cubic>(todaysDate, swapHelpers, Actual365Fixed(),PiecewiseYieldCurve<Discount, Cubic>::bootstrap_type(tolerance)));
+    // ext::shared_ptr<YieldTermStructure> yieldCurve(new PiecewiseYieldCurve<Discount, LogLinear>(todaysDate, swapHelpers, Actual365Fixed(),PiecewiseYieldCurve<Discount, LogLinear>::bootstrap_type(tolerance)));
+    ext::shared_ptr<YieldTermStructure> yieldCurve(new PiecewiseYieldCurve<Discount, Linear>(todaysDate, swapHelpers, Actual365Fixed(),PiecewiseYieldCurve<Discount, Linear>::bootstrap_type(tolerance)));
     std::cout << yieldCurve->discount(tenorDates[5]) << std::endl;
     for (size_t i=0; i<tenorDates.size(); i++){
         const auto& date = tenorDates[i];
         std::cout << date << " " << yieldCurve->discount(date) << std::endl;
     }
 
-
+    // Black's normal volatility model in QuantLib
+    
 
     // SwapRateHelper()
     /* 
