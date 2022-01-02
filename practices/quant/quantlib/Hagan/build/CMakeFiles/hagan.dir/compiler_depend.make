@@ -3,42 +3,33 @@
 
 CMakeFiles/hagan.dir/geometry.cpp.o: ../geometry.cpp \
   ../geometry.hpp \
-  ../eigen/Eigen/Dense \
-  ../eigen/Eigen/Core \
-  ../eigen/Eigen/src/Core/util/DisableStupidWarnings.h \
-  ../eigen/Eigen/src/Core/util/Macros.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/cmath \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/iostream \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/x86_64-apple-darwin21/bits/c++config.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/x86_64-apple-darwin21/bits/os_defines.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/x86_64-apple-darwin21/bits/cpu_defines.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/pstl/pstl_config.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/cpp_type_traits.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ext/type_traits.h \
-  /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include-fixed/math.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ostream \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ios \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/iosfwd \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stringfwd.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/memoryfwd.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/postypes.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/cwchar \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/wchar.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_types.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_symbol_aliasing.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_posix_availability.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/Availability.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/AvailabilityVersions.h \
-  /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include-fixed/AvailabilityInternal.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/std_abs.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/stdlib.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_types.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/machine/_types.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/i386/_types.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_pthread/_pthread_types.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/wait.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_pid_t.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_id_t.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/signal.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/appleapiopts.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/machine/signal.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/i386/signal.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/machine/_mcontext.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/i386/_mcontext.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/mach/machine/_structs.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/mach/i386/_structs.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/Availability.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/AvailabilityVersions.h \
+  /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include-fixed/AvailabilityInternal.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_null.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_size_t.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_mbstate_t.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/machine/types.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/i386/types.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_int8_t.h \
@@ -51,87 +42,9 @@ CMakeFiles/hagan.dir/geometry.cpp.o: ../geometry.cpp \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_u_int64_t.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_intptr_t.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_uintptr_t.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_pthread/_pthread_attr_t.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_sigaltstack.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_ucontext.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_sigset_t.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_size_t.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_uid_t.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/resource.h \
-  /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include/stdint.h \
-  /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include-fixed/stdint.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_types/_uint8_t.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_types/_uint16_t.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_types/_uint32_t.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_types/_uint64_t.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_types/_intmax_t.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_types/_uintmax_t.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_timeval.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/machine/endian.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/i386/endian.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_endian.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/libkern/_OSByteOrder.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/libkern/i386/_OSByteOrder.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/alloca.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_ct_rune_t.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_rune_t.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_wchar_t.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_null.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/malloc/_malloc.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_dev_t.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_mode_t.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/specfun.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_algobase.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/functexcept.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/exception_defines.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ext/numeric_traits.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_pair.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/move.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/type_traits \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_iterator_base_types.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_iterator_base_funcs.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/concept_check.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/debug/assertions.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_iterator.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/ptr_traits.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/debug/debug.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/predefined_ops.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/limits \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/gamma.tcc \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/special_function_util.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/bessel_function.tcc \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/beta_function.tcc \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/ell_integral.tcc \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/exp_integral.tcc \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/hypergeometric.tcc \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/legendre_function.tcc \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/modified_bessel_func.tcc \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/poly_hermite.tcc \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/poly_laguerre.tcc \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/riemann_zeta.tcc \
-  ../eigen/Eigen/src/Core/util/ConfigureVectorization.h \
-  /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include/mmintrin.h \
-  /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include/emmintrin.h \
-  /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include/xmmintrin.h \
-  /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include/mm_malloc.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/stdlib.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/cstdlib \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/errno.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/errno.h \
-  /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include/pmmintrin.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/new \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/exception.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/complex \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/sstream \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/istream \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ios \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/iosfwd \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stringfwd.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/memoryfwd.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/postypes.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/cwchar \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/wchar.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_mbstate_t.h \
   /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include/stdarg.h \
   /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include-fixed/stdio.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h \
@@ -152,14 +65,41 @@ CMakeFiles/hagan.dir/geometry.cpp.o: ../geometry.cpp \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_ctype.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/runetype.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/exception \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/exception.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/exception_ptr.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/exception_defines.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/cxxabi_init_exception.h \
   /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include/stddef.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/typeinfo \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/hash_bytes.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/new \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/nested_exception.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/move.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/type_traits \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/char_traits.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_algobase.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/functexcept.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/cpp_type_traits.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ext/type_traits.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ext/numeric_traits.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_pair.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_iterator_base_types.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_iterator_base_funcs.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/concept_check.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/debug/assertions.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_iterator.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/ptr_traits.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/debug/debug.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/predefined_ops.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/cstdint \
+  /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include/stdint.h \
+  /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include-fixed/stdint.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_types/_uint8_t.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_types/_uint16_t.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_types/_uint32_t.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_types/_uint64_t.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_types/_intmax_t.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_types/_uintmax_t.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/localefwd.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/x86_64-apple-darwin21/bits/c++locale.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/clocale \
@@ -173,6 +113,7 @@ CMakeFiles/hagan.dir/geometry.cpp.o: ../geometry.cpp \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.1.sdk/usr/include/pthread.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/pthread/sched.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/pthread/pthread_impl.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_pthread/_pthread_attr_t.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_pthread/_pthread_cond_t.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_pthread/_pthread_condattr_t.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_pthread/_pthread_key_t.h \
@@ -185,6 +126,7 @@ CMakeFiles/hagan.dir/geometry.cpp.o: ../geometry.cpp \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/pthread/qos.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/qos.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_mach_port_t.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_sigset_t.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/x86_64-apple-darwin21/bits/atomic_word.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/locale_classes.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/string \
@@ -205,8 +147,38 @@ CMakeFiles/hagan.dir/geometry.cpp.o: ../geometry.cpp \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/functional_hash.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/string_view.tcc \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ext/string_conversions.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/cstdlib \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/stdlib.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/wait.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_pid_t.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_id_t.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/signal.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/appleapiopts.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/machine/signal.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/i386/signal.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/machine/_mcontext.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/i386/_mcontext.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/mach/machine/_structs.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/mach/i386/_structs.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_sigaltstack.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_ucontext.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_uid_t.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/resource.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_timeval.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/machine/endian.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/i386/endian.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_endian.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/libkern/_OSByteOrder.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/libkern/i386/_OSByteOrder.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/alloca.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/malloc/_malloc.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_dev_t.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_mode_t.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/std_abs.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/cstdio \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/cerrno \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/errno.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/errno.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/charconv.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/basic_string.tcc \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/locale_classes.tcc \
@@ -225,9 +197,38 @@ CMakeFiles/hagan.dir/geometry.cpp.o: ../geometry.cpp \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/x86_64-apple-darwin21/bits/ctype_inline.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/locale_facets.tcc \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/basic_ios.tcc \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ostream \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/ostream.tcc \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/istream \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/istream.tcc \
+  ../eigen/Eigen/Dense \
+  ../eigen/Eigen/Core \
+  ../eigen/Eigen/src/Core/util/DisableStupidWarnings.h \
+  ../eigen/Eigen/src/Core/util/Macros.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/cmath \
+  /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include-fixed/math.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/specfun.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/limits \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/gamma.tcc \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/special_function_util.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/bessel_function.tcc \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/beta_function.tcc \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/ell_integral.tcc \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/exp_integral.tcc \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/hypergeometric.tcc \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/legendre_function.tcc \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/modified_bessel_func.tcc \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/poly_hermite.tcc \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/poly_laguerre.tcc \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/riemann_zeta.tcc \
+  ../eigen/Eigen/src/Core/util/ConfigureVectorization.h \
+  /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include/mmintrin.h \
+  /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include/emmintrin.h \
+  /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include/xmmintrin.h \
+  /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include/mm_malloc.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/stdlib.h \
+  /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include/pmmintrin.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/complex \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/sstream \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/sstream.tcc \
   ../eigen/Eigen/src/Core/util/MKL_support.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/cstddef \
@@ -5172,9 +5173,9 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/include/ql/math/copulas/galamboscopula.hpp:
 
-/usr/local/include/boost/serialization/collections_save_imp.hpp:
-
 /usr/local/include/boost/container_hash/hash_fwd.hpp:
+
+/usr/local/include/boost/serialization/collections_save_imp.hpp:
 
 /usr/local/include/ql/math/copulas/farliegumbelmorgensterncopula.hpp:
 
@@ -6754,9 +6755,9 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/include/boost/math/special_functions/lanczos.hpp:
 
-/usr/local/include/boost/mpl/aux_/preprocessed/gcc/plus.hpp:
-
 /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/iostream:
+
+/usr/local/include/boost/mpl/aux_/preprocessed/gcc/plus.hpp:
 
 /usr/local/include/boost/fusion/support/tag_of_fwd.hpp:
 
@@ -8594,9 +8595,9 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/gslice_array.h:
 
-/usr/local/include/boost/type_traits/add_reference.hpp:
-
 /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include-fixed/stdio.h:
+
+/usr/local/include/boost/type_traits/add_reference.hpp:
 
 /usr/local/include/boost/smart_ptr/shared_ptr.hpp:
 
@@ -8782,9 +8783,9 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/include/boost/predef/library/c/cloudabi.h:
 
-/usr/local/include/boost/type_traits/is_unsigned.hpp:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_pthread/_pthread_rwlock_t.h:
+
+/usr/local/include/boost/type_traits/is_unsigned.hpp:
 
 /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_map.h:
 
@@ -8894,9 +8895,9 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/include/boost/serialization/strong_typedef.hpp:
 
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_id_t.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/stdio.h:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_id_t.h:
 
 /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/list.tcc:
 
@@ -8950,9 +8951,9 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/include/boost/tuple/tuple.hpp:
 
-/usr/local/include/boost/multi_index/detail/base_type.hpp:
-
 /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/cstdio:
+
+/usr/local/include/boost/multi_index/detail/base_type.hpp:
 
 /usr/local/include/boost/mpl/inherit_linearly.hpp:
 
@@ -9542,13 +9543,13 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_u_int16_t.h:
 
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_mbstate_t.h:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_types/_wctype_t.h:
 
 /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/fstream:
 
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_types/_wctype_t.h:
-
 ../eigen/Eigen/src/Cholesky/LDLT.h:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_mbstate_t.h:
 
 /usr/local/include/boost/mpl/aux_/lambda_support.hpp:
 
@@ -9620,6 +9621,8 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/include/ql/instruments/zerocouponinflationswap.hpp:
 
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/pstl/glue_algorithm_defs.h:
+
 /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/codecvt.h:
 
 /usr/local/include/boost/mpl/at_fwd.hpp:
@@ -9627,8 +9630,6 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/memory:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/alloca.h:
-
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/pstl/glue_algorithm_defs.h:
 
 /usr/local/include/boost/mpl/aux_/config/nttp.hpp:
 
@@ -9832,9 +9833,9 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/include/boost/preprocessor/comma_if.hpp:
 
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/i386/endian.h:
-
 /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/clocale:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/i386/endian.h:
 
 /usr/local/include/boost/mpl/aux_/lambda_arity_param.hpp:
 
@@ -10046,9 +10047,9 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/include/boost/function/detail/maybe_include.hpp:
 
-/usr/local/include/ql/experimental/lattices/extendedbinomialtree.hpp:
-
 /usr/local/include/boost/mpl/aux_/preprocessed/gcc/equal_to.hpp:
+
+/usr/local/include/ql/experimental/lattices/extendedbinomialtree.hpp:
 
 ../eigen/Eigen/src/Core/CwiseTernaryOp.h:
 
@@ -10326,10 +10327,6 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/include/boost/config.hpp:
 
-/usr/local/include/boost/math/tools/throw_exception.hpp:
-
-/usr/local/include/boost/math/special_functions/detail/ibeta_inv_ab.hpp:
-
 /usr/local/include/ql/indexes/ibor/usdlibor.hpp:
 
 /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/hashtable_policy.h:
@@ -10450,16 +10447,6 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 ../eigen/Eigen/src/misc/Image.h:
 
-/usr/local/include/ql/math/copulas/alimikhailhaqcopula.hpp:
-
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/cwchar:
-
-/usr/local/include/boost/random/shuffle_order.hpp:
-
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_wint_t.h:
-
-../eigen/Eigen/LU:
-
 /usr/local/include/ql/experimental/credit/gaussianlhplossmodel.hpp:
 
 /usr/local/include/ql/pricingengines/basket/all.hpp:
@@ -10518,10 +10505,6 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 ../eigen/Eigen/src/Core/CoreIterators.h:
 
-../eigen/Eigen/SVD:
-
-../eigen/Eigen/src/plugins/MatrixCwiseUnaryOps.h:
-
 /usr/local/include/boost/fusion/view/joint_view/detail/end_impl.hpp:
 
 /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/backward/binders.h:
@@ -10531,6 +10514,10 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 /usr/local/include/boost/numeric/conversion/detail/converter.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_pthread/_pthread_condattr_t.h:
+
+../eigen/Eigen/SVD:
+
+../eigen/Eigen/src/plugins/MatrixCwiseUnaryOps.h:
 
 /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/x86_64-apple-darwin21/bits/ctype_base.h:
 
@@ -10622,11 +10609,11 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/include/ql/methods/finitedifferences/utilities/escroweddividendadjustment.hpp:
 
-/usr/local/include/boost/type_traits/is_member_object_pointer.hpp:
-
 /usr/local/include/ql/experimental/exoticoptions/twoassetbarrieroption.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_time_t.h:
+
+/usr/local/include/boost/type_traits/is_member_object_pointer.hpp:
 
 /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/functional:
 
@@ -10738,10 +10725,6 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/string_view.tcc:
 
-/usr/local/include/boost/parameter/aux_/is_placeholder.hpp:
-
-/usr/local/include/boost/move/detail/pointer_element.hpp:
-
 ../eigen/Eigen/src/Core/arch/Default/GenericPacketMathFunctionsFwd.h:
 
 /usr/local/include/boost/fusion/algorithm/query/detail/segmented_find.hpp:
@@ -10749,6 +10732,10 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 /usr/local/include/boost/multi_index/detail/vartempl_support.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_timespec.h:
+
+/usr/local/include/boost/parameter/aux_/is_placeholder.hpp:
+
+/usr/local/include/boost/move/detail/pointer_element.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_int64_t.h:
 
@@ -10800,6 +10787,8 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 ../eigen/Eigen/src/Core/arch/Default/Settings.h:
 
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/utility:
+
 /usr/local/include/boost/fusion/iterator/key_of.hpp:
 
 /usr/local/include/ql/pricingengines/cliquet/analyticcliquetengine.hpp:
@@ -10810,9 +10799,9 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_u_int32_t.h:
 
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/utility:
-
 /usr/local/include/boost/mpl/empty.hpp:
+
+../eigen/Eigen/LU:
 
 /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/bessel_function.tcc:
 
@@ -10974,23 +10963,205 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/sstream.tcc:
 
+/usr/local/include/boost/fusion/support/is_iterator.hpp:
+
+/usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include/pmmintrin.h:
+
+/usr/local/include/boost/type_traits/has_logical_or.hpp:
+
+/usr/local/include/ql/indexes/ibor/chflibor.hpp:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/stdexcept:
+
+/usr/local/include/ql/methods/finitedifferences/utilities/fdmshoutloginnervaluecalculator.hpp:
+
+/usr/local/include/ql/termstructures/volatility/spreadedsmilesection.hpp:
+
+../eigen/Eigen/src/plugins/BlockMethods.h:
+
+/usr/local/include/boost/type_traits/remove_cv_ref.hpp:
+
+../eigen/Eigen/src/Eigenvalues/ComplexEigenSolver.h:
+
+/usr/local/include/boost/mpl/eval_if.hpp:
+
+/usr/local/include/boost/random/lagged_fibonacci.hpp:
+
+../eigen/Eigen/src/Core/StableNorm.h:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/beta_function.tcc:
+
+/usr/local/include/boost/math/tools/is_standalone.hpp:
+
+/usr/local/include/boost/type_traits/has_logical_and.hpp:
+
+/usr/local/include/ql/math/solvers1d/newtonsafe.hpp:
+
+/usr/local/include/boost/predef/compiler/metaware.h:
+
+/usr/local/include/ql/math/randomnumbers/centrallimitgaussianrng.hpp:
+
+/usr/local/include/boost/preprocessor/logical/not.hpp:
+
+/usr/local/include/boost/smart_ptr/bad_weak_ptr.hpp:
+
+/usr/local/include/boost/preprocessor/tuple/rem.hpp:
+
+/usr/local/include/boost/math/tools/throw_exception.hpp:
+
+/usr/local/include/boost/math/special_functions/detail/ibeta_inv_ab.hpp:
+
 /usr/local/include/boost/predef/compiler/ibm.h:
 
 /usr/local/include/ql/experimental/volatility/swaptionvolcube1a.hpp:
 
-/usr/local/include/ql/methods/lattices/lattice.hpp:
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/uniform_int_dist.h:
 
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/string:
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/locale_classes.tcc:
 
-/usr/local/include/boost/type_traits/has_greater.hpp:
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/mask_array.h:
 
-/usr/local/include/boost/serialization/detail/stack_constructor.hpp:
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/x86_64-apple-darwin21/bits/atomic_word.h:
 
-/usr/local/include/boost/mpl/clear.hpp:
+/usr/local/include/ql/methods/lattices/lattice1d.hpp:
 
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/parse_numbers.h:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/mach/machine/_structs.h:
 
-/usr/local/include/ql/experimental/volatility/zabrinterpolatedsmilesection.hpp:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:
+
+/usr/local/include/boost/iterator/iterator_concepts.hpp:
+
+/usr/local/include/boost/mp11/detail/mp_min_element.hpp:
+
+/usr/local/include/ql/math/statistics/statistics.hpp:
+
+/usr/local/include/boost/mpl/apply_wrap.hpp:
+
+/usr/local/include/ql/quotes/simplequote.hpp:
+
+/usr/local/include/boost/type_traits/remove_cv.hpp:
+
+/usr/local/include/ql/math/randomnumbers/haltonrsg.hpp:
+
+/usr/local/include/boost/mpl/vector/aux_/O1_size.hpp:
+
+/usr/local/include/ql/methods/finitedifferences/solvers/fdmbatessolver.hpp:
+
+/usr/local/include/boost/type_traits/add_rvalue_reference.hpp:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/mach/i386/_structs.h:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/sstream:
+
+/usr/local/include/boost/core/explicit_operator_bool.hpp:
+
+/usr/local/include/ql/math/interpolations/cubicinterpolation.hpp:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/resource.h:
+
+/usr/local/include/boost/range/algorithm/equal.hpp:
+
+/usr/local/include/boost/type_index.hpp:
+
+/usr/local/include/boost/core/swap.hpp:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/x86_64-apple-darwin21/bits/c++allocator.h:
+
+/usr/local/include/boost/container_hash/detail/hash_float.hpp:
+
+../eigen/Eigen/src/plugins/MatrixCwiseBinaryOps.h:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/i386/_mcontext.h:
+
+/usr/local/include/boost/preprocessor/facilities/empty.hpp:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/signal.h:
+
+/usr/local/include/ql/termstructures/volatility/equityfx/andreasenhugevolatilityadapter.hpp:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ios:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/errno.h:
+
+/usr/local/include/ql/experimental/math/piecewiseintegral.hpp:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ext/string_conversions.h:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_algo.h:
+
+/usr/local/include/ql/instruments/floatfloatswaption.hpp:
+
+/usr/local/include/ql/grid.hpp:
+
+/usr/local/include/ql/models/marketmodels/pathwisediscounter.hpp:
+
+/usr/local/include/boost/type_traits/is_list_constructible.hpp:
+
+/usr/local/include/boost/fusion/mpl/insert.hpp:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_timeval.h:
+
+/usr/local/include/boost/mpl/set/aux_/insert_range_impl.hpp:
+
+/usr/local/include/ql/experimental/inflation/interpolatedyoyoptionletstripper.hpp:
+
+/usr/local/include/ql/experimental/exoticoptions/twoassetcorrelationoption.hpp:
+
+/usr/local/include/boost/range/detail/safe_bool.hpp:
+
+/usr/local/include/boost/mpl/aux_/empty_impl.hpp:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/functional_hash.h:
+
+/usr/local/include/ql/experimental/varianceoption/varianceoption.hpp:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types.h:
+
+/usr/local/include/boost/integer_fwd.hpp:
+
+/usr/local/include/ql/experimental/models/hestonslvfdmmodel.hpp:
+
+/usr/local/include/ql/methods/montecarlo/multipath.hpp:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_uid_t.h:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/predefined_ops.h:
+
+/usr/local/include/ql/indexes/ibor/cdor.hpp:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/allocator.h:
+
+/usr/local/include/ql/indexes/ibor/trlibor.hpp:
+
+/usr/local/include/ql/indexes/ibor/pribor.hpp:
+
+/usr/local/include/boost/lexical_cast.hpp:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/localefwd.h:
+
+/usr/local/include/ql/methods/finitedifferences/solvers/fdmhullwhitesolver.hpp:
+
+/usr/local/include/ql/models/shortrate/onefactormodels/gsr.hpp:
+
+/usr/local/include/boost/multi_index_container.hpp:
+
+/usr/local/include/boost/type_traits/has_trivial_move_assign.hpp:
+
+/usr/local/include/ql/instruments/quantovanillaoption.hpp:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/iterator:
+
+/usr/local/include/ql/termstructures/volatility/sabrsmilesection.hpp:
+
+/usr/local/include/boost/predef/make.h:
+
+/usr/local/include/ql/methods/finitedifferences/fdtypedefs.hpp:
+
+/usr/local/include/ql/termstructures/localbootstrap.hpp:
+
+/usr/local/include/ql/currencies/oceania.hpp:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_pthread/_pthread_t.h:
 
 /usr/local/include/ql/indexes/inflation/frhicp.hpp:
 
@@ -11000,31 +11171,27 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/include/boost/fusion/mpl/push_back.hpp:
 
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/uniform_int_dist.h:
+/usr/local/include/ql/legacy/libormarketmodels/lmconstwrappercorrmodel.hpp:
 
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/locale_classes.tcc:
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/std_mutex.h:
 
-/usr/local/include/boost/optional/detail/optional_reference_spec.hpp:
+/usr/local/include/ql/experimental/credit/defaultprobabilitylatentmodel.hpp:
 
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/deque:
+/usr/local/include/boost/smart_ptr/detail/local_counted_base.hpp:
 
-/usr/local/include/ql/termstructures/interpolatedcurve.hpp:
+/usr/local/include/boost/type_traits/has_post_increment.hpp:
 
-/usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include-fixed/syslimits.h:
+/usr/local/include/boost/core/demangle.hpp:
 
-/usr/local/include/boost/make_shared.hpp:
+/usr/local/include/boost/preprocessor/seq/cat.hpp:
 
-/usr/local/include/ql/instruments/swap.hpp:
+/usr/local/include/ql/time/calendars/canada.hpp:
 
-/usr/local/include/boost/mpl/size_t.hpp:
+/usr/local/include/boost/mpl/inserter.hpp:
 
-/usr/local/include/ql/methods/lattices/lattice1d.hpp:
+/usr/local/include/boost/core/addressof.hpp:
 
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/mach/machine/_structs.h:
-
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/mask_array.h:
-
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/x86_64-apple-darwin21/bits/atomic_word.h:
+/usr/local/include/boost/move/detail/workaround.hpp:
 
 /usr/local/include/ql/pricingengines/quanto/all.hpp:
 
@@ -11040,55 +11207,15 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/include/ql/math/interpolations/flatextrapolation2d.hpp:
 
-/usr/local/include/boost/type_traits/has_logical_or.hpp:
+../eigen/Eigen/src/Core/products/SelfadjointProduct.h:
 
-/usr/local/include/ql/indexes/ibor/chflibor.hpp:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_rune_t.h:
 
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/stdexcept:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_uuid_t.h:
 
-/usr/local/include/ql/experimental/math/piecewiseintegral.hpp:
+../eigen/Eigen/src/Core/functors/StlFunctors.h:
 
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ext/string_conversions.h:
-
-/usr/local/include/ql/experimental/varianceoption/varianceoption.hpp:
-
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types.h:
-
-/usr/local/include/boost/container_hash/detail/hash_float.hpp:
-
-../eigen/Eigen/src/plugins/MatrixCwiseBinaryOps.h:
-
-/usr/local/include/boost/range/algorithm/equal.hpp:
-
-/usr/local/include/boost/type_index.hpp:
-
-/usr/local/include/boost/core/swap.hpp:
-
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/x86_64-apple-darwin21/bits/c++allocator.h:
-
-/usr/local/include/ql/methods/finitedifferences/solvers/fdmhullwhitesolver.hpp:
-
-/usr/local/include/ql/models/shortrate/onefactormodels/gsr.hpp:
-
-/usr/local/include/boost/multi_index_container.hpp:
-
-/usr/local/include/boost/type_traits/has_trivial_move_assign.hpp:
-
-/usr/local/include/boost/predef/make.h:
-
-/usr/local/include/ql/methods/finitedifferences/fdtypedefs.hpp:
-
-/usr/local/include/ql/termstructures/localbootstrap.hpp:
-
-/usr/local/include/ql/currencies/oceania.hpp:
-
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_pthread/_pthread_t.h:
-
-/usr/local/include/boost/preprocessor/seq/cat.hpp:
-
-/usr/local/include/ql/time/calendars/canada.hpp:
-
-/usr/local/include/boost/mpl/inserter.hpp:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_pthread/_pthread_rwlockattr_t.h:
 
 /usr/local/include/boost/random/detail/operators.hpp:
 
@@ -11104,7 +11231,25 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/include/boost/predef/os/haiku.h:
 
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/functional_hash.h:
+/usr/local/include/boost/predef/platform/windows_desktop.h:
+
+/usr/local/include/boost/mpl/always.hpp:
+
+/usr/local/include/boost/format/exceptions.hpp:
+
+/usr/local/include/ql/experimental/barrieroption/analyticdoublebarrierbinaryengine.hpp:
+
+../eigen/Eigen/Dense:
+
+/usr/local/include/boost/numeric/conversion/detail/preprocessed/numeric_cast_traits_long_long.hpp:
+
+/usr/local/include/boost/predef/compiler/palm.h:
+
+/usr/local/include/boost/container_hash/detail/float_functions.hpp:
+
+/usr/local/include/boost/math/special_functions/next.hpp:
+
+/usr/local/include/boost/property_tree/ptree.hpp:
 
 /usr/local/include/boost/random/detail/int_float_pair.hpp:
 
@@ -11112,19 +11257,9 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/locale.h:
 
-/usr/local/include/ql/math/randomnumbers/haltonrsg.hpp:
-
-/usr/local/include/ql/quotes/simplequote.hpp:
-
-/usr/local/include/boost/type_traits/remove_cv.hpp:
-
 /usr/local/include/ql/termstructures/volatility/equityfx/andreasenhugelocalvoladapter.hpp:
 
 /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include-fixed/AvailabilityInternal.h:
-
-/usr/local/include/boost/smart_ptr/bad_weak_ptr.hpp:
-
-/usr/local/include/boost/preprocessor/logical/not.hpp:
 
 /usr/local/include/boost/mpl/aux_/push_back_impl.hpp:
 
@@ -11158,13 +11293,49 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/x86_64-apple-darwin21/bits/c++locale.h:
 
-/usr/local/include/ql/indexes/ibor/trlibor.hpp:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_fd_set.h:
 
-/usr/local/include/ql/indexes/ibor/pribor.hpp:
+/usr/local/include/boost/math/tools/detail/polynomial_horner3_20.hpp:
 
-/usr/local/include/boost/lexical_cast.hpp:
+/usr/local/include/ql/experimental/averageois/averageoiscouponpricer.hpp:
 
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/localefwd.h:
+/usr/local/include/boost/type_traits/is_lvalue_reference.hpp:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_mode_t.h:
+
+/usr/local/include/boost/fusion/container/list/cons_fwd.hpp:
+
+/usr/local/include/boost/mpl/if.hpp:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_ssize_t.h:
+
+/usr/local/include/boost/fusion/view/joint_view/detail/deref_impl.hpp:
+
+../geometry.hpp:
+
+/usr/local/include/boost/predef/compiler/hp_acc.h:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ratio:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/iosfwd:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/map:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_posix_availability.h:
+
+/usr/local/include/boost/predef/platform/windows_server.h:
+
+/usr/local/include/ql/pricingengines/vanilla/mchestonhullwhiteengine.hpp:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_iterator.h:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/cwchar:
+
+/usr/local/include/ql/math/copulas/alimikhailhaqcopula.hpp:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/exception_ptr.h:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_va_list.h:
 
 /usr/local/include/ql/qldefines.hpp:
 
@@ -11172,31 +11343,23 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include-fixed/math.h:
 
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_va_list.h:
-
-/usr/local/include/boost/mpl/pop_front_fwd.hpp:
-
-/usr/local/include/boost/mpl/map/aux_/tag.hpp:
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/basic_string.h:
 
 ../eigen/Eigen/src/Core/util/DisableStupidWarnings.h:
 
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/basic_string.h:
+/usr/local/include/boost/mpl/map/aux_/tag.hpp:
 
-/usr/local/include/ql/instruments/floatfloatswaption.hpp:
+/usr/local/include/boost/random/shuffle_order.hpp:
 
-/usr/local/include/ql/grid.hpp:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_wint_t.h:
 
-/usr/local/include/ql/models/marketmodels/pathwisediscounter.hpp:
+/usr/local/include/ql/experimental/finitedifferences/fdmzabrop.hpp:
 
-/usr/local/include/boost/type_traits/is_list_constructible.hpp:
+/usr/local/include/boost/predef/architecture/x86/32.h:
 
-/usr/local/include/boost/fusion/mpl/insert.hpp:
+/usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include-fixed/stdint.h:
 
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_algo.h:
-
-/usr/local/include/boost/numeric/conversion/detail/preprocessed/numeric_cast_traits_long_long.hpp:
-
-/usr/local/include/boost/predef/compiler/palm.h:
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/x86_64-apple-darwin21/bits/cpu_defines.h:
 
 /usr/local/include/boost/preprocessor/variadic/size.hpp:
 
@@ -11220,12 +11383,6 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_wctype.h:
 
-/usr/local/include/ql/methods/finitedifferences/solvers/fdmbatessolver.hpp:
-
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/mach/i386/_structs.h:
-
-/usr/local/include/boost/type_traits/add_rvalue_reference.hpp:
-
 /usr/local/include/boost/mpl/aux_/iter_fold_impl.hpp:
 
 ../eigen/Eigen/src/Core/NumTraits.h:
@@ -11236,221 +11393,31 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/include/boost/preprocessor/facilities/intercept.hpp:
 
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_rune_t.h:
-
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_uuid_t.h:
-
-../eigen/Eigen/src/Core/products/SelfadjointProduct.h:
-
 /usr/local/include/ql/methods/finitedifferences/utilities/all.hpp:
 
 /usr/local/include/boost/ref.hpp:
 
 /usr/local/include/boost/preprocessor/punctuation/comma.hpp:
 
-/usr/local/include/ql/instruments/quantovanillaoption.hpp:
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/x86_64-apple-darwin21/bits/os_defines.h:
 
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/iterator:
+/usr/local/include/ql/methods/finitedifferences/bsmtermoperator.hpp:
 
-/usr/local/include/ql/termstructures/volatility/sabrsmilesection.hpp:
+/usr/local/include/boost/fusion/support/detail/is_native_fusion_sequence.hpp:
 
-/usr/local/include/ql/termstructures/volatility/optionlet/capletvariancecurve.hpp:
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/cpp_type_traits.h:
 
-/usr/local/include/boost/iterator/iterator_concepts.hpp:
+/usr/local/include/boost/mpl/pop_front_fwd.hpp:
 
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:
+/usr/local/include/boost/type_traits/has_greater.hpp:
 
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/sstream:
+/usr/local/include/boost/serialization/detail/stack_constructor.hpp:
 
-/usr/local/include/boost/type_traits/is_pointer.hpp:
+/usr/local/include/boost/mpl/clear.hpp:
 
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/postypes.h:
+/usr/local/include/ql/methods/lattices/lattice.hpp:
 
-/usr/local/include/boost/optional/optional_fwd.hpp:
-
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/errno.h:
-
-/usr/local/include/ql/termstructures/volatility/equityfx/andreasenhugevolatilityadapter.hpp:
-
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ios:
-
-/usr/local/include/boost/predef/platform/windows_desktop.h:
-
-/usr/local/include/boost/mpl/always.hpp:
-
-/usr/local/include/boost/format/exceptions.hpp:
-
-/usr/local/include/ql/experimental/barrieroption/analyticdoublebarrierbinaryengine.hpp:
-
-../eigen/Eigen/Dense:
-
-/usr/local/include/boost/container_hash/detail/float_functions.hpp:
-
-/usr/local/include/boost/math/special_functions/next.hpp:
-
-/usr/local/include/boost/property_tree/ptree.hpp:
-
-/usr/local/include/boost/parameter/aux_/pack/parameter_requirements.hpp:
-
-../eigen/Eigen/src/Eigenvalues/Tridiagonalization.h:
-
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/x86_64-apple-darwin21/bits/cpu_defines.h:
-
-/usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include-fixed/stdint.h:
-
-/usr/local/include/boost/mpl/aux_/include_preprocessed.hpp:
-
-/usr/local/include/ql/experimental/inflation/interpolatedyoyoptionletstripper.hpp:
-
-/usr/local/include/ql/experimental/exoticoptions/twoassetcorrelationoption.hpp:
-
-/usr/local/include/boost/range/detail/safe_bool.hpp:
-
-/usr/local/include/boost/mpl/aux_/empty_impl.hpp:
-
-/usr/local/include/boost/mpl/set/aux_/insert_range_impl.hpp:
-
-../eigen/Eigen/src/Geometry/Hyperplane.h:
-
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/pthread/sched.h:
-
-/usr/local/include/boost/mpl/eval_if.hpp:
-
-/usr/local/include/boost/random/lagged_fibonacci.hpp:
-
-../eigen/Eigen/src/Core/StableNorm.h:
-
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/beta_function.tcc:
-
-/usr/local/include/boost/mpl/vector/aux_/O1_size.hpp:
-
-/usr/local/include/boost/type_traits/is_bounded_array.hpp:
-
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_uninitialized.h:
-
-/usr/local/include/boost/core/demangle.hpp:
-
-/usr/local/include/boost/type_traits/has_post_increment.hpp:
-
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_types/_wctrans_t.h:
-
-/usr/local/include/boost/core/explicit_operator_bool.hpp:
-
-/usr/local/include/boost/math/tools/detail/polynomial_horner3_20.hpp:
-
-/usr/local/include/ql/experimental/averageois/averageoiscouponpricer.hpp:
-
-/usr/local/include/boost/type_traits/is_lvalue_reference.hpp:
-
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_mode_t.h:
-
-/usr/local/include/boost/fusion/container/list/cons_fwd.hpp:
-
-/usr/local/include/boost/mpl/if.hpp:
-
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_ssize_t.h:
-
-/usr/local/include/ql/methods/finitedifferences/utilities/fdmshoutloginnervaluecalculator.hpp:
-
-/usr/local/include/ql/termstructures/volatility/spreadedsmilesection.hpp:
-
-../eigen/Eigen/src/plugins/BlockMethods.h:
-
-/usr/local/include/boost/type_traits/remove_cv_ref.hpp:
-
-../eigen/Eigen/src/Eigenvalues/ComplexEigenSolver.h:
-
-/usr/local/include/boost/fusion/view/joint_view/detail/deref_impl.hpp:
-
-../geometry.hpp:
-
-/usr/local/include/boost/predef/compiler/hp_acc.h:
-
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ratio:
-
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/iosfwd:
-
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/map:
-
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_posix_availability.h:
-
-/usr/local/include/boost/predef/platform/windows_server.h:
-
-/usr/local/include/ql/pricingengines/vanilla/mchestonhullwhiteengine.hpp:
-
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_iterator.h:
-
-/usr/local/include/boost/range/empty.hpp:
-
-/usr/local/include/boost/mpl/int.hpp:
-
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_pthread/_pthread_rwlockattr_t.h:
-
-../eigen/Eigen/src/Core/functors/StlFunctors.h:
-
-/usr/local/include/boost/predef/architecture/x86/32.h:
-
-/usr/local/include/ql/experimental/finitedifferences/fdmzabrop.hpp:
-
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_types.h:
-
-/usr/local/include/boost/core/addressof.hpp:
-
-/usr/local/include/boost/move/detail/workaround.hpp:
-
-/usr/local/include/boost/mpl/aux_/find_if_pred.hpp:
-
-/usr/local/include/ql/models/marketmodels/models/fwdperiodadapter.hpp:
-
-/usr/local/include/ql/methods/all.hpp:
-
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/syslimits.h:
-
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_timeval.h:
-
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/exception_ptr.h:
-
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/modified_bessel_func.tcc:
-
-/usr/local/include/ql/methods/finitedifferences/meshers/exponentialjump1dmesher.hpp:
-
-/usr/local/include/ql/methods/finitedifferences/shoutcondition.hpp:
-
-/usr/local/include/boost/fusion/support/is_iterator.hpp:
-
-/usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include/pmmintrin.h:
-
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/predefined_ops.h:
-
-/usr/local/include/ql/indexes/ibor/cdor.hpp:
-
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/allocator.h:
-
-/usr/local/include/boost/integer_fwd.hpp:
-
-/usr/local/include/ql/experimental/models/hestonslvfdmmodel.hpp:
-
-/usr/local/include/ql/methods/montecarlo/multipath.hpp:
-
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_uid_t.h:
-
-/usr/local/include/boost/math/special_functions/detail/igamma_large.hpp:
-
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/ostream_insert.h:
-
-/usr/local/include/ql/methods/finitedifferences/boundarycondition.hpp:
-
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_useconds_t.h:
-
-/usr/local/include/boost/mpl/aux_/numeric_op.hpp:
-
-/usr/local/include/ql/methods/montecarlo/mctraits.hpp:
-
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/i386/_mcontext.h:
-
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_fd_set.h:
-
-/usr/local/include/ql/math/copulas/claytoncopula.hpp:
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/string:
 
 /usr/local/include/boost/preprocessor/logical/bitand.hpp:
 
@@ -11464,35 +11431,63 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/include/boost/concept_check.hpp:
 
+/usr/local/include/ql/methods/finitedifferences/boundarycondition.hpp:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_useconds_t.h:
+
+/usr/local/include/boost/math/special_functions/detail/igamma_large.hpp:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/ostream_insert.h:
+
+/usr/local/include/boost/parameter/aux_/pack/parameter_requirements.hpp:
+
+../eigen/Eigen/src/Eigenvalues/Tridiagonalization.h:
+
+/usr/local/include/boost/mpl/aux_/include_preprocessed.hpp:
+
+/usr/local/include/ql/termstructures/interpolatedcurve.hpp:
+
+/usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include-fixed/syslimits.h:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tr1/modified_bessel_func.tcc:
+
+/usr/local/include/boost/optional/optional_fwd.hpp:
+
+/usr/local/include/ql/methods/finitedifferences/meshers/exponentialjump1dmesher.hpp:
+
+/usr/local/include/ql/methods/finitedifferences/shoutcondition.hpp:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_types.h:
+
+/usr/local/include/ql/math/copulas/all.hpp:
+
+/usr/local/include/boost/fusion/view/iterator_range.hpp:
+
+../eigen/Eigen/src/Eigenvalues/ComplexSchur.h:
+
+/usr/local/include/boost/type_traits/is_bounded_array.hpp:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_uninitialized.h:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_types/_wctrans_t.h:
+
+/usr/local/include/ql/math/copulas/claytoncopula.hpp:
+
 /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/exception:
 
-/usr/local/include/ql/models/marketmodels/evolutiondescription.hpp:
+/usr/local/include/boost/mpl/size_t.hpp:
 
-../eigen/Eigen/src/Core/MatrixBase.h:
-
-/usr/local/include/boost/math/tools/is_standalone.hpp:
-
-/usr/local/include/boost/type_traits/has_logical_and.hpp:
-
-/usr/local/include/ql/math/solvers1d/newtonsafe.hpp:
-
-/usr/local/include/boost/preprocessor/repetition/enum_trailing.hpp:
-
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/concept_check.h:
-
-/usr/local/include/boost/preprocessor/facilities/empty.hpp:
-
-/usr/local/include/boost/mp11/detail/mp_min_element.hpp:
-
-/usr/local/include/ql/math/statistics/statistics.hpp:
-
-/usr/local/include/boost/mpl/apply_wrap.hpp:
-
-/usr/local/include/boost/predef/compiler/metaware.h:
+/usr/local/include/boost/random/piecewise_constant_distribution.hpp:
 
 /usr/local/include/boost/predef/architecture/ia64.h:
 
-/usr/local/include/boost/random/piecewise_constant_distribution.hpp:
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ext/aligned_buffer.h:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/i386/_types.h:
+
+/usr/local/include/boost/range/empty.hpp:
+
+/usr/local/include/boost/mpl/int.hpp:
 
 ../eigen/Eigen/src/Core/arch/SSE/Complex.h:
 
@@ -11500,11 +11495,21 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/include/boost/mpl/aux_/advance_forward.hpp:
 
-/usr/local/include/boost/mpl/aux_/preprocessor/default_params.hpp:
+/usr/local/include/boost/preprocessor/repetition/enum_trailing.hpp:
 
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/i386/_types.h:
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/concept_check.h:
 
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ext/aligned_buffer.h:
+/usr/local/include/boost/mpl/aux_/numeric_op.hpp:
+
+/usr/local/include/ql/methods/montecarlo/mctraits.hpp:
+
+../eigen/Eigen/src/Core/IO.h:
+
+/usr/local/include/ql/experimental/coupons/all.hpp:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_null.h:
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_symbol_aliasing.h:
 
 /usr/local/include/boost/fusion/view/filter_view.hpp:
 
@@ -11516,9 +11521,19 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/include/boost/mpl/int_fwd.hpp:
 
-/usr/local/include/ql/math/randomnumbers/centrallimitgaussianrng.hpp:
+/usr/local/include/boost/mpl/aux_/preprocessor/default_params.hpp:
 
-/usr/local/include/boost/preprocessor/tuple/rem.hpp:
+/usr/local/include/boost/type_traits/is_pointer.hpp:
+
+/usr/local/include/ql/models/marketmodels/evolutiondescription.hpp:
+
+../eigen/Eigen/src/Core/MatrixBase.h:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/postypes.h:
+
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/parse_numbers.h:
+
+/usr/local/include/ql/experimental/volatility/zabrinterpolatedsmilesection.hpp:
 
 /usr/local/include/boost/predef/compiler/pgi.h:
 
@@ -11526,38 +11541,24 @@ CMakeFiles/hagan.dir/utils.cpp.o: ../utils.cpp \
 
 /usr/local/include/boost/mpl/aux_/config/has_apply.hpp:
 
-/usr/local/include/ql/math/interpolations/cubicinterpolation.hpp:
+/usr/local/include/boost/mpl/aux_/find_if_pred.hpp:
 
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/resource.h:
+/usr/local/include/ql/models/marketmodels/models/fwdperiodadapter.hpp:
 
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/signal.h:
+/usr/local/include/ql/methods/all.hpp:
 
-/usr/local/include/ql/methods/finitedifferences/bsmtermoperator.hpp:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/syslimits.h:
 
-/usr/local/include/boost/fusion/support/detail/is_native_fusion_sequence.hpp:
+/usr/local/include/boost/optional/detail/optional_reference_spec.hpp:
 
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/cpp_type_traits.h:
+/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/deque:
 
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/x86_64-apple-darwin21/bits/os_defines.h:
+/usr/local/include/boost/make_shared.hpp:
 
-/usr/local/include/ql/legacy/libormarketmodels/lmconstwrappercorrmodel.hpp:
+/usr/local/include/ql/instruments/swap.hpp:
 
-/usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/std_mutex.h:
+/usr/local/include/ql/termstructures/volatility/optionlet/capletvariancecurve.hpp:
 
-/usr/local/include/ql/experimental/credit/defaultprobabilitylatentmodel.hpp:
+../eigen/Eigen/src/Geometry/Hyperplane.h:
 
-/usr/local/include/boost/smart_ptr/detail/local_counted_base.hpp:
-
-../eigen/Eigen/src/Core/IO.h:
-
-/usr/local/include/ql/experimental/coupons/all.hpp:
-
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_null.h:
-
-/usr/local/include/ql/math/copulas/all.hpp:
-
-/usr/local/include/boost/fusion/view/iterator_range.hpp:
-
-../eigen/Eigen/src/Eigenvalues/ComplexSchur.h:
-
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_symbol_aliasing.h:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/pthread/sched.h:

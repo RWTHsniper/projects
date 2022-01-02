@@ -144,10 +144,20 @@ int main(int, char* []) {
 
     std::cout << swaptionVolMat << std::endl;
 
-    Rectangle test;
-    Rectangle::drift a{1,2,3,4};
-    test.test(a);
+    Eigen::VectorXd xVals(5);
+    Eigen::VectorXd yVals(5);
+    xVals << 1,2,3,4,5;
+    yVals << 1,4,9,16,25;
+    Geometry::PolynomialCurve polyCurve(xVals, yVals, 2);
+    for (size_t i=0; i<xVals.size(); i++){
+        std::cout << polyCurve.polyEval(xVals[i]) << " " << yVals[i] << std::endl;
+    }
 
+    yVals << 1,8,27,64,125;
+    Geometry::PolynomialCurve polyCurve3(xVals, yVals, 3);
+    for (size_t i=0; i<xVals.size(); i++){
+        std::cout << polyCurve3.polyEval(xVals[i]) << " " << yVals[i] << std::endl;
+    }
 
 
 
