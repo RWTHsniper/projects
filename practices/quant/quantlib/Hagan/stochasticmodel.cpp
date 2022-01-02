@@ -1,4 +1,4 @@
-#include "stochasticmodels.hpp"
+#include "stochasticmodel.hpp"
 
 
 void Rectangle::test(drift arg){

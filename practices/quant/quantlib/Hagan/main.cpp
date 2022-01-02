@@ -148,18 +148,23 @@ int main(int, char* []) {
     Eigen::VectorXd yVals(5);
     xVals << 1,2,3,4,5;
     yVals << 1,4,9,16,25;
-    Geometry::PolynomialCurve polyCurve(xVals, yVals, 2);
+    Model::PolyFunc polyCurve(xVals, yVals, 2);
     for (size_t i=0; i<xVals.size(); i++){
-        std::cout << polyCurve.polyEval(xVals[i]) << " " << yVals[i] << std::endl;
+        std::cout << polyCurve.evaluate(xVals[i]) << " " << yVals[i] << std::endl;
     }
-
     yVals << 1,8,27,64,125;
-    Geometry::PolynomialCurve polyCurve3(xVals, yVals, 3);
     for (size_t i=0; i<xVals.size(); i++){
-        std::cout << polyCurve3.polyEval(xVals[i]) << " " << yVals[i] << std::endl;
+        std::cout << polyCurve.evalDeriv(xVals[i]) << " " << yVals[i] << std::endl;
     }
 
-
+    Eigen::VectorXd params(3);
+    params << 1.0, 1.0, 1.0;
+    Eigen::VectorXd yExpVals(5);
+    yExpVals << exp(1),exp(2),exp(3),exp(4),exp(5);
+    Model::ExpFunc expCurve(xVals, yVals, params);
+    for (size_t i=0; i<xVals.size(); i++){
+        std::cout << expCurve.evaluate(xVals[i]) << " " << yExpVals[i] << std::endl;
+    }
 
 /*
 I worked on defining it, but not going to need it

@@ -1,12 +1,12 @@
 /*
- * stochasticmodels.hpp
+ * stochasticmodel.hpp
  *
  *  Created on: Jan 2, 2022
  *      Author: jaeyong
  */
 
-#ifndef STOCHASTICMODELS_HPP_
-#define STOCHASTICMODELS_HPP_
+#ifndef STOCHASTICMODEL_HPP_
+#define STOCHASTICMODEL_HPP_
 
 #include <iostream>
  
@@ -55,4 +55,4 @@ struct Rectangle::drift{
     double order;
     };    
 
-#endif /* STOCHASTICMODELS_HPP_ */
+#endif /* STOCHASTICMODEL_HPP_ */

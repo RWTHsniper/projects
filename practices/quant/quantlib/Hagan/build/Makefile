@@ -523,30 +523,6 @@ hagan/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/build
 .PHONY : hagan/fast
 
-geometry.o: geometry.cpp.o
-.PHONY : geometry.o
-
-# target to build an object file
-geometry.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/geometry.cpp.o
-.PHONY : geometry.cpp.o
-
-geometry.i: geometry.cpp.i
-.PHONY : geometry.i
-
-# target to preprocess a source file
-geometry.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/geometry.cpp.i
-.PHONY : geometry.cpp.i
-
-geometry.s: geometry.cpp.s
-.PHONY : geometry.s
-
-# target to generate assembly for a file
-geometry.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/geometry.cpp.s
-.PHONY : geometry.cpp.s
-
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -571,29 +547,53 @@ main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/main.cpp.s
 .PHONY : main.cpp.s
 
-stochasticmodels.o: stochasticmodels.cpp.o
-.PHONY : stochasticmodels.o
+model.o: model.cpp.o
+.PHONY : model.o
 
 # target to build an object file
-stochasticmodels.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/stochasticmodels.cpp.o
-.PHONY : stochasticmodels.cpp.o
+model.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/model.cpp.o
+.PHONY : model.cpp.o
 
-stochasticmodels.i: stochasticmodels.cpp.i
-.PHONY : stochasticmodels.i
+model.i: model.cpp.i
+.PHONY : model.i
 
 # target to preprocess a source file
-stochasticmodels.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/stochasticmodels.cpp.i
-.PHONY : stochasticmodels.cpp.i
+model.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/model.cpp.i
+.PHONY : model.cpp.i
 
-stochasticmodels.s: stochasticmodels.cpp.s
-.PHONY : stochasticmodels.s
+model.s: model.cpp.s
+.PHONY : model.s
 
 # target to generate assembly for a file
-stochasticmodels.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/stochasticmodels.cpp.s
-.PHONY : stochasticmodels.cpp.s
+model.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/model.cpp.s
+.PHONY : model.cpp.s
+
+stochasticmodel.o: stochasticmodel.cpp.o
+.PHONY : stochasticmodel.o
+
+# target to build an object file
+stochasticmodel.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/stochasticmodel.cpp.o
+.PHONY : stochasticmodel.cpp.o
+
+stochasticmodel.i: stochasticmodel.cpp.i
+.PHONY : stochasticmodel.i
+
+# target to preprocess a source file
+stochasticmodel.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/stochasticmodel.cpp.i
+.PHONY : stochasticmodel.cpp.i
+
+stochasticmodel.s: stochasticmodel.cpp.s
+.PHONY : stochasticmodel.s
+
+# target to generate assembly for a file
+stochasticmodel.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/stochasticmodel.cpp.s
+.PHONY : stochasticmodel.cpp.s
 
 utils.o: utils.cpp.o
 .PHONY : utils.o
@@ -659,15 +659,15 @@ help:
 	@echo "... NightlyTest"
 	@echo "... NightlyUpdate"
 	@echo "... hagan"
-	@echo "... geometry.o"
-	@echo "... geometry.i"
-	@echo "... geometry.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
-	@echo "... stochasticmodels.o"
-	@echo "... stochasticmodels.i"
-	@echo "... stochasticmodels.s"
+	@echo "... model.o"
+	@echo "... model.i"
+	@echo "... model.s"
+	@echo "... stochasticmodel.o"
+	@echo "... stochasticmodel.i"
+	@echo "... stochasticmodel.s"
 	@echo "... utils.o"
 	@echo "... utils.i"
 	@echo "... utils.s"

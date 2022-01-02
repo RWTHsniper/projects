@@ -17,8 +17,8 @@
 #include <ql/termstructures/yield/flatforward.hpp>
 #include <ql/termstructures/volatility/swaption/swaptionvolmatrix.hpp>
 
-#include "stochasticmodels.hpp"
-#include "geometry.hpp"
+#include "stochasticmodel.hpp"
+#include "model.hpp"
 #include "utils.hpp"
 
 using namespace QuantLib;
