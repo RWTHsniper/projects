@@ -130,13 +130,26 @@ int main(int, char* []) {
     for (const pt::ptree::value_type &tenor : swaption_vol.get_child("tenor")){
         swaptionTenor.emplace_back(stoi(tenor.second.data()), Years);
     }
-    std::vector<Real> swaptionQuote;
-    swaptionTenor.reserve(expiry_size*tenor_size);
+    // read swaption ATM volatility matrix
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> swaptionVolMat(expiry_size, tenor_size); // row-major matrix with dynamic allocation
+    std::array<size_t, 2> counter{0,0};
     for (const pt::ptree::value_type &quote : swaption_vol.get_child("quote")){
-        swaptionQuote.emplace_back(stod(quote.second.data()));
+        swaptionVolMat(counter[0], counter[1]) = stod(quote.second.data());
+        counter[1]++; 
+        if (counter[1] % tenor_size == 0){
+            counter[0]++;
+            counter[1] = 0;
+        }
     }
-    Matrix swaptionVolMat(expiry_size, tenor_size, swaptionQuote.begin(), swaptionQuote.end());
+
     std::cout << swaptionVolMat << std::endl;
+
+    Rectangle test;
+    Rectangle::drift a{1,2,3,4};
+    test.test(a);
+
+
+
 
 /*
 I worked on defining it, but not going to need it

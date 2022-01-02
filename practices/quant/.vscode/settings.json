@@ -93,6 +93,7 @@
         "variant": "cpp",
         "memory_resource": "cpp",
         "hash_map": "cpp",
-        "stop_token": "cpp"
+        "stop_token": "cpp",
+        "alignedvector3": "cpp"
     }
 }

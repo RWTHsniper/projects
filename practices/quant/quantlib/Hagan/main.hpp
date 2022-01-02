@@ -5,7 +5,7 @@
 #include <string> // stoi, stod
 #include <typeinfo>
 
-
+#include <Eigen/Dense> // Dense matrices
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <ql/quantlib.hpp>
@@ -17,6 +17,8 @@
 #include <ql/termstructures/yield/flatforward.hpp>
 #include <ql/termstructures/volatility/swaption/swaptionvolmatrix.hpp>
 
+#include "stochasticmodels.hpp"
+#include "geometry.hpp"
 #include "utils.hpp"
 
 using namespace QuantLib;
