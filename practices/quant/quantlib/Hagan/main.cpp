@@ -151,6 +151,9 @@ int main(int, char* []) {
     StochasticModel::HaganNF haganModel(yieldCurve, nFactor, corrMat);
 
 
+    testModel(); // test classes in model.hpp
+
+
 /*
 I worked on defining it, but not going to need it
     std::vector<std::vector<Handle<Quote>>> swaptionQuote;

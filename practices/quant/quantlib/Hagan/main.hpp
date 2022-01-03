@@ -53,7 +53,7 @@ Arguments
 }
 
 void testModel(){
-
+    double tol = 1e-8;
     Eigen::VectorXd xVals(5);
     Eigen::VectorXd yVals(5);
     xVals << 1,2,3,4,5;
@@ -61,30 +61,32 @@ void testModel(){
     Model::PolyFunc polyCurve(xVals, yVals, 2);
     for (size_t i=0; i<xVals.size(); i++){
         std::cout << polyCurve.evaluate(xVals[i]) << " " << yVals[i] << std::endl;
+        assert(tol >= std::abs(polyCurve.evaluate(xVals[i]) - yVals[i])); // should be less than a tolerance
     }
-    // for (size_t i=0; i<xVals.size(); i++){
-    //     std::cout << polyCurve.evalDeriv(xVals[i], 1) << " " << yVals[i] << std::endl;
-    // }
     std::cout << "+1" << std::endl;
     polyCurve += 1;
     for (size_t i=0; i<xVals.size(); i++){
         std::cout << polyCurve.evaluate(xVals[i]) << " " << yVals[i] << std::endl;
+        assert(tol >= std::abs(polyCurve.evaluate(xVals[i]) - (yVals[i]+1))); // should be less than a tolerance
     }
-    std::cout << "Integration of x^2 + 1" << std::endl; // 1/3*x^3 + x
+    std::cout << "Integration of x^2 + 1" << std::endl; // 1/3*x^3 + x 
     for (size_t i=0; i<xVals.size(); i++){
-        std::cout << xVals[i] << " " << polyCurve.evalInt(1.0, xVals[i]) << std::endl;
+        std::cout << xVals[i] << " " << polyCurve.evalInt(0.0, xVals[i]) << std::endl;
+        assert(tol >= std::abs(polyCurve.evalInt(0.0, xVals[i]) - (1/3.0 * pow(xVals[i],3) + xVals[i])));
     }
     Model::PolyFunc polyCurve2(polyCurve);
     std::cout << "add1 " << &(polyCurve) << std::endl;
     std::cout << "add2 " << &(polyCurve2) << std::endl;
-    Model::PolyFunc polyCurve3 = polyCurve + polyCurve2;
+    Model::PolyFunc polyCurve3 = polyCurve + polyCurve2; // (x^2+1)*2
     std::cout << "add3 " << &(polyCurve3) << std::endl;
     for (size_t i=0; i<xVals.size(); i++){
         std::cout << polyCurve3.evaluate(xVals[i]) << " " << yVals[i] << std::endl;
+        assert(tol >= std::abs(polyCurve3.evaluate(xVals[i]) - 2.0*(pow(xVals[i],2)+1)));
     }
-    Model::PolyFunc polyCurve4 = polyCurve*polyCurve2;
+    Model::PolyFunc polyCurve4 = polyCurve*polyCurve2; // (x^2+1)^2
     for (size_t i=0; i<xVals.size(); i++){
         std::cout << polyCurve4.evaluate(xVals[i]) << " " << yVals[i] << std::endl;
+        assert(tol >= std::abs(polyCurve4.evaluate(xVals[i]) - pow(pow(xVals[i],2)+1,2)));
     }
 
     Eigen::VectorXd params(3);
@@ -94,6 +96,7 @@ void testModel(){
     Model::ExpFunc expCurve(xVals, yVals, params);
     for (size_t i=0; i<xVals.size(); i++){
         std::cout << expCurve.evaluate(xVals[i]) << " " << yExpVals[i] << std::endl;
+        assert(tol >= std::abs(polyCurve.evaluate(xVals[i]) - yExpVals[i])); // should be less than a tolerance
     }
 
 

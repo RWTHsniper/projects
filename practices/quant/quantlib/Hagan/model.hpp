@@ -48,13 +48,13 @@ namespace Model{
                 this->coeffs_[0] -= static_cast<double>(other);
                 return *this;
             }
-            PolyFunc& operator+=(const PolyFunc& other){
-                this->coeffs_ += other.coeffs_;
-                return *this;
-            }
             PolyFunc operator+(const PolyFunc& other) const {
                 PolyFunc res(*this); // copy constructor
-                res.coeffs_ += other.coeffs_;
+                res.order_ = std::max(this->order_, other.order_);
+                res.coeffs_.resize(res.order_+1);
+                res.coeffs_.setZero();
+                for(size_t i=0; i< this->coeffs_.size(); i++) res.coeffs_[i] += this->coeffs_[i];
+                for(size_t i=0; i< other.coeffs_.size(); i++) res.coeffs_[i] += other.coeffs_[i];
                 return res;
             }
             // multiplication b.t.w. two polynomials
