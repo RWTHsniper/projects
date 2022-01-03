@@ -75,11 +75,12 @@ int main(int, char* []) {
     // Possible interpolators: Cubic, LogLinear, Linear
     double tolerance = 1.0e-15;
     // ext::shared_ptr<YieldTermStructure> yieldCurve(new PiecewiseYieldCurve<Discount, Cubic>(todaysDate, swapHelpers, Actual365Fixed(),PiecewiseYieldCurve<Discount, Cubic>::bootstrap_type(tolerance)));
-    // ext::shared_ptr<YieldTermStructure> yieldCurve(new PiecewiseYieldCurve<Discount, LogLinear>(todaysDate, swapHelpers, Actual365Fixed(),PiecewiseYieldCurve<Discount, LogLinear>::bootstrap_type(tolerance)));
-    ext::shared_ptr<YieldTermStructure> yieldCurve(new PiecewiseYieldCurve<Discount, Linear>(todaysDate, swapHelpers, Actual365Fixed(),PiecewiseYieldCurve<Discount, Linear>::bootstrap_type(tolerance)));
+    ext::shared_ptr<YieldTermStructure> yieldCurve(new PiecewiseYieldCurve<Discount, LogLinear>(todaysDate, swapHelpers, Actual365Fixed(),PiecewiseYieldCurve<Discount, LogLinear>::bootstrap_type(tolerance)));
+    // ext::shared_ptr<YieldTermStructure> yieldCurve(new PiecewiseYieldCurve<Discount, Linear>(todaysDate, swapHelpers, Actual365Fixed(),PiecewiseYieldCurve<Discount, Linear>::bootstrap_type(tolerance)));
     for (size_t i=0; i<tenorDates.size(); i++){
         const auto& date = tenorDates[i];
-        std::cout << date << " " << yieldCurve->discount(date) << std::endl;
+        std::cout << date << " " << yieldCurve->discount(date) << std::endl; // DiscountFactor
+        std::cout << "fwd " << Time(date-todaysDate)  << " " << yieldCurve->forwardRate(todaysDate, date, Actual365Fixed(), Continuous) << std::endl; // InterestRate
     }
 
     // Bachilier's normal volatility model in QuantLib
@@ -144,27 +145,11 @@ int main(int, char* []) {
 
     std::cout << swaptionVolMat << std::endl;
 
-    Eigen::VectorXd xVals(5);
-    Eigen::VectorXd yVals(5);
-    xVals << 1,2,3,4,5;
-    yVals << 1,4,9,16,25;
-    Model::PolyFunc polyCurve(xVals, yVals, 2);
-    for (size_t i=0; i<xVals.size(); i++){
-        std::cout << polyCurve.evaluate(xVals[i]) << " " << yVals[i] << std::endl;
-    }
-    yVals << 1,8,27,64,125;
-    for (size_t i=0; i<xVals.size(); i++){
-        std::cout << polyCurve.evalDeriv(xVals[i]) << " " << yVals[i] << std::endl;
-    }
+    size_t nFactor = 2;
+    Eigen::MatrixXd corrMat(nFactor, nFactor);
+    corrMat << 1.0,0.5,0.5,1.0;
+    StochasticModel::HaganNF haganModel(yieldCurve, nFactor, corrMat);
 
-    Eigen::VectorXd params(3);
-    params << 1.0, 1.0, 1.0;
-    Eigen::VectorXd yExpVals(5);
-    yExpVals << exp(1),exp(2),exp(3),exp(4),exp(5);
-    Model::ExpFunc expCurve(xVals, yVals, params);
-    for (size_t i=0; i<xVals.size(); i++){
-        std::cout << expCurve.evaluate(xVals[i]) << " " << yExpVals[i] << std::endl;
-    }
 
 /*
 I worked on defining it, but not going to need it

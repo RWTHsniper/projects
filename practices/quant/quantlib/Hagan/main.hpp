@@ -52,6 +52,53 @@ Arguments
 
 }
 
+void testModel(){
+
+    Eigen::VectorXd xVals(5);
+    Eigen::VectorXd yVals(5);
+    xVals << 1,2,3,4,5;
+    yVals << 1,4,9,16,25;
+    Model::PolyFunc polyCurve(xVals, yVals, 2);
+    for (size_t i=0; i<xVals.size(); i++){
+        std::cout << polyCurve.evaluate(xVals[i]) << " " << yVals[i] << std::endl;
+    }
+    // for (size_t i=0; i<xVals.size(); i++){
+    //     std::cout << polyCurve.evalDeriv(xVals[i], 1) << " " << yVals[i] << std::endl;
+    // }
+    std::cout << "+1" << std::endl;
+    polyCurve += 1;
+    for (size_t i=0; i<xVals.size(); i++){
+        std::cout << polyCurve.evaluate(xVals[i]) << " " << yVals[i] << std::endl;
+    }
+    std::cout << "Integration of x^2 + 1" << std::endl; // 1/3*x^3 + x
+    for (size_t i=0; i<xVals.size(); i++){
+        std::cout << xVals[i] << " " << polyCurve.evalInt(1.0, xVals[i]) << std::endl;
+    }
+    Model::PolyFunc polyCurve2(polyCurve);
+    std::cout << "add1 " << &(polyCurve) << std::endl;
+    std::cout << "add2 " << &(polyCurve2) << std::endl;
+    Model::PolyFunc polyCurve3 = polyCurve + polyCurve2;
+    std::cout << "add3 " << &(polyCurve3) << std::endl;
+    for (size_t i=0; i<xVals.size(); i++){
+        std::cout << polyCurve3.evaluate(xVals[i]) << " " << yVals[i] << std::endl;
+    }
+    Model::PolyFunc polyCurve4 = polyCurve*polyCurve2;
+    for (size_t i=0; i<xVals.size(); i++){
+        std::cout << polyCurve4.evaluate(xVals[i]) << " " << yVals[i] << std::endl;
+    }
+
+    Eigen::VectorXd params(3);
+    params << 1.0, 1.0, 1.0;
+    Eigen::VectorXd yExpVals(5);
+    yExpVals << exp(1),exp(2),exp(3),exp(4),exp(5);
+    Model::ExpFunc expCurve(xVals, yVals, params);
+    for (size_t i=0; i<xVals.size(); i++){
+        std::cout << expCurve.evaluate(xVals[i]) << " " << yExpVals[i] << std::endl;
+    }
+
+
+}
+
 /*
 Code to read input file. When I have time, I will try to automatically read JSON inputs.
     // Read input file

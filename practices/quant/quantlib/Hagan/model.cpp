@@ -16,7 +16,7 @@ namespace Model{
     };
 
     // Evaluate a polynomial.
-    double PolyFunc::evaluate(double x) {
+    double PolyFunc::evaluate(const double& x) const {
         double result = 0.0;
         for (int i = 0; i < coeffs_.size(); i++) {
             result += coeffs_[i] * pow(x, i);
@@ -24,13 +24,26 @@ namespace Model{
         return result;
     }
     // Evaluate the derivative of a polynomial.
-    double PolyFunc::evalDeriv(double x) {
+    double PolyFunc::evalDeriv(const double& x, const size_t& order) const {
+        assert(order > 0);
         double result = 0.0;
-        for (int i = 1; i < coeffs_.size(); i++) {
-            result += coeffs_[i] * i * pow(x, i-1);
+        for (size_t i = order; i < coeffs_.size(); i++) { // position in coefficient vector
+            double tmp = 1.0; // multiplication of powers
+            for (size_t j = 0; j < order; j++){
+                tmp *= i-j;
+            }
+            result += coeffs_[i] * tmp * pow(x, i-order);
         }
         return result;
     }
+    double PolyFunc::evalInt(const double& x_i, const double& x_f) const {
+        double result = 0.0;
+        for (size_t n = 0; n < coeffs_.size(); n++) { // position and order for each coefficient
+            result += coeffs_[n] / (n+1) * (pow(x_f, n+1) - pow(x_i, n+1));
+        }
+        return result;
+    }
+
 
     void ExpFunc::computeFitting(){
         ExpFunc::check();
@@ -39,12 +52,13 @@ namespace Model{
         }
 
     };
-    double ExpFunc::evaluate(double x) {
+    double ExpFunc::evaluate(const double& x) {
         double result = params_[0] * exp(params_[1] * x) + params_[2];
         return result;
     }
-    double ExpFunc::evalDeriv(double x) {
-        double result = params_[0] * params_[1] * exp(params_[1] * x);
+    double ExpFunc::evalDeriv(const double& x, const size_t& order) {
+        assert(order > 0);
+        double result = pow(params_[1], order) * params_[0] * exp(params_[1] * x);
         return result;
     }
 }

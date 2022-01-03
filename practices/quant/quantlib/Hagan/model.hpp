@@ -21,18 +21,58 @@ namespace Model{
         https://gist.github.com/ksjgh/4d5050d0e9afc5fdb5908734335138d0
         */
         public:
-            PolyFunc(const Eigen::VectorXd& xVals, const Eigen::VectorXd& yVals, const size_t& order): 
+            PolyFunc(const Eigen::VectorXd& xVals, const Eigen::VectorXd& yVals, const size_t& order):
                                                     xVals_(xVals), yVals_(yVals), order_(order){
                                                     A_.resize(xVals_.size(), order_ + 1);
                                                     coeffs_.resize(order_ + 1);
                                                     computeFitting();}
+            PolyFunc(const size_t& order, const Eigen::VectorXd& coeffs): order_(order), coeffs_(coeffs){
+                                                    xVals_.resize(0);
+                                                    yVals_.resize(0);
+            };
             void setCoeffs(const Eigen::VectorXd& coeffs){
                 coeffs_ = coeffs;} // copy assignment            
             void setOrder(const size_t& order){order_ = order;}
             void setxVals(const Eigen::VectorXd& xVals){xVals_ = xVals;}
             void setyVals(const Eigen::VectorXd& yVals){yVals_ = yVals;}
-            double evaluate(double x);
-            double evalDeriv(double x);
+            double evaluate(const double& x) const;
+            double evalDeriv(const double& x, const size_t& order) const;
+            double evalInt(const double& x_i, const double& x_f) const;
+            template <typename T>
+            PolyFunc& operator+=(const T& other){
+                this->coeffs_[0] += static_cast<double>(other);
+                return *this;
+            }
+            template <typename T>
+            PolyFunc& operator-=(const T& other){
+                this->coeffs_[0] -= static_cast<double>(other);
+                return *this;
+            }
+            PolyFunc& operator+=(const PolyFunc& other){
+                this->coeffs_ += other.coeffs_;
+                return *this;
+            }
+            PolyFunc operator+(const PolyFunc& other) const {
+                PolyFunc res(*this); // copy constructor
+                res.coeffs_ += other.coeffs_;
+                return res;
+            }
+            // multiplication b.t.w. two polynomials
+            PolyFunc operator*(const PolyFunc& other) const {
+                PolyFunc res(*this); // copy constructor
+                // To avoid any confusion, initialize xVals_ and yVals_ as empty vectors
+                res.xVals_.resize(0);
+                res.yVals_.resize(0);
+                res.order_ = this->order_ + other.order_; // increas in the order
+                res.coeffs_.resize(res.order_ + 1);
+                res.coeffs_.setZero();
+                for (size_t i=0; i<this->order_+1; i++){
+                    for (size_t j=0; j<other.order_+1; j++){
+                        res.coeffs_[i+j] += this->coeffs_[i] * other.coeffs_[j];
+                    }
+                }
+                return res;
+            }
         private:
             size_t order_;
             Eigen::VectorXd xVals_;
@@ -51,13 +91,13 @@ namespace Model{
         y(x) = a*exp(b*x) + c
         */
         public:
-            ExpFunc(const Eigen::VectorXd& xVals, const Eigen::VectorXd& yVals, const Eigen::VectorXd& params): 
+            ExpFunc(const Eigen::VectorXd& xVals, const Eigen::VectorXd& yVals, const Eigen::VectorXd& params):
                                                     xVals_(xVals), yVals_(yVals), params_(params){check(); buffer_.resize(xVals_.size());} // copy constructor
             void setxVals(const Eigen::VectorXd& xVals){xVals_ = xVals;}
             void setyVals(const Eigen::VectorXd& yVals){yVals_ = yVals;}
             void setParams(const Eigen::VectorXd& params){assert(params_.size() == 3); params_ = params;}
-            double evaluate(double x);
-            double evalDeriv(double x);
+            double evaluate(const double& x);
+            double evalDeriv(const double& x, const size_t& order);
         private:
             Eigen::VectorXd xVals_;
             Eigen::VectorXd yVals_;
