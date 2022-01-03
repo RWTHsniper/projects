@@ -150,9 +150,7 @@ int main(int, char* []) {
     corrMat << 1.0,0.5,0.5,1.0;
     StochasticModel::HaganNF haganModel(yieldCurve, nFactor, corrMat);
 
-Eigen::VectorXd coeffs;
-std::cout << "sizeof tmp " << coeffs.size() << std::endl;
-    testModel(); // test classes in model.hpp
+    // testModel(); // test classes in model.hpp
 
 
 /*

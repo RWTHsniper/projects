@@ -44,9 +44,15 @@ namespace Model{
         return result;
     }
 
-    PolyFunc PolyFunc::getIndefIntegral() const { // get indefinite integral
+    void PolyFunc::getInfo() const {
+        std::cout << "Information of a PolyFunc " << this << std::endl;
+        std::cout << "order " << std::endl << order_ << std::endl;
+        std::cout << "coeffs " << std::endl << coeffs_ << std::endl;
+    }
+
+    // PolyFunc PolyFunc::getIndefIntegral() const { // get indefinite integral
         
-    } 
+    // } 
 
 
     void ExpFunc::computeFitting(){

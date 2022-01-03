@@ -38,6 +38,7 @@ namespace Model{
             double evaluate(const double& x) const;
             double evalDeriv(const double& x, const size_t& order) const;
             double evalInt(const double& x_i, const double& x_f) const;
+            void getInfo() const;
             PolyFunc getIndefIntegral() const; // get indefinite integral
             template <typename T>
             PolyFunc& operator+=(const T& other){
@@ -58,6 +59,13 @@ namespace Model{
                 for(size_t i=0; i< other.coeffs_.size(); i++) res.coeffs_[i] += other.coeffs_[i];
                 return res;
             }
+            template <typename T>
+            PolyFunc operator*(const T& other) const {
+                PolyFunc res(*this); // copy constructor
+                // for (size_t i=0; i<res.coeffs_.size(); i++){res.coeffs_[i] *= other;};
+                res.coeffs_ *= other; // multiply by the factor
+                return res;
+            }
             // multiplication b.t.w. two polynomials
             PolyFunc operator*(const PolyFunc& other) const {
                 PolyFunc res(*this); // copy constructor
@@ -67,6 +75,8 @@ namespace Model{
                 res.order_ = this->order_ + other.order_; // increas in the order
                 res.coeffs_.resize(res.order_ + 1);
                 res.coeffs_.setZero();
+                // for (size_t i=0; i<this->coeffs_.size(); i++){
+                //     for (size_t j=0; j<other.coeffs_.size(); j++){
                 for (size_t i=0; i<this->order_+1; i++){
                     for (size_t j=0; j<other.order_+1; j++){
                         res.coeffs_[i+j] += this->coeffs_[i] * other.coeffs_[j];

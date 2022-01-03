@@ -37,11 +37,23 @@ namespace StochasticModel{
                                        std::cout << "Lower matrix " << lowerMat_ << std::endl;
                                        throw std::runtime_error("Cholesky decomposition for the correlation matrix is failed!");
                                     }
-                                    Eigen::VectorXd coeffs(2); coeffs << 0.0,1.0;
+                                    Eigen::VectorXd coeffs(2); coeffs << 0.0,1.0; // f(x) = x
                                     // initialize alphas
                                     alp.reserve(nFactor_);
                                     size_t order = 1;
-                                    for (size_t i=0; i<nFactor_; i++){alp.emplace_back(order, coeffs);};
+                                    for (size_t i=0; i<nFactor_; i++){alp.emplace_back(order, coeffs);}
+                                    // alp[0].getInfo();
+                                    // alp[1].getInfo();
+                                    zeta_.reserve(nFactor_);
+                                    for (size_t i=0; i< nFactor_; i++){
+                                       std::vector<Model::PolyFunc> tmp;
+                                       tmp.reserve(nFactor_);
+                                       for (size_t j=0; j< nFactor_; j++){
+                                          Model::PolyFunc elem = alp[i] * alp[j] * corrMat_(i, j);
+                                          tmp.push_back(elem); 
+                                       }
+                                       zeta_.push_back(tmp);
+                                    }
          }
          Eigen::MatrixXd getLowerMat() const {return lowerMat_;}
          Eigen::VectorXd evolve(double t, Eigen::VectorXd x, double dt, Eigen::VectorXd dw) const;

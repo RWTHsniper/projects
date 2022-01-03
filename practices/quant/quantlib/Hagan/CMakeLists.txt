@@ -4,8 +4,8 @@ project(hagan VERSION 0.1.0)
 # Specified compilers to make sure there is no mistake
 set(CMAKE_C_COMPILER "gcc")
 set(CMAKE_CXX_COMPILER "g++")
-include(CTest)
-enable_testing()
+# include(CTest)
+# enable_testing()
 
 # Wildcard to include all the source files in the directory and the sub-ones.
 file(GLOB autopilot_sources ./**.cpp ./**.c) 
@@ -25,7 +25,8 @@ target_link_libraries(hagan PUBLIC ${QUANTLIB_LIBRARY})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/eigen/) # Source codes are there
 
 # Cmake flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++17")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++17")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -std=c++17") # faster compilation
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-include(CPack)
+# include(CPack)
