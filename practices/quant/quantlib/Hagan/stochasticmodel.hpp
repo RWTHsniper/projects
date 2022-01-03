@@ -25,8 +25,8 @@ namespace StochasticModel{
       public:
          HaganNF(ext::shared_ptr<YieldTermStructure>& yieldCurve, const size_t& nFactor, Eigen::MatrixXd& corrMat): yieldCurve_(yieldCurve),
                                  nFactor_(nFactor), corrMat_(corrMat){
-                                    H_.resize(nFactor);
-                                    zeta_.resize(nFactor, nFactor);
+                                    // H_.resize(nFactor);
+                                    // zeta_.resize(nFactor, nFactor);
                                     if (!corrMat_.isApprox(corrMat_.transpose())){
                                        throw std::runtime_error("Input correlation matrix is not symmetric!");
                                     }
@@ -38,8 +38,9 @@ namespace StochasticModel{
                                        throw std::runtime_error("Cholesky decomposition for the correlation matrix is failed!");
                                     }
                                     Eigen::VectorXd coeffs(2); coeffs << 0.0,1.0;
-                                    size_t order = 1;
+                                    // initialize alphas
                                     alp.reserve(nFactor_);
+                                    size_t order = 1;
                                     for (size_t i=0; i<nFactor_; i++){alp.emplace_back(order, coeffs);};
          }
          Eigen::MatrixXd getLowerMat() const {return lowerMat_;}
@@ -47,11 +48,11 @@ namespace StochasticModel{
 
       private:
          size_t nFactor_;
-         std::vector<Model::PolyFunc> alp; // alpha
-         Eigen::VectorXd H_; // How to implement H_ in the framework?
-         Eigen::MatrixXd zeta_;
-         Eigen::MatrixXd corrMat_; // correlation matrices b.t.w. factors
-         Eigen::MatrixXd lowerMat_; // Lower part of the Cholesky decomposition of corrMat_
+         std::vector<Model::PolyFunc> alp; // alpha (nFactor)
+         std::vector<Model::ExpFunc> H_; // How to implement H_ in the framework? (nFactor)
+         std::vector<std::vector<Model::PolyFunc>> zeta_; // integration fo square of alphas. (nFactor, nFactor)
+         Eigen::MatrixXd corrMat_; // correlation matrices b.t.w. factors (nFactor, nFactor)
+         Eigen::MatrixXd lowerMat_; // Lower part of the Cholesky decomposition of corrMat_ (nFactor, nFactor)
          ext::shared_ptr<YieldTermStructure> yieldCurve_; // computes discount factor and forward rate
 
 

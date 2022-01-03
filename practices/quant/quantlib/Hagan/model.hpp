@@ -38,6 +38,7 @@ namespace Model{
             double evaluate(const double& x) const;
             double evalDeriv(const double& x, const size_t& order) const;
             double evalInt(const double& x_i, const double& x_f) const;
+            PolyFunc getIndefIntegral() const; // get indefinite integral
             template <typename T>
             PolyFunc& operator+=(const T& other){
                 this->coeffs_[0] += static_cast<double>(other);

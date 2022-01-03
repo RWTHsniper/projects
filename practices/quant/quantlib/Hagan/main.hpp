@@ -91,15 +91,13 @@ void testModel(){
 
     Eigen::VectorXd params(3);
     params << 1.0, 1.0, 1.0;
-    Eigen::VectorXd yExpVals(5);
-    yExpVals << exp(1),exp(2),exp(3),exp(4),exp(5);
-    Model::ExpFunc expCurve(xVals, yVals, params);
+    Eigen::VectorXd yExpVals(5); // exp(x) + 1
+    yExpVals << exp(1)+1,exp(2)+1,exp(3)+1,exp(4)+1,exp(5)+1;
+    Model::ExpFunc expCurve(xVals, yExpVals, params);
     for (size_t i=0; i<xVals.size(); i++){
         std::cout << expCurve.evaluate(xVals[i]) << " " << yExpVals[i] << std::endl;
-        assert(tol >= std::abs(polyCurve.evaluate(xVals[i]) - yExpVals[i])); // should be less than a tolerance
+        assert(tol >= std::abs(expCurve.evaluate(xVals[i]) - yExpVals[i])); // should be less than a tolerance
     }
-
-
 }
 
 /*

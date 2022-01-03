@@ -44,6 +44,10 @@ namespace Model{
         return result;
     }
 
+    PolyFunc PolyFunc::getIndefIntegral() const { // get indefinite integral
+        
+    } 
+
 
     void ExpFunc::computeFitting(){
         ExpFunc::check();
