@@ -47,7 +47,16 @@ namespace Model{
     void PolyFunc::getInfo() const {
         std::cout << "Information of a PolyFunc " << this << std::endl;
         std::cout << "order " << std::endl << order_ << std::endl;
-        std::cout << "coeffs " << std::endl << coeffs_ << std::endl;
+        std::cout << "coeffs " << std::endl << coeffs_.transpose() << std::endl;
+        for (int i= order_; i>=0; i--){
+            if (i != order_) {std::cout  << " + ";}
+            if (i>0){
+                std::cout << coeffs_[i] << "*x^(" << i << ")";
+            }
+            else{
+                std::cout << coeffs_[i] << std::endl;
+            }
+        }
     }
 
     // PolyFunc PolyFunc::getIndefIntegral() const { // get indefinite integral
@@ -70,5 +79,13 @@ namespace Model{
         assert(order > 0);
         double result = pow(params_[1], order) * params_[0] * exp(params_[1] * x);
         return result;
+    }
+    double ExpFunc::evalInt(const double& x_i, const double& x_f) const {
+        double result = params_[0] / params_[1] * (std::exp(params_[1] * x_f) - std::exp(params_[1] * x_f));
+        return result;
+    }
+    void ExpFunc::getInfo() const {
+        std::cout << "Information of a ExpFunc " << this << std::endl;
+        std::cout << params_[0] << "*Exp[" << params_[1] <<"*x] + " << params_[2] << std::endl;
     }
 }

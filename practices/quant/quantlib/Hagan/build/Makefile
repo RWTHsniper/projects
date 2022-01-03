@@ -65,26 +65,6 @@ CMAKE_BINARY_DIR = /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/bu
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target package
-package: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Run CPack packaging tool..."
-	/usr/local/Cellar/cmake/3.22.0/bin/cpack --config ./CPackConfig.cmake
-.PHONY : package
-
-# Special rule for the target package
-package/fast: package
-.PHONY : package/fast
-
-# Special rule for the target package_source
-package_source:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Run CPack packaging tool for source..."
-	/usr/local/Cellar/cmake/3.22.0/bin/cpack --config ./CPackSourceConfig.cmake /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/build/CPackSourceConfig.cmake
-.PHONY : package_source
-
-# Special rule for the target package_source
-package_source/fast: package_source
-.PHONY : package_source/fast
-
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
@@ -197,6 +177,30 @@ model.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/model.cpp.s
 .PHONY : model.cpp.s
 
+simulation.o: simulation.cpp.o
+.PHONY : simulation.o
+
+# target to build an object file
+simulation.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/simulation.cpp.o
+.PHONY : simulation.cpp.o
+
+simulation.i: simulation.cpp.i
+.PHONY : simulation.i
+
+# target to preprocess a source file
+simulation.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/simulation.cpp.i
+.PHONY : simulation.cpp.i
+
+simulation.s: simulation.cpp.s
+.PHONY : simulation.s
+
+# target to generate assembly for a file
+simulation.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/simulation.cpp.s
+.PHONY : simulation.cpp.s
+
 stochasticmodel.o: stochasticmodel.cpp.o
 .PHONY : stochasticmodel.o
 
@@ -252,8 +256,6 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
-	@echo "... package"
-	@echo "... package_source"
 	@echo "... rebuild_cache"
 	@echo "... hagan"
 	@echo "... main.o"
@@ -262,6 +264,9 @@ help:
 	@echo "... model.o"
 	@echo "... model.i"
 	@echo "... model.s"
+	@echo "... simulation.o"
+	@echo "... simulation.i"
+	@echo "... simulation.s"
 	@echo "... stochasticmodel.o"
 	@echo "... stochasticmodel.i"
 	@echo "... stochasticmodel.s"

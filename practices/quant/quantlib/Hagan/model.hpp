@@ -104,11 +104,17 @@ namespace Model{
         public:
             ExpFunc(const Eigen::VectorXd& xVals, const Eigen::VectorXd& yVals, const Eigen::VectorXd& params):
                                                     xVals_(xVals), yVals_(yVals), params_(params){check(); buffer_.resize(xVals_.size());} // copy constructor
+            ExpFunc(const Eigen::VectorXd& params): params_(params){
+                                                    xVals_.resize(0);
+                                                    yVals_.resize(0);
+            };
             void setxVals(const Eigen::VectorXd& xVals){xVals_ = xVals;}
             void setyVals(const Eigen::VectorXd& yVals){yVals_ = yVals;}
             void setParams(const Eigen::VectorXd& params){assert(params_.size() == 3); params_ = params;}
             double evaluate(const double& x);
             double evalDeriv(const double& x, const size_t& order);
+            double evalInt(const double& x_i, const double& x_f) const;
+            void getInfo() const;
         private:
             Eigen::VectorXd xVals_;
             Eigen::VectorXd yVals_;

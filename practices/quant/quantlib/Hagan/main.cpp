@@ -152,6 +152,63 @@ int main(int, char* []) {
 
     // testModel(); // test classes in model.hpp
 
+    // Eigen::VectorXd a(3); a<< 1,2,3;
+    // auto b = Eigen::square(a); std::cout << "a " << b <<std::endl;
+
+    // Simulation
+    size_t numPaths = 10;
+    size_t numSteps = 10;
+
+    // Initialization for Brownian motion
+    std::vector<Eigen::MatrixXd> dWIndep;
+    buildBrownianMotion(dWIndep, numSteps, nFactor, numPaths);
+    std::cout << dWIndep[0] << std::endl;
+    std::cout << dWIndep[numSteps-1] << std::endl;
+
+    // unsigned int seed_id = 0; // Seed 0
+    // std::default_random_engine norm_generator{seed_id};
+    // std::normal_distribution<double> norm_distribution(0.0, 1.0);
+    // std::vector<Eigen::MatrixXd> dW_indep; dW_indep.reserve(numSteps);
+
+    // for (size_t i=0; i<numSteps; i++){
+    //     dW_indep.emplace_back(nFactor, numPaths);
+    //     Eigen::VectorXd meanSquare(nFactor); meanSquare.setZero();
+    //     for (size_t j=0; j<nFactor; j++)
+    //         for (size_t k=0; k<numPaths; k++){
+    //             dW_indep[i](j, k) = norm_distribution(norm_generator);
+    //             meanSquare(j) += std::pow(dW_indep[i](j, k), 2); // compute the sum of squares
+    //         }
+    //     meanSquare /= numPaths;
+    //     Eigen::VectorXd meanRow = dW_indep[i].rowwise().mean(); // mean for each state variable
+    //     Eigen::VectorXd variance(meanSquare);
+    //     for (size_t j=0; j<nFactor; j++) variance[j] -= meanRow[j] * meanRow[j];
+    //     for (size_t j=0; j<nFactor; j++)
+    //         for (size_t k=0; k<numPaths; k++){
+    //             dW_indep[i](j, k) = (dW_indep[i](j, k) - meanRow[j]) / std::sqrt(variance[j]);
+    //         }
+    // }
+
+    // dW_indep.resize(std::vector<size_t>{Nt, num_sv, num_paths});
+    // for (std::size_t i = 0; i < Nt; ++i) {
+    //     for (std::size_t j = 0; j < num_sv; ++j) {
+    //         for (std::size_t k=0; k<num_paths;++k){
+    //             dW_indep.get(i,j,k) = norm_distribution(norm_generator);
+    //         }
+    //     }
+    // }
+
+
+        // x[0] = spotQuote -> value ();
+        // x[1] = v0;
+        // ql::Size numVals =10;
+        // for ( ql::Size j=1;j <= numVals ;++j){
+        //     dw [0]= bmGauss . next (). value ;
+        //     dw [1]= bmGauss . next (). value ;
+        //     x= hestonProcess -> evolve (t,x,dt ,dw );
+        //     std :: cout << " Time : " << t+dt << ", S_t : " << x[0] << ", V_t : " << x [1] << std :: endl ;
+        //     t+= dt;
+        // }
+
 
 /*
 I worked on defining it, but not going to need it

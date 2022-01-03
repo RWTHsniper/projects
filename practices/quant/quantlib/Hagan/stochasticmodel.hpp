@@ -25,8 +25,6 @@ namespace StochasticModel{
       public:
          HaganNF(ext::shared_ptr<YieldTermStructure>& yieldCurve, const size_t& nFactor, Eigen::MatrixXd& corrMat): yieldCurve_(yieldCurve),
                                  nFactor_(nFactor), corrMat_(corrMat){
-                                    // H_.resize(nFactor);
-                                    // zeta_.resize(nFactor, nFactor);
                                     if (!corrMat_.isApprox(corrMat_.transpose())){
                                        throw std::runtime_error("Input correlation matrix is not symmetric!");
                                     }
@@ -37,25 +35,37 @@ namespace StochasticModel{
                                        std::cout << "Lower matrix " << lowerMat_ << std::endl;
                                        throw std::runtime_error("Cholesky decomposition for the correlation matrix is failed!");
                                     }
-                                    Eigen::VectorXd coeffs(2); coeffs << 0.0,1.0; // f(x) = x
+                                    Eigen::VectorXd polyCoeffs(2); polyCoeffs << 0.0,1.0; // f(x) = x
                                     // initialize alphas
                                     alp.reserve(nFactor_);
                                     size_t order = 1;
-                                    for (size_t i=0; i<nFactor_; i++){alp.emplace_back(order, coeffs);}
-                                    // alp[0].getInfo();
-                                    // alp[1].getInfo();
+                                    for (size_t i=0; i<nFactor_; i++){alp.emplace_back(order, polyCoeffs);}
                                     zeta_.reserve(nFactor_);
                                     for (size_t i=0; i< nFactor_; i++){
                                        std::vector<Model::PolyFunc> tmp;
                                        tmp.reserve(nFactor_);
                                        for (size_t j=0; j< nFactor_; j++){
                                           Model::PolyFunc elem = alp[i] * alp[j] * corrMat_(i, j);
-                                          tmp.push_back(elem); 
+                                          tmp.emplace_back(elem); 
                                        }
-                                       zeta_.push_back(tmp);
+                                       zeta_.emplace_back(tmp);
                                     }
+                                    H_.reserve(nFactor);
+                                    double kappa = 1.0;
+                                    Eigen::VectorXd expParams(3); expParams << -1.0/kappa, -kappa, 1.0/kappa; // g(x) = (1-exp(-k*x))/k
+                                    for (size_t i=0; i< nFactor_; i++){
+                                       H_.emplace_back(expParams);
+                                    }
+                                    // Information to check
+                                    // for (size_t i=0; i<nFactor_; i++){
+                                    //    for (size_t j=0; j<nFactor_; j++)
+                                    //       zeta_[i][j].getInfo();
+                                    // }
+                                    // H_[0].getInfo();
+                                    // H_[1].getInfo();
          }
          Eigen::MatrixXd getLowerMat() const {return lowerMat_;}
+         Eigen::MatrixXd getCorrMat() const {return corrMat_;}
          Eigen::VectorXd evolve(double t, Eigen::VectorXd x, double dt, Eigen::VectorXd dw) const;
 
       private:

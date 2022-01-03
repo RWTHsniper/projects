@@ -1,5 +1,3 @@
 /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/build/CMakeFiles/hagan.dir
-/Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/build/CMakeFiles/package.dir
-/Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/build/CMakeFiles/package_source.dir
 /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/build/CMakeFiles/edit_cache.dir
 /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/build/CMakeFiles/rebuild_cache.dir

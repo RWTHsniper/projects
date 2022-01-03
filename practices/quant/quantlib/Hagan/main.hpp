@@ -20,6 +20,7 @@
 #include "stochasticmodel.hpp"
 #include "model.hpp"
 #include "utils.hpp"
+#include "simulation.hpp"
 
 using namespace QuantLib;
 
