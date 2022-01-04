@@ -29,11 +29,11 @@ void buildBrownianMotion(std::vector<Eigen::MatrixXd>& dWIndep, const size_t& nu
     }
 }
 
-void buildVectofMat(std::vector<Eigen::MatrixXd>& x, const size_t& numSteps, const size_t& nFactor, const size_t& numPaths){
+void buildVectofMat(std::vector<Eigen::MatrixXd>& x, const size_t& n1, const size_t& n2, const size_t& n3){
     x.clear();
-    x.reserve(numSteps);
-    for (size_t i=0; i<numSteps; i++){
-        x.emplace_back(nFactor, numPaths);
+    x.reserve(n1);
+    for (size_t i=0; i<n1; i++){
+        x.emplace_back(n2, n3);
         x[i].setZero();
     }
 }

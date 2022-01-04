@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <utility> // move
+#include <memory> // unique_pntr
 
 #include <ql/quantlib.hpp>
 #include <ql/time/calendar.hpp>
@@ -69,12 +70,13 @@ namespace StochasticModel{
          Eigen::MatrixXd getCorrMat() const {return corrMat_;}
          void evolve(Eigen::MatrixXd& xn, const double& t, const Eigen::MatrixXd& x, const double& dt, const Eigen::MatrixXd& dw) const;
          Eigen::VectorXd evolve(const double& t, const Eigen::VectorXd& x, const double& dt, const Eigen::VectorXd& dw) const;
+         std::shared_ptr<Eigen::MatrixXd>  computeInterestRate(const double& t_i, const double& dt,  const size_t& numPaths, const size_t& numSteps, std::vector<Eigen::MatrixXd>& x);
 
       private:
          size_t nFactor_;
          std::vector<Model::PolyFunc> alp; // alpha (nFactor)
          std::vector<Model::ExpFunc> H_; // How to implement H_ in the framework? (nFactor)
-         std::vector<std::vector<Model::PolyFunc>> zeta_; // integration fo square of alphas. (nFactor, nFactor)
+         std::vector<std::vector<Model::PolyFunc>> zeta_; // zeta: alp^2. variable to compute integration of square of alphas. (nFactor, nFactor)
          Eigen::MatrixXd corrMat_; // correlation matrices b.t.w. factors (nFactor, nFactor)
          Eigen::MatrixXd lowerMat_; // Lower part of the Cholesky decomposition of corrMat_ (nFactor, nFactor)
          ext::shared_ptr<YieldTermStructure> yieldCurve_; // computes discount factor and forward rate

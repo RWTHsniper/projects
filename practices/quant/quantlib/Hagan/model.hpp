@@ -36,7 +36,7 @@ namespace Model{
             void setxVals(const Eigen::VectorXd& xVals){xVals_ = xVals;}
             void setyVals(const Eigen::VectorXd& yVals){yVals_ = yVals;}
             double evaluate(const double& x) const;
-            double evalDeriv(const double& x, const size_t& order) const;
+            double evalDeriv(const double& x, const size_t& order = 1) const;
             double evalInt(const double& x_i, const double& x_f) const;
             void getInfo() const;
             PolyFunc getIndefIntegral() const; // get indefinite integral
@@ -112,7 +112,7 @@ namespace Model{
             void setyVals(const Eigen::VectorXd& yVals){yVals_ = yVals;}
             void setParams(const Eigen::VectorXd& params){assert(params_.size() == 3); params_ = params;}
             double evaluate(const double& x);
-            double evalDeriv(const double& x, const size_t& order);
+            double evalDeriv(const double& x, const size_t& order = 1);
             double evalInt(const double& x_i, const double& x_f) const;
             void getInfo() const;
         private:

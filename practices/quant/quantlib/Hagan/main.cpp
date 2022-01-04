@@ -157,15 +157,16 @@ int main(int, char* []) {
 
     // Simulation
     // const size_t numPaths = 10;
-    const size_t numPaths = 5000; // test
+    const size_t numPaths = 100; // test
     const size_t numSteps = 365*10;
     const double T = 10.0;
 
     // Initialization for Brownian motion
     std::vector<Eigen::MatrixXd> dWIndep; // [numSteps](nFactor, numPaths)
     buildBrownianMotion(dWIndep, numSteps, nFactor, numPaths);
-    double dt = T/(numSteps);
-    double t = 0.0;
+    const double dt = T/(numSteps);
+    const double t_i = 0.0;
+    double t = t;
     // std::cout << dWIndep[0] << std::endl;
     // std::cout << dWIndep[numSteps-1] << std::endl;
     // Eigen::VectorXd x(nFactor); x.setZero();
@@ -176,14 +177,21 @@ int main(int, char* []) {
     const Eigen::MatrixXd& lowerMat_ = haganModel.getLowerMat();
     // std::cout << "lower mat " << lowerMat_ << std::endl;
     for (size_t i=0; i < numSteps ;i++){
-        t+= dt;
         // dw = lowerMat_ * dWIndep[i];
         dw = lowerMat_; dw *= dWIndep[i];
         haganModel.evolve(x[i+1], t, x[i], dt, dw);
+        t+= dt;
         if (i==numSteps-1) saveData(source_dir+"output/dw.csv", dw);
     }
 
     saveData(source_dir+"output/matrix.csv", x[numSteps]); // save matrix in output folder
+    std::shared_ptr<Eigen::MatrixXd> r =  haganModel.computeInterestRate(t_i, dt, numPaths, numSteps, x); // size of (numPaths, numSteps+1)
+    saveData(source_dir+"output/r.csv", (*r)); // save interest rate paths
+
+    /* Next steps
+        - Think about pricing swaptions. (analytic)
+        - Think about pricing swaptions. (MC)
+    */
 
 
         // x[0] = spotQuote -> value ();
