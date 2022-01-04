@@ -9,6 +9,7 @@
 #define STOCHASTICMODEL_HPP_
 
 #include <iostream>
+#include <utility> // move
 
 #include <ql/quantlib.hpp>
 #include <ql/time/calendar.hpp>
@@ -66,6 +67,7 @@ namespace StochasticModel{
          }
          Eigen::MatrixXd getLowerMat() const {return lowerMat_;}
          Eigen::MatrixXd getCorrMat() const {return corrMat_;}
+         void evolve(Eigen::MatrixXd& xn, const double& t, const Eigen::MatrixXd& x, const double& dt, const Eigen::MatrixXd& dw) const;
          Eigen::VectorXd evolve(const double& t, const Eigen::VectorXd& x, const double& dt, const Eigen::VectorXd& dw) const;
 
       private:

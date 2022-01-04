@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string> // stoi, stod
 #include <typeinfo>
+#include <utility> // move
 
 #include <Eigen/Dense> // Dense matrices
 #include <boost/property_tree/ptree.hpp>

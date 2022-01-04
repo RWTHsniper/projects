@@ -157,35 +157,30 @@ int main(int, char* []) {
 
     // Simulation
     // const size_t numPaths = 10;
-    const size_t numPaths = 2; // test
-    const size_t numSteps = 5;
+    const size_t numPaths = 5000; // test
+    const size_t numSteps = 365*10;
+    const double T = 10.0;
 
     // Initialization for Brownian motion
     std::vector<Eigen::MatrixXd> dWIndep; // [numSteps](nFactor, numPaths)
     buildBrownianMotion(dWIndep, numSteps, nFactor, numPaths);
-    double dt = 1.0/(numSteps);
+    double dt = T/(numSteps);
     double t = 0.0;
-    std::cout << dWIndep[0] << std::endl;
-    std::cout << dWIndep[numSteps-1] << std::endl;
+    // std::cout << dWIndep[0] << std::endl;
+    // std::cout << dWIndep[numSteps-1] << std::endl;
     // Eigen::VectorXd x(nFactor); x.setZero();
     std::vector<Eigen::MatrixXd> x;
     buildVectofMat(x, numSteps+1, nFactor, numPaths); // 0th element in vector represents the initial values
-    Eigen::VectorXd dw(nFactor);
+    Eigen::MatrixXd dw(nFactor, numPaths);
+    // Eigen::VectorXd dw(nFactor);
     const Eigen::MatrixXd& lowerMat_ = haganModel.getLowerMat();
     // std::cout << "lower mat " << lowerMat_ << std::endl;
     for (size_t i=0; i < numSteps ;i++){
         t+= dt;
-        std::cout << "i " << i << std::endl;
-        for (size_t j=0; j < numPaths; j++){
-            // std::cout << "dWIndep " << dWIndep[i] << std::endl;
-            // std::cout << "dWIndep col " << dWIndep[i].col(j) << std::endl;
-            dw = lowerMat_ * dWIndep[i].col(j); // explicitly state that Cholesky decomposition is used to compute correlated BM
-            // std::cout << "dw correlated " << std::endl << dw << std::endl;
-            // x = haganModel.evolve(t, x, dt, dw);
-            x[i+1].col(j) = haganModel.evolve(t, x[i].col(j), dt, dw);
-            // std :: cout << " Time : " << t+dt << ", x[0] : " << x[0] << ", x[1] : " << x [1] << std :: endl ;
-            std :: cout << " Time : " << t+dt << ", x[0] : " << x[i+1](0, j) << ", x[1] : " << x[i+1](1, j) << std :: endl ;
-        }
+        // dw = lowerMat_ * dWIndep[i];
+        dw = lowerMat_; dw *= dWIndep[i];
+        haganModel.evolve(x[i+1], t, x[i], dt, dw);
+        if (i==numSteps-1) saveData(source_dir+"output/dw.csv", dw);
     }
 
     saveData(source_dir+"output/matrix.csv", x[numSteps]); // save matrix in output folder
