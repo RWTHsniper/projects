@@ -66,7 +66,7 @@ namespace StochasticModel{
          }
          Eigen::MatrixXd getLowerMat() const {return lowerMat_;}
          Eigen::MatrixXd getCorrMat() const {return corrMat_;}
-         Eigen::VectorXd evolve(double t, Eigen::VectorXd x, double dt, Eigen::VectorXd dw) const;
+         Eigen::VectorXd evolve(const double& t, const Eigen::VectorXd& x, const double& dt, const Eigen::VectorXd& dw) const;
 
       private:
          size_t nFactor_;

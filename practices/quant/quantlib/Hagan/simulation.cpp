@@ -2,7 +2,8 @@
 
 
 void buildBrownianMotion(std::vector<Eigen::MatrixXd>& dWIndep, const size_t& numSteps, const size_t& nFactor, 
-                                                        const size_t& numPaths, const unsigned int& seed_id, const bool& normalize){
+                                                        const size_t& numPaths, const unsigned int& seed_id, bool normalize){
+    if (numPaths <= 50) normalize = false; // When there are few paths, normalization does not work!
     std::default_random_engine norm_generator{seed_id};
     std::normal_distribution<double> norm_distribution(0.0, 1.0);
     dWIndep.reserve(numSteps);
@@ -25,5 +26,14 @@ void buildBrownianMotion(std::vector<Eigen::MatrixXd>& dWIndep, const size_t& nu
                     dWIndep[i](j, k) = (dWIndep[i](j, k) - meanRow[j]) / std::sqrt(variance[j]);
                 }
         }
+    }
+}
+
+void buildVectofMat(std::vector<Eigen::MatrixXd>& x, const size_t& numSteps, const size_t& nFactor, const size_t& numPaths){
+    x.clear();
+    x.reserve(numSteps);
+    for (size_t i=0; i<numSteps; i++){
+        x.emplace_back(nFactor, numPaths);
+        x[i].setZero();
     }
 }

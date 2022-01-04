@@ -156,46 +156,37 @@ int main(int, char* []) {
     // auto b = Eigen::square(a); std::cout << "a " << b <<std::endl;
 
     // Simulation
-    size_t numPaths = 10;
-    size_t numSteps = 10;
+    // const size_t numPaths = 10;
+    const size_t numPaths = 2; // test
+    const size_t numSteps = 5;
 
     // Initialization for Brownian motion
-    std::vector<Eigen::MatrixXd> dWIndep;
+    std::vector<Eigen::MatrixXd> dWIndep; // [numSteps](nFactor, numPaths)
     buildBrownianMotion(dWIndep, numSteps, nFactor, numPaths);
+    double dt = 1.0/(numSteps);
+    double t = 0.0;
     std::cout << dWIndep[0] << std::endl;
     std::cout << dWIndep[numSteps-1] << std::endl;
-
-    // unsigned int seed_id = 0; // Seed 0
-    // std::default_random_engine norm_generator{seed_id};
-    // std::normal_distribution<double> norm_distribution(0.0, 1.0);
-    // std::vector<Eigen::MatrixXd> dW_indep; dW_indep.reserve(numSteps);
-
-    // for (size_t i=0; i<numSteps; i++){
-    //     dW_indep.emplace_back(nFactor, numPaths);
-    //     Eigen::VectorXd meanSquare(nFactor); meanSquare.setZero();
-    //     for (size_t j=0; j<nFactor; j++)
-    //         for (size_t k=0; k<numPaths; k++){
-    //             dW_indep[i](j, k) = norm_distribution(norm_generator);
-    //             meanSquare(j) += std::pow(dW_indep[i](j, k), 2); // compute the sum of squares
-    //         }
-    //     meanSquare /= numPaths;
-    //     Eigen::VectorXd meanRow = dW_indep[i].rowwise().mean(); // mean for each state variable
-    //     Eigen::VectorXd variance(meanSquare);
-    //     for (size_t j=0; j<nFactor; j++) variance[j] -= meanRow[j] * meanRow[j];
-    //     for (size_t j=0; j<nFactor; j++)
-    //         for (size_t k=0; k<numPaths; k++){
-    //             dW_indep[i](j, k) = (dW_indep[i](j, k) - meanRow[j]) / std::sqrt(variance[j]);
-    //         }
-    // }
-
-    // dW_indep.resize(std::vector<size_t>{Nt, num_sv, num_paths});
-    // for (std::size_t i = 0; i < Nt; ++i) {
-    //     for (std::size_t j = 0; j < num_sv; ++j) {
-    //         for (std::size_t k=0; k<num_paths;++k){
-    //             dW_indep.get(i,j,k) = norm_distribution(norm_generator);
-    //         }
-    //     }
-    // }
+    // Eigen::VectorXd x(nFactor); x.setZero();
+    std::vector<Eigen::MatrixXd> x;
+    buildVectofMat(x, numSteps+1, nFactor, numPaths); // 0th element in vector represents the initial values
+    Eigen::VectorXd dw(nFactor);
+    const Eigen::MatrixXd& lowerMat_ = haganModel.getLowerMat();
+    // std::cout << "lower mat " << lowerMat_ << std::endl;
+    for (size_t i=0; i < numSteps ;i++){
+        t+= dt;
+        std::cout << "i " << i << std::endl;
+        for (size_t j=0; j < numPaths; j++){
+            // std::cout << "dWIndep " << dWIndep[i] << std::endl;
+            // std::cout << "dWIndep col " << dWIndep[i].col(j) << std::endl;
+            dw = lowerMat_ * dWIndep[i].col(j); // explicitly state that Cholesky decomposition is used to compute correlated BM
+            // std::cout << "dw correlated " << std::endl << dw << std::endl;
+            // x = haganModel.evolve(t, x, dt, dw);
+            x[i+1].col(j) = haganModel.evolve(t, x[i].col(j), dt, dw);
+            // std :: cout << " Time : " << t+dt << ", x[0] : " << x[0] << ", x[1] : " << x [1] << std :: endl ;
+            std :: cout << " Time : " << t+dt << ", x[0] : " << x[i+1](0, j) << ", x[1] : " << x[i+1](1, j) << std :: endl ;
+        }
+    }
 
 
         // x[0] = spotQuote -> value ();
