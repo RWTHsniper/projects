@@ -37,3 +37,16 @@ void buildVectofMat(std::vector<Eigen::MatrixXd>& x, const size_t& numSteps, con
         x[i].setZero();
     }
 }
+
+void saveData(std::string fileName, Eigen::MatrixXd matrix){
+    //https://eigen.tuxfamily.org/dox/structEigen_1_1IOFormat.html
+    //https://aleksandarhaber.com/eigen-matrix-library-c-tutorial-saving-and-loading-data-in-from-a-csv-file/
+    const static Eigen::IOFormat CSVFormat(Eigen::FullPrecision, Eigen::DontAlignCols, ", ", "\n");
+ 
+    std::ofstream file(fileName);
+    if (file.is_open())
+    {
+        file << matrix.format(CSVFormat);
+        file.close();
+    }
+}

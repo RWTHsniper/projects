@@ -188,6 +188,8 @@ int main(int, char* []) {
         }
     }
 
+    saveData(source_dir+"output/matrix.csv", x[numSteps]); // save matrix in output folder
+
 
         // x[0] = spotQuote -> value ();
         // x[1] = v0;
