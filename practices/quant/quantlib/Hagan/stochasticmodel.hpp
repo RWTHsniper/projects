@@ -21,6 +21,7 @@
 #include "model.hpp"
 
 using namespace QuantLib;
+namespace ql = QuantLib;
 
 namespace StochasticModel{
    class HaganNF{
@@ -42,7 +43,7 @@ namespace StochasticModel{
                                     alp.reserve(nFactor_);
                                     size_t order = 1;
                                     for (size_t i=0; i<nFactor_; i++){alp.emplace_back(order, polyCoeffs);}
-                                    zeta_.reserve(nFactor_);
+                                    dZeta_.reserve(nFactor_);
                                     for (size_t i=0; i< nFactor_; i++){
                                        std::vector<Model::PolyFunc> tmp;
                                        tmp.reserve(nFactor_);
@@ -50,7 +51,7 @@ namespace StochasticModel{
                                           Model::PolyFunc elem = alp[i] * alp[j] * corrMat_(i, j);
                                           tmp.emplace_back(elem); 
                                        }
-                                       zeta_.emplace_back(tmp);
+                                       dZeta_.emplace_back(tmp);
                                     }
                                     H_.reserve(nFactor);
                                     double kappa = 1.0;
@@ -61,7 +62,7 @@ namespace StochasticModel{
                                     // Information to check
                                     // for (size_t i=0; i<nFactor_; i++){
                                     //    for (size_t j=0; j<nFactor_; j++)
-                                    //       zeta_[i][j].getInfo();
+                                    //       dZeta_[i][j].getInfo();
                                     // }
                                     // H_[0].getInfo();
                                     // H_[1].getInfo();
@@ -71,12 +72,13 @@ namespace StochasticModel{
          void evolve(Eigen::MatrixXd& xn, const double& t, const Eigen::MatrixXd& x, const double& dt, const Eigen::MatrixXd& dw) const;
          Eigen::VectorXd evolve(const double& t, const Eigen::VectorXd& x, const double& dt, const Eigen::VectorXd& dw) const;
          std::shared_ptr<Eigen::MatrixXd>  computeInterestRate(const double& t_i, const double& dt,  const size_t& numPaths, const size_t& numSteps, std::vector<Eigen::MatrixXd>& x);
+         double impliedVol(const Period& swaptionExpiry, const Period& swaptionTenor, const double& tau=0.25, const ql::VolatilityType& type=ql::Normal);
 
       private:
          size_t nFactor_;
          std::vector<Model::PolyFunc> alp; // alpha (nFactor)
          std::vector<Model::ExpFunc> H_; // How to implement H_ in the framework? (nFactor)
-         std::vector<std::vector<Model::PolyFunc>> zeta_; // zeta: alp^2. variable to compute integration of square of alphas. (nFactor, nFactor)
+         std::vector<std::vector<Model::PolyFunc>> dZeta_; // dZeta: alp^2. variable to compute integration of square of alphas. (nFactor, nFactor)
          Eigen::MatrixXd corrMat_; // correlation matrices b.t.w. factors (nFactor, nFactor)
          Eigen::MatrixXd lowerMat_; // Lower part of the Cholesky decomposition of corrMat_ (nFactor, nFactor)
          ext::shared_ptr<YieldTermStructure> yieldCurve_; // computes discount factor and forward rate

@@ -93,19 +93,19 @@ int main(int, char* []) {
                 todaysDate, Handle<Quote>(flatRate), // assume todaysDate = settlementDate
                                 Actual365Fixed()));
                                 ext::shared_ptr<IborIndex> indexThreeMonths(new Euribor3M(rhTermStructure));
-                                ext::shared_ptr<BlackCalibrationHelper> swaption(new SwaptionHelper(
-                                Period(6, Years), // maturity Period
-                                Period(1, Years), // length Period
-                                Handle<Quote>(vol), // 
-                                indexThreeMonths,
-                                indexThreeMonths->tenor(),
-                                Actual365Fixed(), // Actual365Fixed() is more exact than indexThreeMonths->dayCounter()
-                                Actual365Fixed(), // Actual365Fixed()
-                                rhTermStructure,
-                                BlackCalibrationHelper::RelativePriceError,
-                                Null<Real>(),
-                                1.0,
-                                Normal));
+    ext::shared_ptr<BlackCalibrationHelper> swaption(new SwaptionHelper(
+                                                        Period(6, Years), // maturity Period
+                                                        Period(1, Years), // length Period
+                                                        Handle<Quote>(vol), // 
+                                                        indexThreeMonths,
+                                                        indexThreeMonths->tenor(),
+                                                        Actual365Fixed(), // Actual365Fixed() is more exact than indexThreeMonths->dayCounter()
+                                                        Actual365Fixed(), // Actual365Fixed()
+                                                        rhTermStructure,
+                                                        BlackCalibrationHelper::RelativePriceError,
+                                                        Null<Real>(),
+                                                        1.0,
+                                                        Normal));
     ext::shared_ptr<PricingEngine> bachelierEngine(new BachelierSwaptionEngine(rhTermStructure, Handle<Quote>(ext::shared_ptr<Quote>(vol))));
     swaption->setPricingEngine(bachelierEngine);
 
@@ -132,7 +132,8 @@ int main(int, char* []) {
         swaptionTenor.emplace_back(stoi(tenor.second.data()), Years);
     }
     // read swaption ATM volatility matrix
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> swaptionVolMat(expiry_size, tenor_size); // row-major matrix with dynamic allocation
+    // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> swaptionVolMat(expiry_size, tenor_size); // row-major matrix with dynamic allocation
+    Eigen::MatrixXd swaptionVolMat(expiry_size, tenor_size); // row-major matrix with dynamic allocation
     std::array<size_t, 2> counter{0,0};
     for (const pt::ptree::value_type &quote : swaption_vol.get_child("quote")){
         swaptionVolMat(counter[0], counter[1]) = stod(quote.second.data());
@@ -157,9 +158,9 @@ int main(int, char* []) {
 
     // Simulation
     // const size_t numPaths = 10;
+    const double T = 1;
     const size_t numPaths = 100; // test
-    const size_t numSteps = 365*10;
-    const double T = 10.0;
+    const size_t numSteps = 365*T;
 
     // Initialization for Brownian motion
     std::vector<Eigen::MatrixXd> dWIndep; // [numSteps](nFactor, numPaths)
@@ -187,6 +188,9 @@ int main(int, char* []) {
     saveData(source_dir+"output/matrix.csv", x[numSteps]); // save matrix in output folder
     std::shared_ptr<Eigen::MatrixXd> r =  haganModel.computeInterestRate(t_i, dt, numPaths, numSteps, x); // size of (numPaths, numSteps+1)
     saveData(source_dir+"output/r.csv", (*r)); // save interest rate paths
+
+    double iVol = haganModel.impliedVol(swaptionExpiry[0], swaptionTenor[0]);
+    std::cout << "Ivol from HaganModel " << iVol << std::endl;
 
     /* Next steps
         - Think about pricing swaptions. (analytic)

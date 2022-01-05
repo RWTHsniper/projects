@@ -115,6 +115,7 @@ namespace Model{
             double evalDeriv(const double& x, const size_t& order = 1);
             double evalInt(const double& x_i, const double& x_f) const;
             void getInfo() const;
+            
         private:
             Eigen::VectorXd xVals_;
             Eigen::VectorXd yVals_;
