@@ -137,12 +137,22 @@ int main(int, char* []) {
     std::shared_ptr<Eigen::MatrixXd> swaptionVolMat = std::make_shared<Eigen::MatrixXd>(expiry_size, tenor_size);
     // Eigen::MatrixXd swaptionVolMat(expiry_size, tenor_size); // row-major matrix with dynamic allocation
     std::array<size_t, 2> counter{0,0};
+    // row major like C
+    // for (const pt::ptree::value_type &quote : swaption_vol.get_child("quote")){
+    //     (*swaptionVolMat)(counter[0], counter[1]) = stod(quote.second.data());
+    //     counter[1]++; 
+    //     if (counter[1] % tenor_size == 0){
+    //         counter[0]++;
+    //         counter[1] = 0;
+    //     }
+    // }
+    // column major like F
     for (const pt::ptree::value_type &quote : swaption_vol.get_child("quote")){
         (*swaptionVolMat)(counter[0], counter[1]) = stod(quote.second.data());
-        counter[1]++; 
-        if (counter[1] % tenor_size == 0){
-            counter[0]++;
-            counter[1] = 0;
+        counter[0]++; 
+        if (counter[0] % expiry_size == 0){
+            counter[1]++;
+            counter[0] = 0;
         }
     }
 
@@ -152,6 +162,7 @@ int main(int, char* []) {
     pt::ptree lgm;
     pt::read_json(data_dir+"LGM.json", lgm); // expiry: option. tenor: swap
     const size_t& nFactor = lgm.get("numFactors", 0); // number of factors
+    const size_t& alpOrder = lgm.get("alpOrder", 0); // number of factors
     counter[0] = 0; counter[1] = 0; // initialize the counter
     Eigen::MatrixXd corrMat(nFactor, nFactor);
     for (const pt::ptree::value_type &corr : lgm.get_child("corrUpper")){ // Upper triangular part in the correlation matrix
@@ -166,7 +177,7 @@ int main(int, char* []) {
 
     std::cout << "This is corrMat " << std::endl << corrMat << std::endl;
     // corrMat << 1.0,0.5,0.5,1.0;
-    StochasticModel::HaganNF haganModel(yieldCurve, nFactor, corrMat);
+    StochasticModel::HaganNF haganModel(yieldCurve, nFactor, corrMat, alpOrder);
 
     // testModel(); // test classes in model.hpp
 
@@ -230,8 +241,17 @@ int main(int, char* []) {
         else jsonMsg += ", \n";
     }
     jsonMsg += "\"quote\": ["; 
-    for (size_t i=0; i<swaptionExpiry->size(); i++){
-        for (size_t j=0; j<swaptionTenor->size(); j++){
+    // row major
+    // for (size_t i=0; i<swaptionExpiry->size(); i++){
+    //     for (size_t j=0; j<swaptionTenor->size(); j++){
+    //         jsonMsg += std::to_string(haganModel.impliedVol(today, (*swaptionExpiry)[i], (*swaptionTenor)[j], 0.25, ql::Normal));
+    //         if ((i == swaptionExpiry->size()-1) &&(j == swaptionTenor->size()-1)) jsonMsg += "]\n";
+    //         else jsonMsg += ", \n";
+    //     }
+    // }
+    // column major
+    for (size_t j=0; j<swaptionTenor->size(); j++){
+        for (size_t i=0; i<swaptionExpiry->size(); i++){
             jsonMsg += std::to_string(haganModel.impliedVol(today, (*swaptionExpiry)[i], (*swaptionTenor)[j], 0.25, ql::Normal));
             if ((i == swaptionExpiry->size()-1) &&(j == swaptionTenor->size()-1)) jsonMsg += "]\n";
             else jsonMsg += ", \n";

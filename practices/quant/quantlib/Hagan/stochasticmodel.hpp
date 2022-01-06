@@ -27,7 +27,7 @@ namespace ql = QuantLib;
 namespace StochasticModel{
    class HaganNF{
       public:
-         HaganNF(boost::shared_ptr<ql::YieldTermStructure>& yieldCurve, const size_t& nFactor, Eigen::MatrixXd& corrMat);
+         HaganNF(boost::shared_ptr<ql::YieldTermStructure>& yieldCurve, const size_t& nFactor, Eigen::MatrixXd& corrMat, const size_t& alpOrder);
          Eigen::MatrixXd getLowerMat() const {return lowerMat_;}
          Eigen::MatrixXd getCorrMat() const {return corrMat_;}
          void evolve(Eigen::MatrixXd& xn, const double& t, const Eigen::MatrixXd& x, const double& dt, const Eigen::MatrixXd& dw) const;
@@ -43,6 +43,7 @@ namespace StochasticModel{
 
       private:
          size_t nFactor_;
+         size_t alpOrder_;
          Eigen::MatrixXd corrMat_; // correlation matrices b.t.w. factors (nFactor, nFactor)
          Eigen::MatrixXd lowerMat_; // Lower part of the Cholesky decomposition of corrMat_ (nFactor, nFactor)
          boost::shared_ptr<ql::YieldTermStructure> yieldCurve_; // computes discount factor and forward rate

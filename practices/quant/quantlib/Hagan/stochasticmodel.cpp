@@ -1,8 +1,8 @@
 #include "stochasticmodel.hpp"
 
 namespace StochasticModel{
-        HaganNF::HaganNF(boost::shared_ptr<ql::YieldTermStructure>& yieldCurve, const size_t& nFactor, Eigen::MatrixXd& corrMat): yieldCurve_(yieldCurve),
-            nFactor_(nFactor), corrMat_(corrMat){
+        HaganNF::HaganNF(boost::shared_ptr<ql::YieldTermStructure>& yieldCurve, const size_t& nFactor, Eigen::MatrixXd& corrMat, const size_t& alpOrder): yieldCurve_(yieldCurve),
+            nFactor_(nFactor), corrMat_(corrMat), alpOrder_(alpOrder){
             if (!corrMat_.isApprox(corrMat_.transpose())){
                 throw std::runtime_error("Input correlation matrix is not symmetric!");
             }
@@ -15,10 +15,11 @@ namespace StochasticModel{
             }
             // initialize alphas
             // Assume linear functions for alpha (volatility)
-            size_t order = 1;
-            Eigen::VectorXd polyCoeffs(order+1); polyCoeffs << 0.0,1.0; // f(x) = x
+            Eigen::VectorXd polyCoeffs(alpOrder_+1); 
+            if (alpOrder_==1) polyCoeffs << 0.0,1.0; // f(x) = x
+            else if (alpOrder_ == 2) polyCoeffs << 0.0, 0.0, 1.0; // f(x) = x^2
             alp_.reserve(nFactor_);
-            for (size_t i=0; i<nFactor_; i++){alp_.emplace_back(order, polyCoeffs);}
+            for (size_t i=0; i<nFactor_; i++){alp_.emplace_back(alpOrder_, polyCoeffs);}
             dZeta_.reserve(nFactor_);
             for (size_t i=0; i< nFactor_; i++){
                 std::vector<Model::PolyFunc> tmp;
@@ -219,24 +220,24 @@ namespace StochasticModel{
                 this_->H_[i].setParams(buff);
                 count++;
                 if (kappa <= 0.0){
-                    penalty += std::pow(kappa, 2);
+                    // penalty += std::pow(kappa, 2);
                 }
                 else if (kappa > 10){
                     penalty += std::pow(kappa-10.0, 2);
                 }
             }
             this_->updateDZeta();
-            std::cout << "current sol" << std::endl << z << std::endl;
+            // std::cout << "current sol" << std::endl << z.transpose() << std::endl;
             for (size_t i=0; i< swaptionExpiry_->size(); i++){
                 for (size_t j=0; j< swaptionTenor_->size(); j++){
                     size_t ind = i*swaptionTenor_->size() + j;
                     // Use z (xvalues) to update model parameters
                     double iVol = this_->impliedVol(today, (*swaptionExpiry_)[i], (*swaptionTenor_)[j], tau, type);
                     fvec(ind) = (*swaptionVolMat_)(i,j) - iVol;
-                    std::cout << (*swaptionVolMat_)(i,j) - iVol << " ";
+                    // std::cout << (*swaptionVolMat_)(i,j) - iVol << " ";
                     fvec(ind) += penalty / fvec.size();
                 }
-                std::cout << std::endl;                
+                // std::cout << std::endl;                
             }
             return 0;
         }
@@ -250,7 +251,9 @@ namespace StochasticModel{
         * H_[0], ..., H_[nFactor-1]: k 
         * In total, nFactor * 2 + nFactor * 1 parameters should be updated
         */
-        size_t numParams = nFactor_ * (2 + 1); // alp_ and H_
+        size_t numParams = 0;
+        for (size_t i=0; i< alp_.size(); i++) numParams += alp_[i].getOrder() + 1; // number of polynomial coefficients
+        numParams += nFactor_; // one param for H_
         // size_t numParams = nFactor_ * (2); // alp_ and H_
         // Initialize the vector of initial values
         Eigen::VectorXd zInit(numParams);
@@ -283,9 +286,16 @@ namespace StochasticModel{
         int ret = lm.minimize(z);
         std::cout << "iter count: " << lm.iter << std::endl;
         std::cout << "return status: " << ret << std::endl; // status 2 is good
+        switch(ret){
+            case Eigen::LevenbergMarquardtSpace::TooManyFunctionEvaluation  : std::cout << "Too many function evaluations\n";   break;
+            case Eigen::LevenbergMarquardtSpace::RelativeReductionTooSmall  : std::cout << "Relative reduction is too small\n";   break;
+            case Eigen::LevenbergMarquardtSpace::RelativeErrorTooSmall  : std::cout << "Relative error is too small\n";   break;
+            case Eigen::LevenbergMarquardtSpace::RelativeErrorAndReductionTooSmall  : std::cout << "Relative error and reduction are too small\n";   break;
+        }
         Eigen::VectorXd tmp(swaptionVolMat->rows()*swaptionVolMat->cols());
         functor(z, tmp);
         std::cout << "Norm of final function: " << tmp.norm() << std::endl;
+        std::cout << "L1-norm of final function: " << tmp.lpNorm<1>() << std::endl;
         std::cout << "zSolver: " << z.transpose() << std::endl;
         std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
     }
