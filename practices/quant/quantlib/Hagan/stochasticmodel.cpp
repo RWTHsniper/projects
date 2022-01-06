@@ -51,7 +51,7 @@ namespace StochasticModel{
         Eigen::VectorXd H_t_deriv(nFactor_);
         Eigen::MatrixXd zeta_t(nFactor_, nFactor_);
         for (size_t step=1; step <= numSteps; step++){ // index for steps
-            double fwdRate = yieldCurve_->forwardRate(0.0,6.0,Continuous);
+            double fwdRate = yieldCurve_->forwardRate(0.0,6.0, ql::Continuous);
             for (size_t sv=0; sv<nFactor_; sv++){ // index for state variable
                 H_t[sv] = H_[sv].evaluate(t);
                 H_t_deriv[sv] = H_[sv].evalDeriv(t);
@@ -72,28 +72,31 @@ namespace StochasticModel{
     return r;
     }
     // void HaganNF::impliedVol(std::vector<Period>& swaptionExpiry, std::vector<Period>& swaptionTenor, ql::VolatilityType& type){ // type: ql::Normal
-    double HaganNF::impliedVol(const Period& swaptionExpiry, const Period& swaptionTenor, const double& tau, const ql::VolatilityType& type){ // type: ql::Normal
+    double HaganNF::impliedVol(const ql::Period& today, const ql::Period& swaptionExpiry, const ql::Period& swaptionTenor, const double& tau, const ql::VolatilityType& type){ // type: ql::Normal
         double res = 0.0;
+        double t = static_cast<double>(ql::years(today));
+        Eigen::MatrixXd zeta_t(nFactor_, nFactor_); zeta_t.setZero();
+        size_t N = static_cast<size_t>(ql::years(swaptionTenor) / tau); // number of payments for a swap
+        double t0 = ql::years(swaptionExpiry); // exercise date
+        double ti = t0;
+        double tn = t0 + ql::years(swaptionTenor);
+        Eigen::VectorXd Pi(N+1); // t0,t1,...,tN
+        Eigen::VectorXd dHi(nFactor_);
+        Eigen::VectorXd Htot(nFactor_); Htot.setZero();
+        // compute discount factors
+        for (size_t i=0; i<N+1; i++){ // t0,t1,...,tN
+            Pi[i] = yieldCurve_->discount(ti); // equivalent to Di
+            ti += tau;
+        }
+        // compute annuity
+        double annuity = 0.0;
+        for (size_t i=1; i<=N; i++){ // t1,...,tN
+            annuity += tau * Pi[i];
+        }
+        double St = (Pi[0] - Pi[N]) / annuity;
         if (type == ql::Normal){
-            Eigen::MatrixXd zeta_t(nFactor_, nFactor_); zeta_t.setZero();
-            size_t N = static_cast<size_t>(ql::years(swaptionTenor) / tau); // number of payments for a swap
-            double t0 = ql::years(swaptionExpiry); // exercise date
-            double ti = t0;
-            double tn = t0 + ql::years(swaptionTenor);
-            Eigen::VectorXd Pi(N+1); // t0,t1,...,tN
-            Eigen::VectorXd dHi(nFactor_);
-            Eigen::VectorXd Htot(nFactor_); Htot.setZero();
-            for (size_t i=0; i<N+1; i++){ // t0,t1,...,tN
-                Pi[i] = yieldCurve_->discount(ti); // equivalent to Di
-                ti += tau;
-            }
-            double annuity = 0.0;
-            for (size_t i=1; i<=N; i++){ // t1,...,tN
-                annuity += tau * Pi[i];
-            }
-            double S0 = (Pi[0] - Pi[N]) / annuity;
-            std::cout << t0 << " " << ti << " " << tn << " " << std::endl << Pi << std::endl;
-            std::cout << N << std::endl;
+            // std::cout << t0 << " " << ti << " " << tn << " " << std::endl << Pi << std::endl;
+            // std::cout << N << std::endl;
             // compute Zeta
             for (size_t i=0; i<nFactor_; i++)
                 for (size_t j=0; j<nFactor_; j++){
@@ -102,10 +105,10 @@ namespace StochasticModel{
             // compute Htot
             for (size_t j=0; j<nFactor_; j++){
                 ti = t0;
-                Htot[j] = Pi[N] * H_[j].evaluate(tn);
+                Htot[j] = Pi[N] * (H_[j].evaluate(tn) - H_[j].evaluate(t));
                 for (size_t i=1; i<=N; i++){
                     ti = t0 + tau;
-                    Htot[j] += S0 * tau * Pi[i] * H_[j].evaluate(ti);
+                    Htot[j] += St * tau * Pi[i] * (H_[j].evaluate(ti) - H_[j].evaluate(t));
                 }
             }
             Htot /= annuity;
@@ -116,6 +119,52 @@ namespace StochasticModel{
             std::cout << "Volatility type " << type << " is not supported" << std::endl;
         }
         return res;
-
     }
+    struct HaganNF::HaganFunctor : Optimizer::Functor<double> {
+        // members
+        std::shared_ptr<std::vector<ql::Period>> swaptionExpiry_;
+        std::shared_ptr<std::vector<ql::Period>> swaptionTenor_;
+        // Simple constructor
+        HaganFunctor(const std::shared_ptr<std::vector<ql::Period>>& swaptionExpiry, const std::shared_ptr<std::vector<ql::Period>>& swaptionTenor): 
+            swaptionExpiry_(swaptionExpiry), swaptionTenor_(swaptionTenor), Optimizer::Functor<double>(swaptionExpiry->size()*swaptionTenor->size(),swaptionExpiry->size()*swaptionTenor->size()) {}
+
+        // Implementation of the objective function
+        int operator ()
+            (const Eigen::VectorXd &z, Eigen::VectorXd &fvec) const {
+            double x = z(0);   double y = z(1);
+                /*
+                * Evaluate the Booth function.
+                * Important: LevenbergMarquardt is designed to work with objective functions that are a sum
+                * of squared terms. The algorithm takes this into account: do not do it yourself.
+                * In other words: objFun = sum(fvec(i)^2)
+                */
+                fvec(0) = x + 2*y - 7;
+                fvec(1) = 2*x + y - 5;
+                return 0;
+        }
+    };
+
+    void HaganNF::calibrate(const std::shared_ptr<std::vector<ql::Period>>& swaptionExpiry, const std::shared_ptr<std::vector<ql::Period>>& swaptionTenor){
+        std::cout << "Testing the Booth function..." << std::endl;
+        Eigen::VectorXd zInit(2); zInit << 1.87, 2.032;
+        std::cout << "zInit: " << zInit.transpose() << std::endl;
+        Eigen::VectorXd zSoln(2); zSoln << 1.0, 3.0;
+        std::cout << "zSoln: " << zSoln.transpose() << std::endl;
+        
+        HaganFunctor functor(swaptionExpiry, swaptionTenor);
+        Eigen::NumericalDiff<HaganFunctor> numDiff(functor);
+        Eigen::LevenbergMarquardt<Eigen::NumericalDiff<HaganFunctor>,double> lm(numDiff);
+        lm.parameters.maxfev = 1000;
+        lm.parameters.xtol = 1.0e-10;
+        std::cout << "max fun eval: " << lm.parameters.maxfev << std::endl;
+        std::cout << "x tol: " << lm.parameters.xtol << std::endl;
+
+        Eigen::VectorXd z = zInit;
+        int ret = lm.minimize(z);
+        std::cout << "iter count: " << lm.iter << std::endl;
+        std::cout << "return status: " << ret << std::endl;
+        std::cout << "zSolver: " << z.transpose() << std::endl;
+        std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+    }
+
 }

@@ -3,6 +3,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/hagan.dir/main.cpp.o.d"
   "CMakeFiles/hagan.dir/model.cpp.o"
   "CMakeFiles/hagan.dir/model.cpp.o.d"
+  "CMakeFiles/hagan.dir/optimizer.cpp.o"
+  "CMakeFiles/hagan.dir/optimizer.cpp.o.d"
   "CMakeFiles/hagan.dir/simulation.cpp.o"
   "CMakeFiles/hagan.dir/simulation.cpp.o.d"
   "CMakeFiles/hagan.dir/stochasticmodel.cpp.o"

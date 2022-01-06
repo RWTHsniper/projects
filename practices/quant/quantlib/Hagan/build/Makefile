@@ -177,6 +177,30 @@ model.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/model.cpp.s
 .PHONY : model.cpp.s
 
+optimizer.o: optimizer.cpp.o
+.PHONY : optimizer.o
+
+# target to build an object file
+optimizer.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/optimizer.cpp.o
+.PHONY : optimizer.cpp.o
+
+optimizer.i: optimizer.cpp.i
+.PHONY : optimizer.i
+
+# target to preprocess a source file
+optimizer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/optimizer.cpp.i
+.PHONY : optimizer.cpp.i
+
+optimizer.s: optimizer.cpp.s
+.PHONY : optimizer.s
+
+# target to generate assembly for a file
+optimizer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hagan.dir/build.make CMakeFiles/hagan.dir/optimizer.cpp.s
+.PHONY : optimizer.cpp.s
+
 simulation.o: simulation.cpp.o
 .PHONY : simulation.o
 
@@ -264,6 +288,9 @@ help:
 	@echo "... model.o"
 	@echo "... model.i"
 	@echo "... model.s"
+	@echo "... optimizer.o"
+	@echo "... optimizer.i"
+	@echo "... optimizer.s"
 	@echo "... simulation.o"
 	@echo "... simulation.i"
 	@echo "... simulation.s"

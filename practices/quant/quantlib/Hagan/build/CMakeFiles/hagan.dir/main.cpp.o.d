@@ -200,6 +200,29 @@ CMakeFiles/hagan.dir/main.cpp.o: \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/istream.tcc \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/utility \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_relops.h \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/memory \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_uninitialized.h \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_tempbuf.h \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_raw_storage_iter.h \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/align.h \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bit \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/uses_allocator.h \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/unique_ptr.h \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tuple \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/array \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/invoke.h \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/shared_ptr.h \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/shared_ptr_base.h \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/allocated_ptr.h \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/refwrap.h \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ext/aligned_buffer.h \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ext/concurrence.h \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/shared_ptr_atomic.h \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/atomic_base.h \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/atomic_lockfree_defines.h \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/backward/auto_ptr.h \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/pstl/glue_memory_defs.h \
+ /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/pstl/execution_defs.h \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/Eigen/Dense \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/Eigen/Core \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/Eigen/src/Core/util/DisableStupidWarnings.h \
@@ -235,28 +258,20 @@ CMakeFiles/hagan.dir/main.cpp.o: \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/cassert \
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/assert.h \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/functional \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/tuple \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/array \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/uses_allocator.h \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/invoke.h \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/refwrap.h \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/std_function.h \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/unordered_map \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ext/aligned_buffer.h \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/hashtable.h \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/hashtable_policy.h \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/node_handle.h \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/unordered_map.h \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/erase_if.h \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/vector \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_uninitialized.h \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_vector.h \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_bvector.h \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/vector.tcc \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_algo.h \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/algorithmfwd.h \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_heap.h \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_tempbuf.h \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/uniform_int_dist.h \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/cstring \
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/string.h \
@@ -271,7 +286,6 @@ CMakeFiles/hagan.dir/main.cpp.o: \
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/syslimits.h \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/algorithm \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/pstl/glue_algorithm_defs.h \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/pstl/execution_defs.h \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/Eigen/src/Core/util/Constants.h \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/Eigen/src/Core/util/Meta.h \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/Eigen/src/Core/util/ForwardDeclarations.h \
@@ -369,8 +383,6 @@ CMakeFiles/hagan.dir/main.cpp.o: \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/Eigen/src/Core/products/GeneralBlockPanelKernel.h \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/Eigen/src/Core/products/Parallelizer.h \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/atomic \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/atomic_base.h \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/atomic_lockfree_defines.h \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/Eigen/src/Core/ProductEvaluators.h \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/Eigen/src/Core/products/GeneralMatrixVector.h \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/Eigen/src/Core/products/GeneralMatrixMatrix.h \
@@ -499,18 +511,6 @@ CMakeFiles/hagan.dir/main.cpp.o: \
  /usr/local/include/boost/current_function.hpp \
  /usr/local/include/boost/cstdint.hpp \
  /usr/local/include/boost/config/workaround.hpp \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/memory \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_raw_storage_iter.h \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/align.h \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bit \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/unique_ptr.h \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/shared_ptr.h \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/shared_ptr_base.h \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/allocated_ptr.h \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ext/concurrence.h \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/shared_ptr_atomic.h \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/backward/auto_ptr.h \
- /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/pstl/glue_memory_defs.h \
  /usr/local/include/boost/property_tree/string_path.hpp \
  /usr/local/include/boost/property_tree/id_translator.hpp \
  /usr/local/include/boost/optional.hpp \
@@ -3550,12 +3550,14 @@ CMakeFiles/hagan.dir/main.cpp.o: \
  /usr/local/include/ql/utilities/tracing.hpp \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/stochasticmodel.hpp \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/model.hpp \
- /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/unsupported/Eigen/NonLinearOptimization \
+ /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/optimizer.hpp \
+ /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/unsupported/Eigen/NumericalDiff \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/unsupported/Eigen/../../Eigen/Core \
+ /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/unsupported/Eigen/src/NumericalDiff/NumericalDiff.h \
+ /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/unsupported/Eigen/NonLinearOptimization \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/unsupported/Eigen/../../Eigen/Jacobi \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/unsupported/Eigen/../../Eigen/QR \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/unsupported/Eigen/NumericalDiff \
- /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/unsupported/Eigen/src/NumericalDiff/NumericalDiff.h \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/unsupported/Eigen/src/NonLinearOptimization/qrsolv.h \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/unsupported/Eigen/src/NonLinearOptimization/r1updt.h \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/unsupported/Eigen/src/NonLinearOptimization/r1mpyq.h \
@@ -3567,7 +3569,6 @@ CMakeFiles/hagan.dir/main.cpp.o: \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/unsupported/Eigen/src/NonLinearOptimization/chkder.h \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/unsupported/Eigen/src/NonLinearOptimization/HybridNonLinearSolver.h \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/unsupported/Eigen/src/NonLinearOptimization/LevenbergMarquardt.h \
- /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/eigen/unsupported/Eigen/NumericalDiff \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/utils.hpp \
  /Users/jungjaeyong/projects/practices/quant/quantlib/Hagan/simulation.hpp \
  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/random \

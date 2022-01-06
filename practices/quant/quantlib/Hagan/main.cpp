@@ -121,22 +121,23 @@ int main(int, char* []) {
     const Size& expiry_size = swaption_vol.get("expiry_size", 0); // Length of a swaption's expiry
     const Size& tenor_size = swaption_vol.get("tenor_size", 0); // Length of a swaption's tenor
     std::cout << "expiry and tenor sizes " << expiry_size << " " << tenor_size << std::endl;
-    std::vector<Period> swaptionExpiry;
-    swaptionExpiry.reserve(expiry_size);
+    std::shared_ptr<std::vector<Period>> swaptionExpiry = std::make_shared<std::vector<Period>>();
+    swaptionExpiry->reserve(expiry_size);
     for (const pt::ptree::value_type &expiry : swaption_vol.get_child("expiry")){
-        swaptionExpiry.emplace_back(stoi(expiry.second.data()), Years);
+        swaptionExpiry->emplace_back(stoi(expiry.second.data()), Years);
     }
-    std::vector<Period> swaptionTenor;
-    swaptionTenor.reserve(tenor_size);
+    std::shared_ptr<std::vector<Period>> swaptionTenor = std::make_shared<std::vector<Period>>();
+    swaptionTenor->reserve(tenor_size);
     for (const pt::ptree::value_type &tenor : swaption_vol.get_child("tenor")){
-        swaptionTenor.emplace_back(stoi(tenor.second.data()), Years);
+        swaptionTenor->emplace_back(stoi(tenor.second.data()), Years);
     }
     // read swaption ATM volatility matrix
     // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> swaptionVolMat(expiry_size, tenor_size); // row-major matrix with dynamic allocation
-    Eigen::MatrixXd swaptionVolMat(expiry_size, tenor_size); // row-major matrix with dynamic allocation
+    std::shared_ptr<Eigen::MatrixXd> swaptionVolMat = std::make_shared<Eigen::MatrixXd>(expiry_size, tenor_size);
+    // Eigen::MatrixXd swaptionVolMat(expiry_size, tenor_size); // row-major matrix with dynamic allocation
     std::array<size_t, 2> counter{0,0};
     for (const pt::ptree::value_type &quote : swaption_vol.get_child("quote")){
-        swaptionVolMat(counter[0], counter[1]) = stod(quote.second.data());
+        (*swaptionVolMat)(counter[0], counter[1]) = stod(quote.second.data());
         counter[1]++; 
         if (counter[1] % tenor_size == 0){
             counter[0]++;
@@ -144,11 +145,26 @@ int main(int, char* []) {
         }
     }
 
-    std::cout << swaptionVolMat << std::endl;
+    std::cout << *swaptionVolMat << std::endl;
 
-    size_t nFactor = 2;
+    // Read hagan's LGM model
+    pt::ptree lgm;
+    pt::read_json(data_dir+"LGM.json", lgm); // expiry: option. tenor: swap
+    const size_t& nFactor = lgm.get("numFactors", 0); // number of factors
+    counter[0] = 0; counter[1] = 0; // initialize the counter
     Eigen::MatrixXd corrMat(nFactor, nFactor);
-    corrMat << 1.0,0.5,0.5,1.0;
+    for (const pt::ptree::value_type &corr : lgm.get_child("corrUpper")){ // Upper triangular part in the correlation matrix
+        corrMat(counter[0], counter[1]) = stod(corr.second.data());
+        corrMat(counter[1], counter[0]) = corrMat(counter[0], counter[1]); // symmetric
+        counter[1]++; 
+        if (counter[1] % nFactor == 0){
+            counter[0]++; // next row
+            counter[1] = counter[0]; // diagonal
+        }
+    }
+
+    std::cout << "This is corrMat " << std::endl << corrMat << std::endl;
+    // corrMat << 1.0,0.5,0.5,1.0;
     StochasticModel::HaganNF haganModel(yieldCurve, nFactor, corrMat);
 
     // testModel(); // test classes in model.hpp
@@ -158,9 +174,10 @@ int main(int, char* []) {
 
     // Simulation
     // const size_t numPaths = 10;
-    const double T = 1;
+    const double T = 2;
     const size_t numPaths = 100; // test
-    const size_t numSteps = 365*T;
+    // const size_t numSteps = 365*T; // daily
+    const size_t numSteps = 52*T; // weekly
 
     // Initialization for Brownian motion
     std::vector<Eigen::MatrixXd> dWIndep; // [numSteps](nFactor, numPaths)
@@ -189,8 +206,12 @@ int main(int, char* []) {
     std::shared_ptr<Eigen::MatrixXd> r =  haganModel.computeInterestRate(t_i, dt, numPaths, numSteps, x); // size of (numPaths, numSteps+1)
     saveData(source_dir+"output/r.csv", (*r)); // save interest rate paths
 
-    double iVol = haganModel.impliedVol(swaptionExpiry[0], swaptionTenor[0]);
+    ql::Period today(0, ql::Years); // Current time for evaluation
+    double iVol = haganModel.impliedVol(today, (*swaptionExpiry)[0], (*swaptionTenor)[0], 0.25, ql::Normal);
     std::cout << "Ivol from HaganModel " << iVol << std::endl;
+
+
+    Optimizer::testBoothFun();
 
     /* Next steps
         - Think about pricing swaptions. (analytic)

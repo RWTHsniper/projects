@@ -19,14 +19,15 @@
 #include <Eigen/Dense> // Dense matrices
 
 #include "model.hpp"
+#include "optimizer.hpp"
 
-using namespace QuantLib;
+// using namespace QuantLib;
 namespace ql = QuantLib;
 
 namespace StochasticModel{
    class HaganNF{
       public:
-         HaganNF(ext::shared_ptr<YieldTermStructure>& yieldCurve, const size_t& nFactor, Eigen::MatrixXd& corrMat): yieldCurve_(yieldCurve),
+         HaganNF(boost::shared_ptr<ql::YieldTermStructure>& yieldCurve, const size_t& nFactor, Eigen::MatrixXd& corrMat): yieldCurve_(yieldCurve),
                                  nFactor_(nFactor), corrMat_(corrMat){
                                     if (!corrMat_.isApprox(corrMat_.transpose())){
                                        throw std::runtime_error("Input correlation matrix is not symmetric!");
@@ -72,7 +73,8 @@ namespace StochasticModel{
          void evolve(Eigen::MatrixXd& xn, const double& t, const Eigen::MatrixXd& x, const double& dt, const Eigen::MatrixXd& dw) const;
          Eigen::VectorXd evolve(const double& t, const Eigen::VectorXd& x, const double& dt, const Eigen::VectorXd& dw) const;
          std::shared_ptr<Eigen::MatrixXd>  computeInterestRate(const double& t_i, const double& dt,  const size_t& numPaths, const size_t& numSteps, std::vector<Eigen::MatrixXd>& x);
-         double impliedVol(const Period& swaptionExpiry, const Period& swaptionTenor, const double& tau=0.25, const ql::VolatilityType& type=ql::Normal);
+         double impliedVol(const ql::Period& today, const ql::Period& swaptionExpiry, const ql::Period& swaptionTenor, const double& tau=0.25, const ql::VolatilityType& type=ql::Normal);
+         void calibrate(const std::shared_ptr<std::vector<ql::Period>>& swaptionExpiry, const std::shared_ptr<std::vector<ql::Period>>& swaptionTenor);
 
       private:
          size_t nFactor_;
@@ -81,10 +83,12 @@ namespace StochasticModel{
          std::vector<std::vector<Model::PolyFunc>> dZeta_; // dZeta: alp^2. variable to compute integration of square of alphas. (nFactor, nFactor)
          Eigen::MatrixXd corrMat_; // correlation matrices b.t.w. factors (nFactor, nFactor)
          Eigen::MatrixXd lowerMat_; // Lower part of the Cholesky decomposition of corrMat_ (nFactor, nFactor)
-         ext::shared_ptr<YieldTermStructure> yieldCurve_; // computes discount factor and forward rate
-
+         boost::shared_ptr<ql::YieldTermStructure> yieldCurve_; // computes discount factor and forward rate
+         struct HaganFunctor;
 
    };
+
+
 }
 
 

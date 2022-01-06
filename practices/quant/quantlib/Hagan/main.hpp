@@ -5,6 +5,7 @@
 #include <string> // stoi, stod
 #include <typeinfo>
 #include <utility> // move
+#include <memory> // smart pointer
 
 #include <Eigen/Dense> // Dense matrices
 #include <boost/property_tree/ptree.hpp>
@@ -22,6 +23,7 @@
 #include "model.hpp"
 #include "utils.hpp"
 #include "simulation.hpp"
+#include "optimizer.hpp"
 
 using namespace QuantLib;
 
