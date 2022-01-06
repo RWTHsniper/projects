@@ -233,7 +233,7 @@ namespace StochasticModel{
                     // Use z (xvalues) to update model parameters
                     double iVol = this_->impliedVol(today, (*swaptionExpiry_)[i], (*swaptionTenor_)[j], tau, type);
                     fvec(ind) = (*swaptionVolMat_)(i,j) - iVol;
-                    std::cout << "(" << i << ", " << j << ") " << (*swaptionVolMat_)(i,j) - iVol << " ";
+                    std::cout << (*swaptionVolMat_)(i,j) - iVol << " ";
                     fvec(ind) += penalty / fvec.size();
                 }
                 std::cout << std::endl;                

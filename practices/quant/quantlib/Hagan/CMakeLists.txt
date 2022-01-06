@@ -23,6 +23,8 @@ find_library(QUANTLIB_LIBRARY QuantLIB) # find a path of quantlib library
 target_link_libraries(hagan PUBLIC ${QUANTLIB_LIBRARY})
 # Add Eigen
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/eigen/) # Source codes are there
+# Add RapidJSON
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/rapidjson/) # Source codes are there
 
 # Cmake flags
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++17")

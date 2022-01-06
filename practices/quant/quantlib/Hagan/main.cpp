@@ -30,6 +30,7 @@ int main(int, char* []) {
     std::string source_dir(file_dir);
     eraseSubStr(source_dir, "main.cpp"); // remove main.cpp from the file's path
     std::string data_dir(source_dir+"data/");
+    std::string output_dir(source_dir+"output/");
 
     // Short alias for this namespace
     // Create a root
@@ -211,6 +212,83 @@ int main(int, char* []) {
     std::cout << "Ivol from HaganModel " << iVol << std::endl;
 
     haganModel.calibrate(swaptionExpiry, swaptionTenor, swaptionVolMat);
+
+    // Write output as JSON
+    std::string jsonMsg;
+    jsonMsg = "{\"expiry_size\": " + std::to_string(swaptionExpiry->size()) + ",\n";
+    jsonMsg += "\"tenor_size\": " + std::to_string(swaptionTenor->size()) + ",\n";
+    jsonMsg += "\"expiry\": ["; 
+    for (size_t i=0; i < swaptionExpiry->size(); i++){
+        jsonMsg += std::to_string(ql::years((*swaptionExpiry)[i]));
+        if (i == swaptionExpiry->size()-1) jsonMsg += "],\n";
+        else jsonMsg += ", \n";
+    }
+    jsonMsg += "\"tenor\": ["; 
+    for (size_t i=0; i < swaptionTenor->size(); i++){
+        jsonMsg += std::to_string(ql::years((*swaptionTenor)[i]));
+        if (i == swaptionTenor->size()-1) jsonMsg += "],\n";
+        else jsonMsg += ", \n";
+    }
+    jsonMsg += "\"quote\": ["; 
+    for (size_t i=0; i<swaptionExpiry->size(); i++){
+        for (size_t j=0; j<swaptionTenor->size(); j++){
+            jsonMsg += std::to_string(haganModel.impliedVol(today, (*swaptionExpiry)[i], (*swaptionTenor)[j], 0.25, ql::Normal));
+            if ((i == swaptionExpiry->size()-1) &&(j == swaptionTenor->size()-1)) jsonMsg += "]\n";
+            else jsonMsg += ", \n";
+        }
+    }
+    jsonMsg += "}";
+    std::ofstream myfile;
+    myfile.open (output_dir+"computedVol.json");
+    myfile << jsonMsg;
+    myfile.close();    
+
+    // pt::ptree computedVol;
+    // computedVol.put<double>("expiry_size", double(swaptionExpiry->size())+1000);
+    // // computedVol.put<double>("expiry_size", 100);
+    // computedVol.put<double>("tenor_size", swaptionTenor->size());
+    // pt::ptree expiryList;
+    // pt::ptree expiryNode;
+    // for (const auto& expiry : *swaptionExpiry){
+    //     expiryNode.put<double>("", ql::years(expiry));
+    //     expiryList.push_back(std::make_pair("", expiryNode));
+    // }
+    // computedVol.add_child("expiry", expiryList);
+    // // tenor
+    // pt::ptree tenorList;
+    // pt::ptree tenorNode;
+    // for (const auto& tenor : *swaptionTenor){
+    //     tenorNode.put("", ql::years(tenor));
+    //     tenorList.push_back(std::make_pair("", tenorNode));
+    // }
+    // computedVol.add_child("tenor", tenorList);
+    // // implied volatility
+    // pt::ptree volList;
+    // pt::ptree volNode;
+    // volNode.put("", haganModel.impliedVol(today, (*swaptionExpiry)[0], (*swaptionTenor)[0], 0.25, ql::Normal));
+    // volList.push_back(std::make_pair("", volNode));
+    // volNode.put("", haganModel.impliedVol(today, (*swaptionExpiry)[0], (*swaptionTenor)[1], 0.25, ql::Normal));
+    // volList.push_back(std::make_pair("", volNode));
+    // volNode.put("", haganModel.impliedVol(today, (*swaptionExpiry)[0], (*swaptionTenor)[2], 0.25, ql::Normal));
+    // volList.push_back(std::make_pair("", volNode));
+    // computedVol.add_child("quote", volList);
+
+    // pt::write_json(output_dir+"computedVol.json", computedVol);
+
+
+
+    // pt::write_json(std::cout, computedVol);
+
+    // for (auto &fruit : fruits)
+    // {
+    //     // Create an unnamed node containing the value
+    //     pt::ptree fruit_node;
+    //     fruit_node.put("", fruit);
+
+    //     // Add this node to the list.
+    //     fruits_node.push_back(std::make_pair("", fruit_node));
+    // }
+    // root.add_child("fruits", fruits_node);
 
     // Optimizer::testBoothFun();
 

@@ -2,6 +2,7 @@
 #define MAIN_HPP_
 
 #include <iostream>
+#include <fstream>
 #include <string> // stoi, stod
 #include <typeinfo>
 #include <utility> // move
