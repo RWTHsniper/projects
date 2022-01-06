@@ -27,60 +27,22 @@ namespace ql = QuantLib;
 namespace StochasticModel{
    class HaganNF{
       public:
-         HaganNF(boost::shared_ptr<ql::YieldTermStructure>& yieldCurve, const size_t& nFactor, Eigen::MatrixXd& corrMat): yieldCurve_(yieldCurve),
-                                 nFactor_(nFactor), corrMat_(corrMat){
-                                    if (!corrMat_.isApprox(corrMat_.transpose())){
-                                       throw std::runtime_error("Input correlation matrix is not symmetric!");
-                                    }
-                                    // Apply Cholesky decomposition for the correlation matrix
-                                    lowerMat_ = Eigen::MatrixXd(corrMat_.llt().matrixL());
-                                    if (!corrMat_.isApprox(lowerMat_*lowerMat_.transpose())){
-                                       std::cout << "Correlation matrix " << corrMat_ << std::endl;
-                                       std::cout << "Lower matrix " << lowerMat_ << std::endl;
-                                       throw std::runtime_error("Cholesky decomposition for the correlation matrix is failed!");
-                                    }
-                                    Eigen::VectorXd polyCoeffs(2); polyCoeffs << 0.0,1.0; // f(x) = x
-                                    // initialize alphas
-                                    alp.reserve(nFactor_);
-                                    size_t order = 1;
-                                    for (size_t i=0; i<nFactor_; i++){alp.emplace_back(order, polyCoeffs);}
-                                    dZeta_.reserve(nFactor_);
-                                    for (size_t i=0; i< nFactor_; i++){
-                                       std::vector<Model::PolyFunc> tmp;
-                                       tmp.reserve(nFactor_);
-                                       for (size_t j=0; j< nFactor_; j++){
-                                          Model::PolyFunc elem = alp[i] * alp[j] * corrMat_(i, j);
-                                          tmp.emplace_back(elem); 
-                                       }
-                                       dZeta_.emplace_back(tmp);
-                                    }
-                                    H_.reserve(nFactor);
-                                    double kappa = 1.0;
-                                    Eigen::VectorXd expParams(3); expParams << -1.0/kappa, -kappa, 1.0/kappa; // g(x) = (1-exp(-k*x))/k
-                                    for (size_t i=0; i< nFactor_; i++){
-                                       H_.emplace_back(expParams);
-                                    }
-                                    // Information to check
-                                    // for (size_t i=0; i<nFactor_; i++){
-                                    //    for (size_t j=0; j<nFactor_; j++)
-                                    //       dZeta_[i][j].getInfo();
-                                    // }
-                                    // H_[0].getInfo();
-                                    // H_[1].getInfo();
-         }
+         HaganNF(boost::shared_ptr<ql::YieldTermStructure>& yieldCurve, const size_t& nFactor, Eigen::MatrixXd& corrMat);
          Eigen::MatrixXd getLowerMat() const {return lowerMat_;}
          Eigen::MatrixXd getCorrMat() const {return corrMat_;}
          void evolve(Eigen::MatrixXd& xn, const double& t, const Eigen::MatrixXd& x, const double& dt, const Eigen::MatrixXd& dw) const;
          Eigen::VectorXd evolve(const double& t, const Eigen::VectorXd& x, const double& dt, const Eigen::VectorXd& dw) const;
-         std::shared_ptr<Eigen::MatrixXd>  computeInterestRate(const double& t_i, const double& dt,  const size_t& numPaths, const size_t& numSteps, std::vector<Eigen::MatrixXd>& x);
-         double impliedVol(const ql::Period& today, const ql::Period& swaptionExpiry, const ql::Period& swaptionTenor, const double& tau=0.25, const ql::VolatilityType& type=ql::Normal);
-         void calibrate(const std::shared_ptr<std::vector<ql::Period>>& swaptionExpiry, const std::shared_ptr<std::vector<ql::Period>>& swaptionTenor);
+         std::shared_ptr<Eigen::MatrixXd>  computeInterestRate(const double& t_i, const double& dt,  const size_t& numPaths, const size_t& numSteps, std::vector<Eigen::MatrixXd>& x) const;
+         double impliedVol(const ql::Period& today, const ql::Period& swaptionExpiry, const ql::Period& swaptionTenor, const double& tau=0.25, const ql::VolatilityType& type=ql::Normal) const;
+         void calibrate(const std::shared_ptr<std::vector<ql::Period>>& swaptionExpiry, const std::shared_ptr<std::vector<ql::Period>>& swaptionTenor, const std::shared_ptr<Eigen::MatrixXd>& swaptionVolMat);
+         void updateDZeta();
+         // The followings are public variables due to calibration
+         std::vector<Model::PolyFunc> alp_; // alpha (nFactor)
+         std::vector<Model::ExpFunc> H_; // How to implement H_ in the framework? (nFactor)
+         std::vector<std::vector<Model::PolyFunc>> dZeta_; // dZeta: alp^2. variable to compute integration of square of alphas. (nFactor, nFactor)
 
       private:
          size_t nFactor_;
-         std::vector<Model::PolyFunc> alp; // alpha (nFactor)
-         std::vector<Model::ExpFunc> H_; // How to implement H_ in the framework? (nFactor)
-         std::vector<std::vector<Model::PolyFunc>> dZeta_; // dZeta: alp^2. variable to compute integration of square of alphas. (nFactor, nFactor)
          Eigen::MatrixXd corrMat_; // correlation matrices b.t.w. factors (nFactor, nFactor)
          Eigen::MatrixXd lowerMat_; // Lower part of the Cholesky decomposition of corrMat_ (nFactor, nFactor)
          boost::shared_ptr<ql::YieldTermStructure> yieldCurve_; // computes discount factor and forward rate

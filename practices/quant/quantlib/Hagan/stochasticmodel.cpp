@@ -1,6 +1,49 @@
 #include "stochasticmodel.hpp"
 
 namespace StochasticModel{
+        HaganNF::HaganNF(boost::shared_ptr<ql::YieldTermStructure>& yieldCurve, const size_t& nFactor, Eigen::MatrixXd& corrMat): yieldCurve_(yieldCurve),
+            nFactor_(nFactor), corrMat_(corrMat){
+            if (!corrMat_.isApprox(corrMat_.transpose())){
+                throw std::runtime_error("Input correlation matrix is not symmetric!");
+            }
+            // Apply Cholesky decomposition for the correlation matrix
+            lowerMat_ = Eigen::MatrixXd(corrMat_.llt().matrixL());
+            if (!corrMat_.isApprox(lowerMat_*lowerMat_.transpose())){
+                std::cout << "Correlation matrix " << corrMat_ << std::endl;
+                std::cout << "Lower matrix " << lowerMat_ << std::endl;
+                throw std::runtime_error("Cholesky decomposition for the correlation matrix is failed!");
+            }
+            // initialize alphas
+            // Assume linear functions for alpha (volatility)
+            size_t order = 1;
+            Eigen::VectorXd polyCoeffs(order+1); polyCoeffs << 0.0,1.0; // f(x) = x
+            alp_.reserve(nFactor_);
+            for (size_t i=0; i<nFactor_; i++){alp_.emplace_back(order, polyCoeffs);}
+            dZeta_.reserve(nFactor_);
+            for (size_t i=0; i< nFactor_; i++){
+                std::vector<Model::PolyFunc> tmp;
+                tmp.reserve(nFactor_);
+                for (size_t j=0; j< nFactor_; j++){
+                    Model::PolyFunc elem = alp_[i] * alp_[j] * corrMat_(i, j);
+                    tmp.emplace_back(elem); 
+                }
+                dZeta_.emplace_back(tmp);
+            }
+            H_.reserve(nFactor);
+            double kappa = 1e-3;
+            Eigen::VectorXd expParams(3); expParams << -1.0/kappa, -kappa, 1.0/kappa; // g(x) = (1-exp(-k*x))/k
+            for (size_t i=0; i< nFactor_; i++){
+                H_.emplace_back(expParams);
+            }
+            // Information to check
+            // for (size_t i=0; i<nFactor_; i++){
+            //    for (size_t j=0; j<nFactor_; j++)
+            //       dZeta_[i][j].getInfo();
+            // }
+            // H_[0].getInfo();
+            // H_[1].getInfo();
+         }
+
     void HaganNF::evolve(Eigen::MatrixXd& xn, const double& t, const Eigen::MatrixXd& x, const double& dt, const Eigen::MatrixXd& dw) const{
         // Eigen::VectorXd xn(x); // state variables at next step (output)
         // Compute drift
@@ -13,18 +56,29 @@ namespace StochasticModel{
         double sqrtDt = std::sqrt(dt);
         for (size_t j=0; j< x.cols(); j++){
             for (size_t i=0; i< x.rows(); i++){
-                // vol(i,j) = alp[i].evaluate(t);
-                vol = alp[i].evaluate(t);
+                // vol(i,j) = alp_[i].evaluate(t);
+                vol = alp_[i].evaluate(t);
                 xn(i,j) = x(i,j) + vol * dw(i,j) * sqrtDt;
             }
         }
         // for (size_t i=0; i< nFactor_; i++){
-        //     vol[i] = alp[i].evaluate(t);
+        //     vol[i] = alp_[i].evaluate(t);
         // }
         // for (size_t i=0; i< nFactor_; i++){
         //     xn[i] += vol[i] * dw[i] * std::sqrt(dt);
         // }
     }
+    void HaganNF::updateDZeta(){
+        /* Update dZeta_ after alp_ is updated
+        *
+        */
+        for (size_t i=0; i< nFactor_; i++){
+            for (size_t j=0; j< nFactor_; j++){
+                dZeta_[i][j] = alp_[i] * alp_[j] * corrMat_(i, j);
+            }
+        }
+    }
+
     Eigen::VectorXd HaganNF::evolve(const double& t, const Eigen::VectorXd& x, const double& dt, const Eigen::VectorXd& dw) const{
         Eigen::VectorXd xn(x); // state variables at next step (output)
         double sqrtDt = std::sqrt(dt);
@@ -33,14 +87,14 @@ namespace StochasticModel{
         // Compute volatility
         Eigen::VectorXd vol(nFactor_); 
         for (size_t i=0; i< nFactor_; i++){
-            vol[i] = alp[i].evaluate(t);
+            vol[i] = alp_[i].evaluate(t);
         }
         for (size_t i=0; i< nFactor_; i++){
             xn[i] += vol[i] * dw[i] * sqrtDt;
         }
         return xn;
     }
-    std::shared_ptr<Eigen::MatrixXd> HaganNF::computeInterestRate(const double& t_i, const double& dt, const size_t& numPaths, const size_t& numSteps, std::vector<Eigen::MatrixXd>& x){
+    std::shared_ptr<Eigen::MatrixXd> HaganNF::computeInterestRate(const double& t_i, const double& dt, const size_t& numPaths, const size_t& numSteps, std::vector<Eigen::MatrixXd>& x) const {
         double t = t_i + dt; // skip 0th step
         double T = t_i + numSteps * dt;
         std::shared_ptr<Eigen::MatrixXd> r = std::make_shared<Eigen::MatrixXd>(numPaths, numSteps+1);
@@ -71,8 +125,7 @@ namespace StochasticModel{
         }
     return r;
     }
-    // void HaganNF::impliedVol(std::vector<Period>& swaptionExpiry, std::vector<Period>& swaptionTenor, ql::VolatilityType& type){ // type: ql::Normal
-    double HaganNF::impliedVol(const ql::Period& today, const ql::Period& swaptionExpiry, const ql::Period& swaptionTenor, const double& tau, const ql::VolatilityType& type){ // type: ql::Normal
+    double HaganNF::impliedVol(const ql::Period& today, const ql::Period& swaptionExpiry, const ql::Period& swaptionTenor, const double& tau, const ql::VolatilityType& type) const { // type: ql::Normal
         double res = 0.0;
         double t = static_cast<double>(ql::years(today));
         Eigen::MatrixXd zeta_t(nFactor_, nFactor_); zeta_t.setZero();
@@ -122,36 +175,103 @@ namespace StochasticModel{
     }
     struct HaganNF::HaganFunctor : Optimizer::Functor<double> {
         // members
+        HaganNF* this_;
         std::shared_ptr<std::vector<ql::Period>> swaptionExpiry_;
         std::shared_ptr<std::vector<ql::Period>> swaptionTenor_;
+        std::shared_ptr<Eigen::MatrixXd> swaptionVolMat_; 
         // Simple constructor
-        HaganFunctor(const std::shared_ptr<std::vector<ql::Period>>& swaptionExpiry, const std::shared_ptr<std::vector<ql::Period>>& swaptionTenor): 
-            swaptionExpiry_(swaptionExpiry), swaptionTenor_(swaptionTenor), Optimizer::Functor<double>(swaptionExpiry->size()*swaptionTenor->size(),swaptionExpiry->size()*swaptionTenor->size()) {}
+        HaganFunctor(HaganNF* thisObj, 
+                    const std::shared_ptr<std::vector<ql::Period>>& swaptionExpiry, 
+                    const std::shared_ptr<std::vector<ql::Period>>& swaptionTenor,
+                    const std::shared_ptr<Eigen::MatrixXd>& swaptionVolMat): 
+            this_(thisObj), swaptionExpiry_(swaptionExpiry), swaptionTenor_(swaptionTenor), swaptionVolMat_(swaptionVolMat), 
+            Optimizer::Functor<double>(swaptionExpiry->size()*swaptionTenor->size(),swaptionVolMat->rows()*swaptionVolMat->cols()) {}
 
         // Implementation of the objective function
-        int operator ()
-            (const Eigen::VectorXd &z, Eigen::VectorXd &fvec) const {
-            double x = z(0);   double y = z(1);
-                /*
-                * Evaluate the Booth function.
-                * Important: LevenbergMarquardt is designed to work with objective functions that are a sum
-                * of squared terms. The algorithm takes this into account: do not do it yourself.
-                * In other words: objFun = sum(fvec(i)^2)
-                */
-                fvec(0) = x + 2*y - 7;
-                fvec(1) = 2*x + y - 5;
-                return 0;
+        int operator () (const Eigen::VectorXd &z, Eigen::VectorXd &fvec) const {
+            ql::Period today(0, ql::Years); // Current time for evaluation
+            ql::VolatilityType type = ql::Normal;
+            double tau = 0.25;
+            /*
+            * Evaluate the fitness to ATM swaption matrix.
+            * Important: LevenbergMarquardt is designed to work with objective functions that are a sum
+            * of squared terms. The algorithm takes this into account: do not do it yourself.
+            * In other words: objFun = sum(fvec(i)^2)
+            */
+           // Setup the parameters in LGM
+            double penalty = 0.0; // penalty function
+            size_t count = 0;
+            for (size_t i=0; i<this_->nFactor_; i++){
+                size_t order = this_->alp_[i].getOrder();
+                // auto coeffs = this_->alp_[i].getCoeffs();
+                Eigen::VectorXd buff(order+1);
+                for (size_t j=0; j<= order; j++){ // coefficients from 0th to the last order
+                    buff[j] = z[count];
+                    count++;
+                }
+                this_->alp_[i].setCoeffs(buff);
+            }
+            for (size_t i=0; i<this_->nFactor_; i++){
+                Eigen::VectorXd buff(3);
+                auto expParams = this_->H_[i].getParams(); // a*exp(b) + c: [a, b, c]: [-1/ka, -ka, 1/ka]
+                double kappa = z[count];
+                buff << -1/kappa, -kappa, 1/kappa;
+                this_->H_[i].setParams(buff);
+                count++;
+                if (kappa <= 0.0){
+                    penalty += std::pow(kappa, 2);
+                }
+                else if (kappa > 10){
+                    penalty += std::pow(kappa-10.0, 2);
+                }
+            }
+            this_->updateDZeta();
+            std::cout << "current sol" << std::endl << z << std::endl;
+            for (size_t i=0; i< swaptionExpiry_->size(); i++){
+                for (size_t j=0; j< swaptionTenor_->size(); j++){
+                    size_t ind = i*swaptionTenor_->size() + j;
+                    // Use z (xvalues) to update model parameters
+                    double iVol = this_->impliedVol(today, (*swaptionExpiry_)[i], (*swaptionTenor_)[j], tau, type);
+                    fvec(ind) = (*swaptionVolMat_)(i,j) - iVol;
+                    std::cout << "(" << i << ", " << j << ") " << (*swaptionVolMat_)(i,j) - iVol << " ";
+                    fvec(ind) += penalty / fvec.size();
+                }
+                std::cout << std::endl;                
+            }
+            return 0;
         }
     };
 
-    void HaganNF::calibrate(const std::shared_ptr<std::vector<ql::Period>>& swaptionExpiry, const std::shared_ptr<std::vector<ql::Period>>& swaptionTenor){
-        std::cout << "Testing the Booth function..." << std::endl;
-        Eigen::VectorXd zInit(2); zInit << 1.87, 2.032;
-        std::cout << "zInit: " << zInit.transpose() << std::endl;
-        Eigen::VectorXd zSoln(2); zSoln << 1.0, 3.0;
-        std::cout << "zSoln: " << zSoln.transpose() << std::endl;
-        
-        HaganFunctor functor(swaptionExpiry, swaptionTenor);
+    void HaganNF::calibrate(const std::shared_ptr<std::vector<ql::Period>>& swaptionExpiry, 
+                            const std::shared_ptr<std::vector<ql::Period>>& swaptionTenor,
+                            const std::shared_ptr<Eigen::MatrixXd>& swaptionVolMat){
+        /* The parameters to calibrate are
+        * alp_[0], alp_[1], ..., alp_[nFactor_-1]: coeff[0], coeff[1]
+        * H_[0], ..., H_[nFactor-1]: k 
+        * In total, nFactor * 2 + nFactor * 1 parameters should be updated
+        */
+        size_t numParams = nFactor_ * (2 + 1); // alp_ and H_
+        // size_t numParams = nFactor_ * (2); // alp_ and H_
+        // Initialize the vector of initial values
+        Eigen::VectorXd zInit(numParams);
+        size_t count = 0;
+        for (size_t i=0; i<nFactor_; i++){
+            auto coeffs = alp_[i].getCoeffs();
+            size_t order = alp_[i].getOrder();
+            for (size_t j=0; j<= order; j++){ // coefficients from 0th to the last order
+                zInit[count] = coeffs[j];
+                count++;
+            }
+        }
+        for (size_t i=0; i<nFactor_; i++){
+            auto expParams = H_[i].getParams(); // a*exp(b) + c: [a, b, c]
+            double kappa = -expParams[1]; 
+            zInit[count] = kappa;
+            count++;
+        }
+        std::cout << "Initial guess for LGM " << std::endl << zInit.transpose() << std::endl;
+ 
+        HaganFunctor functor(this, swaptionExpiry, swaptionTenor, swaptionVolMat);
         Eigen::NumericalDiff<HaganFunctor> numDiff(functor);
         Eigen::LevenbergMarquardt<Eigen::NumericalDiff<HaganFunctor>,double> lm(numDiff);
         lm.parameters.maxfev = 1000;
@@ -162,9 +282,31 @@ namespace StochasticModel{
         Eigen::VectorXd z = zInit;
         int ret = lm.minimize(z);
         std::cout << "iter count: " << lm.iter << std::endl;
-        std::cout << "return status: " << ret << std::endl;
+        std::cout << "return status: " << ret << std::endl; // status 2 is good
+        Eigen::VectorXd tmp(swaptionVolMat->rows()*swaptionVolMat->cols());
+        functor(z, tmp);
+        std::cout << "Norm of final function: " << tmp.norm() << std::endl;
         std::cout << "zSolver: " << z.transpose() << std::endl;
         std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
     }
 
 }
+
+/*
+namespace LevenbergMarquardtSpace {
+    enum Status {
+        NotStarted = -2,
+        Running = -1,
+        ImproperInputParameters = 0,
+        RelativeReductionTooSmall = 1,
+        RelativeErrorTooSmall = 2,
+        RelativeErrorAndReductionTooSmall = 3,
+        CosinusTooSmall = 4,
+        TooManyFunctionEvaluation = 5,
+        FtolTooSmall = 6,
+        XtolTooSmall = 7,
+        GtolTooSmall = 8,
+        UserAsked = 9
+    };
+}
+*/

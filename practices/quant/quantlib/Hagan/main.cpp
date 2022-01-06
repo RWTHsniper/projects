@@ -210,8 +210,9 @@ int main(int, char* []) {
     double iVol = haganModel.impliedVol(today, (*swaptionExpiry)[0], (*swaptionTenor)[0], 0.25, ql::Normal);
     std::cout << "Ivol from HaganModel " << iVol << std::endl;
 
+    haganModel.calibrate(swaptionExpiry, swaptionTenor, swaptionVolMat);
 
-    Optimizer::testBoothFun();
+    // Optimizer::testBoothFun();
 
     /* Next steps
         - Think about pricing swaptions. (analytic)

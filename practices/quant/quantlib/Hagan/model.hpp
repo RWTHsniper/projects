@@ -37,6 +37,8 @@ namespace Model{
             double evalDeriv(const double& x, const size_t& order = 1) const;
             double evalInt(const double& x_i, const double& x_f) const;
             void getInfo() const;
+            size_t getOrder() const {return order_;};
+            Eigen::VectorXd getCoeffs(){return coeffs_;};
             PolyFunc getIndefIntegral() const; // get indefinite integral
             template <typename T>
             PolyFunc& operator+=(const T& other){
@@ -109,10 +111,11 @@ namespace Model{
             void setxVals(const Eigen::VectorXd& xVals){xVals_ = xVals;}
             void setyVals(const Eigen::VectorXd& yVals){yVals_ = yVals;}
             void setParams(const Eigen::VectorXd& params){assert(params_.size() == 3); params_ = params;}
-            double evaluate(const double& x);
-            double evalDeriv(const double& x, const size_t& order = 1);
+            double evaluate(const double& x) const;
+            double evalDeriv(const double& x, const size_t& order = 1) const;
             double evalInt(const double& x_i, const double& x_f) const;
             void getInfo() const;
+            Eigen::VectorXd getParams() const {return params_;};
 
         private:
             Eigen::VectorXd xVals_;

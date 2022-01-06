@@ -71,11 +71,11 @@ namespace Model{
         }
 
     };
-    double ExpFunc::evaluate(const double& x) {
+    double ExpFunc::evaluate(const double& x) const {
         double result = params_[0] * exp(params_[1] * x) + params_[2];
         return result;
     }
-    double ExpFunc::evalDeriv(const double& x, const size_t& order) {
+    double ExpFunc::evalDeriv(const double& x, const size_t& order) const {
         assert(order > 0);
         double result = pow(params_[1], order) * params_[0] * exp(params_[1] * x);
         return result;
