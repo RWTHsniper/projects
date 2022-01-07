@@ -1,12 +1,12 @@
 {
+"T": 30,
+"numPaths": 100,
+"numAnnualSteps": 12,
 "numFactors": 2,
-"corrUpper1": [
-    1.0
-],
 "corrUpper": [
     1.0,
-    0.50,
+    -0.50,
     1.0
 ],
-"alpOrder": 1
+"alpOrder":0
 }

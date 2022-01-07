@@ -48,6 +48,7 @@ namespace Model{
         std::cout << "Information of a PolyFunc " << this << std::endl;
         std::cout << "order " << std::endl << order_ << std::endl;
         std::cout << "coeffs " << std::endl << coeffs_.transpose() << std::endl;
+        std::cout << "expression" << std::endl;
         for (int i= order_; i>=0; i--){
             if (i != order_) {std::cout  << " + ";}
             if (i>0){

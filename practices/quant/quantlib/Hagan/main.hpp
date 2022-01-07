@@ -28,34 +28,6 @@
 
 using namespace QuantLib;
 
-/*
-* Bachelier's Normal model for pricing swaptions
-*/
-Real bachelierATMSwaption(Real t, Real T0, Real tau, Real sig, Swap::Type type, std::vector<Real>& discountFactors, Real notional=1.0){
-/*
-Arguments
-- T0: expiration/reset date 
-- t: current time
-- sig: implied volatility
-- type: type of a swaption (Payer or Receiver)
-- discountFactors: vector of discount factors at coupon payments
-- notional: notional amount
-*/
-    Real payer_val{0.0};
-    // Since the goal is to compute ATM swaption, R_swap(t) = K
-    Real sqrt_t = sqrt(T0-t); // sqrt of time to expiry
-    Real pdf_0{0.3989422804014327}; // pdf of Gaussian distribution at 0
-    payer_val = std::accumulate(discountFactors.begin(), discountFactors.end(), 0.0);
-    payer_val *= notional * tau * sig * sqrt_t * pdf_0;
-
-    switch (type) {
-        case Swap::Payer: return payer_val;
-        case Swap::Receiver: return -payer_val;
-        default: std::cout << "d"; exit(-1); // there are no applicable constant_expressions 
-                                   // therefore default is executed
-    }
-
-}
 
 void testModel(){
     double tol = 1e-8;

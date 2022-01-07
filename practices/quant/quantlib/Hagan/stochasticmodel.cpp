@@ -15,9 +15,13 @@ namespace StochasticModel{
             }
             // initialize alphas
             // Assume linear functions for alpha (volatility)
-            Eigen::VectorXd polyCoeffs(alpOrder_+1); 
-            if (alpOrder_==1) polyCoeffs << 0.0,1.0; // f(x) = x
+            Eigen::VectorXd polyCoeffs(alpOrder_+1);
+            if (alpOrder_== 0) polyCoeffs << 0.1; // f(x) = 0.1
+            else if (alpOrder_==1) polyCoeffs << 0.0,1.0; // f(x) = x
             else if (alpOrder_ == 2) polyCoeffs << 0.0, 0.0, 1.0; // f(x) = x^2
+            else if (alpOrder_ == 3) polyCoeffs << 0.0, 0.0, 0.0, 1e-2; // f(x) = x^3
+            else if (alpOrder_ == 4) polyCoeffs << 0.0, 0.0, 0.0, 0.0, 1e-2; // f(x) = x^4
+            else {polyCoeffs.setZero(); polyCoeffs[alpOrder] = 1.0/std::pow(10, alpOrder);}
             alp_.reserve(nFactor_);
             for (size_t i=0; i<nFactor_; i++){alp_.emplace_back(alpOrder_, polyCoeffs);}
             dZeta_.reserve(nFactor_);
@@ -31,7 +35,7 @@ namespace StochasticModel{
                 dZeta_.emplace_back(tmp);
             }
             H_.reserve(nFactor);
-            double kappa = 1e-3;
+            double kappa = 1.0; // kappa should not be small because at steady-state, g(x) = 1/kappa.
             Eigen::VectorXd expParams(3); expParams << -1.0/kappa, -kappa, 1.0/kappa; // g(x) = (1-exp(-k*x))/k
             for (size_t i=0; i< nFactor_; i++){
                 H_.emplace_back(expParams);
@@ -79,6 +83,11 @@ namespace StochasticModel{
             }
         }
     }
+    void HaganNF::getInfo(){
+        std::cout << "Number of factors: " << nFactor_ << std::endl;
+        std::cout << "alpha info" << std::endl;
+        for (size_t i=0; i<nFactor_; i++) alp_[i].getInfo();
+    }
 
     Eigen::VectorXd HaganNF::evolve(const double& t, const Eigen::VectorXd& x, const double& dt, const Eigen::VectorXd& dw) const{
         Eigen::VectorXd xn(x); // state variables at next step (output)
@@ -95,7 +104,43 @@ namespace StochasticModel{
         }
         return xn;
     }
-    std::shared_ptr<Eigen::MatrixXd> HaganNF::computeInterestRate(const double& t_i, const double& dt, const size_t& numPaths, const size_t& numSteps, std::vector<Eigen::MatrixXd>& x) const {
+    Eigen::VectorXd HaganNF::computeH(const double& t) const{
+        Eigen::VectorXd H_t(nFactor_);
+        for (size_t sv=0; sv<nFactor_; sv++){H_t[sv] = H_[sv].evaluate(t);};
+        return H_t;
+    }
+    Eigen::MatrixXd HaganNF::computeZeta(const double& t) const{
+        Eigen::MatrixXd zeta_t(nFactor_, nFactor_);
+        for (size_t sv=0; sv<nFactor_; sv++)
+            for (size_t sv2=0; sv2<nFactor_; sv2++) zeta_t(sv, sv2) = dZeta_[sv][sv2].evalInt(0.0, t);
+        return zeta_t;
+    }
+    double HaganNF::computeNumeraire(const double& t, const Eigen::VectorXd& x) const{
+        const Eigen::VectorXd& H_t = computeH(t);
+        const Eigen::MatrixXd& zeta_t = computeZeta(t);
+        double Nt = std::exp(H_t.dot(x) + 0.5 * H_t.dot(zeta_t * H_t)) / yieldCurve_->discount(t);
+        // std::cout << "Num.. " << std::exp(H_t.dot(x) + 0.5 * H_t.dot(zeta_t * H_t)) << " " << yieldCurve_->discount(t) << std::endl;
+        // std::cout << "H and zeta_t t, x" << std::endl << H_t.transpose() << std::endl << zeta_t << std::endl << t << std::endl << x << std::endl; 
+        // std::cout << "Num.. " << (H_t.dot(x) + 0.5 * H_t.dot(zeta_t * H_t)) << " " << yieldCurve_->discount(t) << std::endl;
+        return Nt;
+    }
+    double HaganNF::computeDiscount(const double& t, const double& T, const Eigen::VectorXd& x) const{
+        /*
+        Use initial yield curve and model parameters to compute the bond price at time t
+        */
+        const Eigen::VectorXd& H_T = computeH(T);
+        const Eigen::MatrixXd& zeta_t = computeZeta(t);
+        const double Nt = computeNumeraire(t, x);
+        // const double Pt = yieldCurve_->discount(t);
+        const double PT = yieldCurve_->discount(T);
+        double res = PT * Nt * std::exp(-H_T.dot(x) - 0.5 * H_T.dot(zeta_t * H_T));
+        return res;
+    }
+    double HaganNF::computeForward(const double& t, const double& T1, const double& T2,const Eigen::VectorXd& x) const{
+        double l = (computeDiscount(t, T1, x) / computeDiscount(t, T2, x) - 1.0) / (T2-T1);
+        return l;
+    }
+    std::shared_ptr<Eigen::MatrixXd> HaganNF::computeInterestRate(const double& t_i, const double& dt, const size_t& numPaths, const size_t& numSteps, const std::vector<Eigen::MatrixXd>& x) const {
         double t = t_i + dt; // skip 0th step
         double T = t_i + numSteps * dt;
         std::shared_ptr<Eigen::MatrixXd> r = std::make_shared<Eigen::MatrixXd>(numPaths, numSteps+1);
@@ -135,10 +180,9 @@ namespace StochasticModel{
         double ti = t0;
         double tn = t0 + ql::years(swaptionTenor);
         Eigen::VectorXd Pi(N+1); // t0,t1,...,tN
-        Eigen::VectorXd dHi(nFactor_);
         Eigen::VectorXd Htot(nFactor_); Htot.setZero();
         // compute discount factors
-        for (size_t i=0; i<N+1; i++){ // t0,t1,...,tN
+        for (size_t i=0; i<=N; i++){ // t0,t1,...,tN
             Pi[i] = yieldCurve_->discount(ti); // equivalent to Di
             ti += tau;
         }
@@ -147,7 +191,7 @@ namespace StochasticModel{
         for (size_t i=1; i<=N; i++){ // t1,...,tN
             annuity += tau * Pi[i];
         }
-        double St = (Pi[0] - Pi[N]) / annuity;
+        double St = (Pi[0] - Pi[N]) / annuity; // swap rate
         if (type == ql::Normal){
             // std::cout << t0 << " " << ti << " " << tn << " " << std::endl << Pi << std::endl;
             // std::cout << N << std::endl;
@@ -161,7 +205,7 @@ namespace StochasticModel{
                 ti = t0;
                 Htot[j] = Pi[N] * (H_[j].evaluate(tn) - H_[j].evaluate(t));
                 for (size_t i=1; i<=N; i++){
-                    ti = t0 + tau;
+                    ti += tau;
                     Htot[j] += St * tau * Pi[i] * (H_[j].evaluate(ti) - H_[j].evaluate(t));
                 }
             }
@@ -186,7 +230,15 @@ namespace StochasticModel{
                     const std::shared_ptr<std::vector<ql::Period>>& swaptionTenor,
                     const std::shared_ptr<Eigen::MatrixXd>& swaptionVolMat): 
             this_(thisObj), swaptionExpiry_(swaptionExpiry), swaptionTenor_(swaptionTenor), swaptionVolMat_(swaptionVolMat), 
-            Optimizer::Functor<double>(swaptionExpiry->size()*swaptionTenor->size(),swaptionVolMat->rows()*swaptionVolMat->cols()) {}
+            Optimizer::Functor<double>(swaptionExpiry->size()*swaptionTenor->size(),swaptionVolMat->rows()*swaptionVolMat->cols()) {
+            // std::cout << "This is HaganFunctior " << std::endl << *swaptionExpiry_ << std::endl << *swaptionTenor_ << std::endl << *swaptionVolMat << std::endl;
+            std::cout << "This is HaganFunctior " << std::endl;
+            std::cout << "This is expiry " << std::endl;
+            for (size_t i=0; i<swaptionExpiry->size(); i++) std::cout << (*swaptionExpiry)[i] << " ";
+            std::cout << std::endl << "This is tenor " << std::endl;
+            for (size_t i=0; i<swaptionTenor->size(); i++) std::cout << (*swaptionTenor)[i] << " ";
+            std::cout << std::endl << "Swaption vol mat " << std::endl << *swaptionVolMat << std::endl;
+            }
 
         // Implementation of the objective function
         int operator () (const Eigen::VectorXd &z, Eigen::VectorXd &fvec) const {
@@ -201,7 +253,7 @@ namespace StochasticModel{
             */
            // Setup the parameters in LGM
             double penalty = 0.0; // penalty function
-            size_t count = 0;
+            size_t count = 0; // index for z vector. THis is used to map current step solution to parameters in the model
             for (size_t i=0; i<this_->nFactor_; i++){
                 size_t order = this_->alp_[i].getOrder();
                 // auto coeffs = this_->alp_[i].getCoeffs();
@@ -216,7 +268,9 @@ namespace StochasticModel{
                 Eigen::VectorXd buff(3);
                 auto expParams = this_->H_[i].getParams(); // a*exp(b) + c: [a, b, c]: [-1/ka, -ka, 1/ka]
                 double kappa = z[count];
-                buff << -1/kappa, -kappa, 1/kappa;
+                buff << -1.0/kappa, -kappa, 1.0/kappa;
+                // double c = 100;
+                // buff[0] *= c; buff[2] *= c;
                 this_->H_[i].setParams(buff);
                 count++;
                 if (kappa <= 0.0){
