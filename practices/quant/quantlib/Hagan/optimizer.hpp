@@ -96,7 +96,19 @@ namespace Optimizer{
             fvec(1) = x + y * y - 7;
             return 0;
         }
-   };
+    };
+
+    inline void LMReturnStatus(int ret){
+        /*
+        LevenbergMarquardt method's return status
+        */
+        switch(ret){
+            case Eigen::LevenbergMarquardtSpace::TooManyFunctionEvaluation  : std::cout << "Too many function evaluations\n";   break;
+            case Eigen::LevenbergMarquardtSpace::RelativeReductionTooSmall  : std::cout << "Relative reduction is too small\n";   break;
+            case Eigen::LevenbergMarquardtSpace::RelativeErrorTooSmall  : std::cout << "Relative error is too small\n";   break;
+            case Eigen::LevenbergMarquardtSpace::RelativeErrorAndReductionTooSmall  : std::cout << "Relative error and reduction are too small\n";   break;
+        }
+    }
 
     void testBoothFun();
 

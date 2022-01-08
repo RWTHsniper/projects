@@ -171,9 +171,8 @@ namespace StochasticModel{
         }
     return r;
     }
-    double HaganNF::impliedVol(const ql::Period& today, const ql::Period& swaptionExpiry, const ql::Period& swaptionTenor, const double& tau, const ql::VolatilityType& type) const { // type: ql::Normal
+    double HaganNF::impliedVol(const ql::Period& swaptionExpiry, const ql::Period& swaptionTenor, const double& tau, const ql::VolatilityType& type) const { // type: ql::Normal
         double res = 0.0;
-        double t = static_cast<double>(ql::years(today));
         Eigen::MatrixXd zeta_t(nFactor_, nFactor_); zeta_t.setZero();
         size_t N = static_cast<size_t>(ql::years(swaptionTenor) / tau); // number of payments for a swap
         double t0 = ql::years(swaptionExpiry); // exercise date
@@ -191,7 +190,7 @@ namespace StochasticModel{
         for (size_t i=1; i<=N; i++){ // t1,...,tN
             annuity += tau * Pi[i];
         }
-        double St = (Pi[0] - Pi[N]) / annuity; // swap rate
+        double S0 = (Pi[0] - Pi[N]) / annuity; // swap rate
         if (type == ql::Normal){
             // std::cout << t0 << " " << ti << " " << tn << " " << std::endl << Pi << std::endl;
             // std::cout << N << std::endl;
@@ -203,10 +202,12 @@ namespace StochasticModel{
             // compute Htot
             for (size_t j=0; j<nFactor_; j++){
                 ti = t0;
-                Htot[j] = Pi[N] * (H_[j].evaluate(tn) - H_[j].evaluate(t));
+                // Htot[j] = Pi[N] * (H_[j].evaluate(tn) - H_[j].evaluate(0.0));
+                Htot[j] = Pi[N] * (H_[j].evaluate(tn));
                 for (size_t i=1; i<=N; i++){
                     ti += tau;
-                    Htot[j] += St * tau * Pi[i] * (H_[j].evaluate(ti) - H_[j].evaluate(t));
+                    // Htot[j] += S0 * tau * Pi[i] * (H_[j].evaluate(ti) - H_[j].evaluate(0.0));
+                    Htot[j] += S0 * tau * Pi[i] * (H_[j].evaluate(ti));
                 }
             }
             Htot /= annuity;
@@ -216,8 +217,60 @@ namespace StochasticModel{
         else{
             std::cout << "Volatility type " << type << " is not supported" << std::endl;
         }
+        // std::cout << "t0 " << std::endl << t0 << std::endl;
+        // std::cout << "zeta " << std::endl << zeta_t << std::endl;
+        // std::cout << "annuity " << std::endl << annuity << std::endl;
+        // std::cout << "Htot " << std::endl << Htot.transpose() << std::endl;
+        // std::cout << "Pi " << std::endl << Pi.transpose() << std::endl;
         return res;
     }
+    double HaganNF::impliedVolAnal(const ql::Period& swaptionExpiry, const ql::Period& swaptionTenor, const double& tau, const ql::VolatilityType& type) const{
+        double t = 0.0;
+        Eigen::MatrixXd zeta_t(nFactor_, nFactor_); zeta_t.setZero();
+        size_t N = static_cast<size_t>(ql::years(swaptionTenor) / tau); // number of payments for a swap
+        double t0 = ql::years(swaptionExpiry); // exercise date
+        double ti = t0;
+        double tn = t0 + ql::years(swaptionTenor);
+
+        Eigen::VectorXd alpha(2); alpha[0] = 0.1; alpha[1] = 0.1;
+        auto H = [](double t) { return 1.0-std::exp(-t);};
+
+        // compute discount factors
+        Eigen::VectorXd Pi(N+1); // t0,t1,...,tN
+        for (size_t i=0; i<=N; i++){ // t0,t1,...,tN
+            Pi[i] = yieldCurve_->discount(ti); // equivalent to Di
+            ti += tau;
+        }
+        // compute annuity
+        double annuity = 0.0;
+        for (size_t i=1; i<=N; i++){ // t1,...,tN
+            annuity += tau * Pi[i];
+        }
+        double S0 = (Pi[0] - Pi[N]) / annuity; // swap rate
+        Eigen::VectorXd Htot(2);
+        for (size_t j=0; j<nFactor_; j++){
+            Htot[j] = Pi[N]*H(tn);
+            ti = t0;
+            for (size_t i=1; i<=N; i++){
+                ti += tau;
+                Htot[j] += S0*tau*Pi[i]*H(ti);
+            }
+            Htot[j] /= annuity;
+        }
+        Eigen::MatrixXd zeta(2,2);
+        zeta(0,0) = 0.01*t0; zeta(0,1) = -0.5*0.01*t0; zeta(1,0) = -0.5*0.01*t0; zeta(1,1) = 0.01*t0;
+        double ivol = std::sqrt(Htot.dot(zeta*Htot)/t0);
+
+//         std::cout << "t0 " << std::endl << t0 << std::endl;
+//         std::cout << "zeta " << std::endl << zeta << std::endl;
+//         std::cout << "annuity " << std::endl << annuity << std::endl;
+//         std::cout << "Htot " << std::endl << Htot.transpose() << std::endl;
+//         std::cout << "Pi " << std::endl << Pi.transpose() << std::endl;
+// exit(-1);
+        return ivol;
+    }
+
+
     struct HaganNF::HaganFunctor : Optimizer::Functor<double> {
         // members
         HaganNF* this_;
@@ -286,7 +339,7 @@ namespace StochasticModel{
                 for (size_t j=0; j< swaptionTenor_->size(); j++){
                     size_t ind = i*swaptionTenor_->size() + j;
                     // Use z (xvalues) to update model parameters
-                    double iVol = this_->impliedVol(today, (*swaptionExpiry_)[i], (*swaptionTenor_)[j], tau, type);
+                    double iVol = this_->impliedVol((*swaptionExpiry_)[i], (*swaptionTenor_)[j], tau, type);
                     fvec(ind) = (*swaptionVolMat_)(i,j) - iVol;
                     // std::cout << (*swaptionVolMat_)(i,j) - iVol << " ";
                     fvec(ind) += penalty / fvec.size();
@@ -340,12 +393,7 @@ namespace StochasticModel{
         int ret = lm.minimize(z);
         std::cout << "iter count: " << lm.iter << std::endl;
         std::cout << "return status: " << ret << std::endl; // status 2 is good
-        switch(ret){
-            case Eigen::LevenbergMarquardtSpace::TooManyFunctionEvaluation  : std::cout << "Too many function evaluations\n";   break;
-            case Eigen::LevenbergMarquardtSpace::RelativeReductionTooSmall  : std::cout << "Relative reduction is too small\n";   break;
-            case Eigen::LevenbergMarquardtSpace::RelativeErrorTooSmall  : std::cout << "Relative error is too small\n";   break;
-            case Eigen::LevenbergMarquardtSpace::RelativeErrorAndReductionTooSmall  : std::cout << "Relative error and reduction are too small\n";   break;
-        }
+        Optimizer::LMReturnStatus(ret);
         Eigen::VectorXd tmp(swaptionVolMat->rows()*swaptionVolMat->cols());
         functor(z, tmp);
         std::cout << "Norm of final function: " << tmp.norm() << std::endl;

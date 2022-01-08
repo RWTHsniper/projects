@@ -5005,7 +5005,18 @@ CMakeFiles/hagan.dir/simulation.cpp.o: ../simulation.cpp \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/codecvt.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/x86_64-apple-darwin21/bits/basic_file.h \
   /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/x86_64-apple-darwin21/bits/c++io.h \
-  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/fstream.tcc
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/fstream.tcc \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/memory \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/stl_raw_storage_iter.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/align.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/unique_ptr.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/shared_ptr.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/shared_ptr_base.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/allocated_ptr.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/ext/concurrence.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/bits/shared_ptr_atomic.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/backward/auto_ptr.h \
+  /usr/local/Cellar/gcc/11.2.0_3/include/c++/11/pstl/glue_memory_defs.h
 
 CMakeFiles/hagan.dir/stochasticmodel.cpp.o: ../stochasticmodel.cpp \
   ../stochasticmodel.hpp \

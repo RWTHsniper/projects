@@ -36,7 +36,8 @@ namespace StochasticModel{
          double computeDiscount(const double& t, const double& T, const Eigen::VectorXd& x) const;
          double computeForward(const double& t, const double& T1, const double& T2, const Eigen::VectorXd& x) const;
          std::shared_ptr<Eigen::MatrixXd>  computeInterestRate(const double& t_i, const double& dt,  const size_t& numPaths, const size_t& numSteps, const std::vector<Eigen::MatrixXd>& x) const;
-         double impliedVol(const ql::Period& today, const ql::Period& swaptionExpiry, const ql::Period& swaptionTenor, const double& tau=0.25, const ql::VolatilityType& type=ql::Normal) const;
+         double impliedVol(const ql::Period& swaptionExpiry, const ql::Period& swaptionTenor, const double& tau=0.25, const ql::VolatilityType& type=ql::Normal) const;
+         double impliedVolAnal(const ql::Period& swaptionExpiry, const ql::Period& swaptionTenor, const double& tau=0.25, const ql::VolatilityType& type=ql::Normal) const;
          void calibrate(const std::shared_ptr<std::vector<ql::Period>>& swaptionExpiry, const std::shared_ptr<std::vector<ql::Period>>& swaptionTenor, const std::shared_ptr<Eigen::MatrixXd>& swaptionVolMat);
          void updateDZeta();
          void getInfo();
@@ -121,12 +122,13 @@ namespace StochasticModel{
       int ret = lm.minimize(z);
       std::cout << "iter count: " << lm.iter << std::endl;
       std::cout << "return status: " << ret << std::endl; // status 2 is good
-      switch(ret){
-         case Eigen::LevenbergMarquardtSpace::TooManyFunctionEvaluation  : std::cout << "Too many function evaluations\n";   break;
-         case Eigen::LevenbergMarquardtSpace::RelativeReductionTooSmall  : std::cout << "Relative reduction is too small\n";   break;
-         case Eigen::LevenbergMarquardtSpace::RelativeErrorTooSmall  : std::cout << "Relative error is too small\n";   break;
-         case Eigen::LevenbergMarquardtSpace::RelativeErrorAndReductionTooSmall  : std::cout << "Relative error and reduction are too small\n";   break;
-      }
+      Optimizer::LMReturnStatus(ret);
+      // switch(ret){
+      //    case Eigen::LevenbergMarquardtSpace::TooManyFunctionEvaluation  : std::cout << "Too many function evaluations\n";   break;
+      //    case Eigen::LevenbergMarquardtSpace::RelativeReductionTooSmall  : std::cout << "Relative reduction is too small\n";   break;
+      //    case Eigen::LevenbergMarquardtSpace::RelativeErrorTooSmall  : std::cout << "Relative error is too small\n";   break;
+      //    case Eigen::LevenbergMarquardtSpace::RelativeErrorAndReductionTooSmall  : std::cout << "Relative error and reduction are too small\n";   break;
+      // }
       Eigen::VectorXd tmp(1);
       functor(z, tmp);
       std::cout << "Norm of final function: " << tmp.norm() << std::endl;

@@ -122,7 +122,6 @@ int main(int, char* []) {
     discountFactors[3] = yieldCurve->discount(7.0);
     double myIvol = StochasticModel::computeIvol(npv, 0.0, 6.0, 0.25, discountFactors, 0.0001);
     std::cout << "My Ivol " << myIvol << std::endl;
-    // exit(-1);
 
     // Create a root
     pt::ptree swaption_vol;
@@ -218,10 +217,12 @@ int main(int, char* []) {
 
     saveData(source_dir+"output/matrix.csv", x[numSteps]); // save matrix in output folder
     std::shared_ptr<Eigen::MatrixXd> r =  haganModel.computeInterestRate(t_i, dt, numPaths, numSteps, x); // size of (numPaths, numSteps+1)
+    std::shared_ptr<Eigen::MatrixXd> M =  computeMSA(r, dt); // size of (numPaths, numSteps+1)
     saveData(source_dir+"output/r.csv", (*r)); // save interest rate paths
+    saveData(source_dir+"output/M.csv", (*M)); // save money-savings-account paths
 
     ql::Period today(0, ql::Years); // Current time for evaluation
-    double iVol = haganModel.impliedVol(today, (*swaptionExpiry)[0], (*swaptionTenor)[0], 0.25, ql::Normal);
+    double iVol = haganModel.impliedVol((*swaptionExpiry)[0], (*swaptionTenor)[0], 0.25, ql::Normal);
     std::cout << "Ivol from HaganModel " << iVol << std::endl;
 
     // haganModel.calibrate(swaptionExpiry, swaptionTenor, swaptionVolMat); // skip calibration because I am working on validation
@@ -247,7 +248,9 @@ int main(int, char* []) {
     Eigen::MatrixXd computedIvol(swaptionExpiry->size(), swaptionTenor->size());
     for (size_t i=0; i<swaptionExpiry->size(); i++){
         for (size_t j=0; j<swaptionTenor->size(); j++){
-            computedIvol(i,j) = haganModel.impliedVol(today, (*swaptionExpiry)[i], (*swaptionTenor)[j], 0.25, ql::Normal);
+            computedIvol(i,j) = haganModel.impliedVol((*swaptionExpiry)[i], (*swaptionTenor)[j], 0.25, ql::Normal);
+            haganModel.impliedVolAnal((*swaptionExpiry)[i], (*swaptionTenor)[j], 0.25, ql::Normal);
+
             jsonMsg += std::to_string(computedIvol(i,j));
             // jsonMsg += std::to_string(haganModel.impliedVol(today, (*swaptionExpiry)[i], (*swaptionTenor)[j], 0.25, ql::Normal));
             if ((i == swaptionExpiry->size()-1) &&(j == swaptionTenor->size()-1)) jsonMsg += "]\n";
@@ -278,7 +281,7 @@ int main(int, char* []) {
             Eigen::VectorXd Pi(N+1); // t0,t1,...,tN
             // compute discount factors
             for (size_t k=0; k<=N; k++){ // t0,t1,...,tN
-                Pi[k] = yieldCurve->discount(ti); // equivalent to Di
+                Pi[k] = yieldCurve->discount(ti); // P(t=0,ti)
                 ti += tau;
             }
             // compute annuity
@@ -286,40 +289,40 @@ int main(int, char* []) {
             for (size_t i=1; i<=N; i++){ // t1,...,tN
                 annuity += tau * Pi[i];
             }
-            double St = (Pi[0] - Pi[N]) / annuity; // swap rate
+            double S0 = (Pi[0] - Pi[N]) / annuity; // swap rate
             // Find expiry and tenor in the simulation -> Compute the value of swaption at expiry
-            // at t = t0, receiver: V_r(t0) = -1 + St*tau*(P1+P2+...+Pn) - tau * (l1(t0)+l2(t1)+...+ln(tn-1)) + Pn
-            size_t t0_step = static_cast<size_t> ((t0-t)/dt);
-            size_t tn_step = static_cast<size_t> ((tn-t)/dt);
-            size_t path_ind = 0;
-            double Pn = haganModel.computeDiscount(t0, tn, x[tn_step].col(path_ind));
-            std::cout << "Pn " << Pn << std::endl;
+            // index for steps in the simulation
+            size_t t0_step = static_cast<size_t> ((t0)/dt);
+            size_t tn_step = static_cast<size_t> ((tn)/dt);
+            // size_t path_ind = 0;
+            // std::cout << "Pn " << Pn << std::endl;
             double V_opt = 0.0; // variable to accumulate payoff of swap at time t0
             for (size_t path_ind=0; path_ind<numPaths; path_ind++){
+                double P_0_n = haganModel.computeDiscount(t0, tn, x[t0_step].col(path_ind)); // P(t0,tn)
                 ti = t0;
-                double V_pay_path = 1.0 - Pn; // -P(t0,t0) + P(t0,tn)
+                double V_pay_path = 1.0 - P_0_n; // -P(t0,t0) + P(t0,tn)
                 for (size_t i=1; i<=N; i++){ // index for payment
                     ti += tau;
                     size_t ti_step = static_cast<size_t> ((ti-t)/dt);
                     // std::cout << "ti_step, x " << std::endl << ti_step << std::endl << x[ti_step].col(path_ind).transpose() << std::endl;
-                    double Pi = haganModel.computeDiscount(t0, ti, x[t0_step].col(path_ind));
-                    // double li = haganModel.computeForward(ti-dt, ti-dt, ti, x[t0_step].col(path_ind));
-                    double li = haganModel.computeForward(t0, ti-dt, ti, x[t0_step].col(path_ind));
-                    V_pay_path += tau * Pi * (li - St);
-                    // std::cout << "Pi, li " << Pi << " " << li<< std::endl;
+                    double P_0_i = haganModel.computeDiscount(t0, ti, x[t0_step].col(path_ind)); // P(t0,ti)
+                    double li = haganModel.computeForward(t0, ti-tau, ti, x[t0_step].col(path_ind)); // l(t0,ti-1,ti)
+                    V_pay_path += tau * P_0_i * (li - S0); // discounted value of swap at time ti
                 }
-                V_opt += std::max(V_pay_path, 0.0) * yieldCurve->discount(t0);
+                V_opt += std::max(V_pay_path / (*M)(path_ind, t0_step), 0.0) ; // Discounted by MSA. (Numeraire)
             }
             V_opt /= numPaths;
-            Eigen::VectorXd dfs(N);
             std::cout << "Number of payments " << N << std::endl;
-            for (size_t i=0; i<N; i++){
-                dfs[i] = yieldCurve->discount(t0+tau*(i+1));
-            }
-            double myIvol = StochasticModel::computeIvol(V_opt, 0.0, t0, 0.25, dfs, 0.2);
+            // Eigen::VectorXd dfs(N);
+            // for (size_t i=0; i<N; i++){
+            //     dfs[i] = yieldCurve->discount(t0+tau*(i+1));
+            // }
+            double myIvol = StochasticModel::computeIvol(V_opt, 0.0, t0, 0.25, Pi(Eigen::seq(1,Eigen::last)), 0.1); // slicing Pi
+            // double myIvol = StochasticModel::computeIvol(V_opt, 0.0, t0, 0.25, dfs, 0.1);
             myIvols(i,j) = myIvol;
 
-            std::cout << "(expiry, tenor, K,V_opt, ivol) " << (*swaptionExpiry)[i] << " " << (*swaptionTenor)[j] << " "<< St << " " << " " << V_opt << " " << myIvol << std::endl;
+            double iva = haganModel.impliedVolAnal((*swaptionExpiry)[i], (*swaptionTenor)[j], 0.25, ql::Normal);
+            std::cout << "(expiry, tenor, K,V_opt, ivol, ivolAnal) " << (*swaptionExpiry)[i] << " " << (*swaptionTenor)[j] << " "<< S0 << " " << " " << V_opt << " " << myIvol << " " << iva << std::endl;
 
 
             // Compare
