@@ -46,6 +46,9 @@ namespace StochasticModel{
          void computeSpread(Eigen::MatrixXd& spread_tau1_tau2, const std::vector<Eigen::MatrixXd>& x, const double& dt, 
                                 const double& tau1, const double& freq1,
                                 const double& tau2, const double& freq2, const double& expiry=30.0) const;
+         double computeSRAN(const Eigen::MatrixXd& spread_tau1_tau2, const std::vector<Eigen::MatrixXd>& x, const double& cRate, const double& period, const double& dt) const; // compute spread-range accrual note 
+         Eigen::MatrixXd computeSwaptionMC(std::shared_ptr<std::vector<ql::Period>> swaptionExpiry, std::shared_ptr<std::vector<ql::Period>> swaptionTenor,
+                    const std::vector<Eigen::MatrixXd>& x, const double& tau, const double& dt) const;
          // The followings are public variables due to calibration
          std::vector<Model::PolyFunc> alp_; // alpha (nFactor)
          std::vector<Model::ExpFunc> H_; // How to implement H_ in the framework? (nFactor)
@@ -127,12 +130,6 @@ namespace StochasticModel{
       std::cout << "iter count: " << lm.iter << std::endl;
       std::cout << "return status: " << ret << std::endl; // status 2 is good
       Optimizer::LMReturnStatus(ret);
-      // switch(ret){
-      //    case Eigen::LevenbergMarquardtSpace::TooManyFunctionEvaluation  : std::cout << "Too many function evaluations\n";   break;
-      //    case Eigen::LevenbergMarquardtSpace::RelativeReductionTooSmall  : std::cout << "Relative reduction is too small\n";   break;
-      //    case Eigen::LevenbergMarquardtSpace::RelativeErrorTooSmall  : std::cout << "Relative error is too small\n";   break;
-      //    case Eigen::LevenbergMarquardtSpace::RelativeErrorAndReductionTooSmall  : std::cout << "Relative error and reduction are too small\n";   break;
-      // }
       Eigen::VectorXd tmp(1);
       functor(z, tmp);
       std::cout << "Norm of final function: " << tmp.norm() << std::endl;

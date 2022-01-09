@@ -1,5 +1,7 @@
 #include "stochasticmodel.hpp"
 
+namespace ql = QuantLib;
+
 namespace StochasticModel{
         HaganNF::HaganNF(boost::shared_ptr<ql::YieldTermStructure>& yieldCurve, const size_t& nFactor, Eigen::MatrixXd& corrMat, const size_t& alpOrder): yieldCurve_(yieldCurve),
             nFactor_(nFactor), corrMat_(corrMat), alpOrder_(alpOrder){
@@ -182,8 +184,6 @@ namespace StochasticModel{
                 double t1_2 = t0 + freq2; // first interest payment date
                 size_t N1 = static_cast<size_t>(tau1/freq1); // number of payments
                 size_t N2 = static_cast<size_t>(tau2/freq2); // number of payments
-                // if (expiry || (std::max(t0+tau1, t0+tau2) > T_max)) break;
-                // if (t0 > 15) break;
                 const auto& x_path = x[i].col(path_ind);
                 // First one
                 const double& S_t0_1 = computeIRSRate(t0, t1, freq1, N1, x_path);
@@ -193,6 +193,95 @@ namespace StochasticModel{
             }
         }
     }
+    double HaganNF::computeSRAN(const Eigen::MatrixXd& spread_tau1_tau2, const std::vector<Eigen::MatrixXd>& x, const double& couponRate, const double& period, const double& dt) const{
+    /*
+    spread_tau1_tau2: The spread which is used for pricing a Spread Range Accrual Note.
+    couponRate: coupon rate
+    period: resetting period for accrual note. 0.25 means quarterly evaluation for coupon payments.
+    dt: time-step size in simulations
+    */
+        const size_t daysPerPeriod = static_cast<size_t>(365 * period);
+        const size_t& numPaths = spread_tau1_tau2.rows();
+        const size_t& noteSteps = spread_tau1_tau2.cols() - 1;
+        const size_t pricingFreq = static_cast<size_t>(period/dt); 
+        Eigen::VectorXd value_path(numPaths); // value for each path
+        value_path.setZero(); // initialize with zeros
+        for (size_t ind_path=0; ind_path<numPaths; ind_path++){
+            size_t accrualNumber{0};
+            for (size_t ind_time=0; ind_time<=noteSteps; ind_time++){ // ind_time=0 means initial time
+                if (spread_tau1_tau2(ind_path, ind_time) > 0.0) accrualNumber++; // The condition for pricing
+                if ((ind_time % pricingFreq) == 0){
+                    const double& t = ind_time * dt;
+                    const double& numeraire = computeNumeraire(t, x[ind_time].col(ind_path));
+                    value_path(ind_path) += couponRate * accrualNumber / (numeraire * daysPerPeriod); // coupon payment discounted by the Numeraire
+                    accrualNumber = 0; // reset accrual number
+                }
+            }
+        }
+        double result = value_path.mean();
+        return result;
+    }
+
+    Eigen::MatrixXd HaganNF::computeSwaptionMC(std::shared_ptr<std::vector<ql::Period>> swaptionExpiry, std::shared_ptr<std::vector<ql::Period>> swaptionTenor,
+                    const std::vector<Eigen::MatrixXd>& x, const double& tau, const double& dt) const{
+    /*
+    This function computes implied volatility matric using the model parameters.
+    */
+        size_t numPaths = x[0].cols(); // number of simulation paths
+        Eigen::MatrixXd myIvols(swaptionExpiry->size(), swaptionTenor->size()); // computed implied volatility matrix using the simulation
+        for (size_t i=0; i<swaptionExpiry->size(); i++){
+            for (size_t j=0; j<swaptionTenor->size(); j++){
+                size_t N = static_cast<size_t>(ql::years((*swaptionTenor)[j]) / tau); // number of payments for a swap
+                double t = 0.0; // Evaluation
+                const double t0 = ql::years((*swaptionExpiry)[i]); // exercise date
+                double ti = t0;
+                const double tn = t0 + ql::years((*swaptionTenor)[j]);
+                Eigen::VectorXd Pi(N+1); // t0,t1,...,tN
+                // compute discount factors
+                for (size_t k=0; k<=N; k++){ // t0,t1,...,tN
+                    Pi[k] = yieldCurve_->discount(ti); // P(t=0,ti)
+                    ti += tau;
+                }
+                // compute annuity
+                double annuity = 0.0;
+                for (size_t i=1; i<=N; i++){ // t1,...,tN
+                    annuity += tau * Pi[i];
+                }
+                double S_0 = (Pi[0] - Pi[N]) / annuity; // swap rate today
+                // Find expiry and tenor in the simulation -> Compute the value of swaption at expiry
+                // index for steps in the simulation
+                size_t t0_step = static_cast<size_t> (t0/dt);
+                size_t tn_step = static_cast<size_t> (tn/dt);
+                double V_opt = 0.0; // variable to accumulate payoff of swap at time t0
+                // Compute swap rate at time t0 from the simulation
+                for (size_t path_ind=0; path_ind<numPaths; path_ind++){
+                    ti = t0;
+                    // Annuity at t0
+                    double annuity_t0 = 0.0;
+                    for (size_t i=1; i<=N; i++){ // t1,...,tN
+                        ti += tau;
+                        double P_0_i = this->computeReducedDiscount(t0, ti, x[t0_step].col(path_ind)); // P(t0,tn) under QN
+                        annuity_t0 += tau * P_0_i;
+                    }
+                    double P_0_n = this->computeReducedDiscount(t0, tn, x[t0_step].col(path_ind)); // P(t0,tn) under QN
+                    double S_t0 = (1.0 - P_0_n) / annuity_t0; // swap rate at the swaption's exercise date
+                    double V_pay_path = annuity_t0 * (S_t0 - S_0); // payer swap's value at t0
+                    V_opt += std::max(V_pay_path, 0.0);
+                }
+                V_opt /= numPaths;
+                // std::cout << "Number of payments " << N << std::endl;
+
+                double myIvol = StochasticModel::computeIvol(V_opt, 0.0, t0, 0.25, Pi(Eigen::seq(1,Eigen::last)), 0.1); // slicing Pi
+                myIvols(i,j) = myIvol;
+
+                double iva = this->impliedVolAnal((*swaptionExpiry)[i], (*swaptionTenor)[j], 0.25, ql::Normal);
+                // std::cout << "(expiry, tenor, K, V_opt, ivol, ivolAnal) " << std::endl << (*swaptionExpiry)[i] << " " << (*swaptionTenor)[j] << " "<< S_0 << " " << " " << V_opt << " " << myIvol << " " << iva << std::endl;
+                // Compare
+            }
+        }
+        return myIvols;
+    }
+
     std::shared_ptr<Eigen::MatrixXd> HaganNF::computeInterestRate(const double& t_i, const double& dt, const size_t& numPaths, const size_t& numSteps, const std::vector<Eigen::MatrixXd>& x) const {
     /*
     t_i: initial time of the sim.
@@ -222,10 +311,7 @@ namespace StochasticModel{
                 (*r)(path, step) = fwdRate;
                 (*r)(path, step) += H_t_deriv.dot(x[step].col(path) + zeta_t * H_t);
             }
-            // // dw = lowerMat_ * dWIndep[i];
-            // dw = lowerMat_; dw *= dWIndep[i];
-            // haganModel.evolve(x[i+1], t, x[i], dt, dw);
-            // if (i==numSteps-1) saveData(source_dir+"output/dw.csv", dw);
+
             t += dt;
         }
     return r;
@@ -274,11 +360,7 @@ namespace StochasticModel{
         else{
             std::cout << "Volatility type " << type << " is not supported" << std::endl;
         }
-        // std::cout << "t0 " << std::endl << t0 << std::endl;
-        // std::cout << "zeta " << std::endl << zeta_t << std::endl;
-        // std::cout << "annuity " << std::endl << annuity << std::endl;
-        // std::cout << "Htot " << std::endl << Htot.transpose() << std::endl;
-        // std::cout << "Pi " << std::endl << Pi.transpose() << std::endl;
+
         return res;
     }
     double HaganNF::impliedVolAnal(const ql::Period& swaptionExpiry, const ql::Period& swaptionTenor, const double& tau, const ql::VolatilityType& type) const{
@@ -318,15 +400,8 @@ namespace StochasticModel{
         zeta(0,0) = 0.01*t0; zeta(0,1) = -0.5*0.01*t0; zeta(1,0) = -0.5*0.01*t0; zeta(1,1) = 0.01*t0;
         double ivol = std::sqrt(Htot.dot(zeta*Htot)/t0);
 
-//         std::cout << "t0 " << std::endl << t0 << std::endl;
-//         std::cout << "zeta " << std::endl << zeta << std::endl;
-//         std::cout << "annuity " << std::endl << annuity << std::endl;
-//         std::cout << "Htot " << std::endl << Htot.transpose() << std::endl;
-//         std::cout << "Pi " << std::endl << Pi.transpose() << std::endl;
-// exit(-1);
         return ivol;
     }
-
 
     struct HaganNF::HaganFunctor : Optimizer::Functor<double> {
         // members

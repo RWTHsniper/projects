@@ -112,5 +112,6 @@
         "splines": "cpp",
         "slist": "cpp",
         "*.expression": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "${workspaceFolder}/quantlib/Hagan"
 }

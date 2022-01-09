@@ -1,6 +1,6 @@
 {
 "T": 30,
-"numPaths": 1000,
+"numPaths": 10,
 "numAnnualSteps": 365,
 "numFactors": 2,
 "corrUpper": [
@@ -8,6 +8,6 @@
     -0.50,
     1.0
 ],
-"alpOrder":0,
-"calibrate":true
+"alpOrder": 0,
+"calibrate": false
 }

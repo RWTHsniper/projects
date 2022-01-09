@@ -1,6 +1,6 @@
 {
 "expiry": 15,
-"couponFreq": 0.25,
+"couponPeriod": 0.25,
 "couponRate": 0.03,
 "tau1": 10,
 "freq1": 0.25,
