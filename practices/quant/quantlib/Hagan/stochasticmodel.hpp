@@ -42,6 +42,10 @@ namespace StochasticModel{
          void calibrate(const std::shared_ptr<std::vector<ql::Period>>& swaptionExpiry, const std::shared_ptr<std::vector<ql::Period>>& swaptionTenor, const std::shared_ptr<Eigen::MatrixXd>& swaptionVolMat);
          void updateDZeta();
          void getInfo();
+         double computeIRSRate(const double& t0, const double& t1, const double& freq, const size_t& N, const Eigen::VectorXd& x) const;
+         void computeSpread(Eigen::MatrixXd& spread_tau1_tau2, const std::vector<Eigen::MatrixXd>& x, const double& dt, 
+                                const double& tau1, const double& freq1,
+                                const double& tau2, const double& freq2, const double& expiry=30.0) const;
          // The followings are public variables due to calibration
          std::vector<Model::PolyFunc> alp_; // alpha (nFactor)
          std::vector<Model::ExpFunc> H_; // How to implement H_ in the framework? (nFactor)

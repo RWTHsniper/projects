@@ -1,7 +1,7 @@
 {
 "T": 30,
-"numPaths": 10000,
-"numAnnualSteps": 12,
+"numPaths": 1000,
+"numAnnualSteps": 365,
 "numFactors": 2,
 "corrUpper": [
     1.0,

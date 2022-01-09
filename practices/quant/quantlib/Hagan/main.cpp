@@ -192,12 +192,12 @@ int main(int, char* []) {
 
     // Initialization for Brownian motion
     std::vector<Eigen::MatrixXd> dWIndep; // [numSteps](nFactor, numPaths)
-    buildBrownianMotion(dWIndep, numSteps, nFactor, numPaths);
+    Simulation::buildBrownianMotion(dWIndep, numSteps, nFactor, numPaths);
     const double dt = T/(numSteps); // time-step size in the simulation
     const double t_i = 0.0; // start time in simulation
     double t = t_i;
     std::vector<Eigen::MatrixXd> x;
-    buildVectofMat(x, numSteps+1, nFactor, numPaths); // 0th element in vector represents the initial values
+    Simulation::buildVectofMat(x, numSteps+1, nFactor, numPaths); // 0th element in vector represents the initial values
     Eigen::MatrixXd dw(nFactor, numPaths);
     // Eigen::VectorXd dw(nFactor);
     const Eigen::MatrixXd& lowerMat_ = haganModel.getLowerMat();
@@ -207,14 +207,33 @@ int main(int, char* []) {
         dw = lowerMat_ * dWIndep[i];
         haganModel.evolve(x[i+1], t, x[i], dt, dw);
         t+= dt;
-        if (i==numSteps-1) saveData(source_dir+"output/dw.csv", dw); // for a test, save Brownian motion
+        if (i==numSteps-1) Simulation::saveData(output_dir+"dw.csv", dw); // for a test, save Brownian motion
     }
+    std::cout << "Running Monte-Carlo simulation is complete" << std::endl;
 
-    saveData(source_dir+"output/matrix.csv", x[numSteps]); // save matrix in output folder
+    // Load the json file in this ptree
+    pt::ptree pricing;
+    pt::read_json(data_dir+"pricing.json", pricing);
+    const double& noteExpiry = pricing.get("expiry", 0.0); // number of factors
+    const double& noteCouponFreq = pricing.get("couponFreq", 0.0); // number of factors
+    const double& noteTau1 = pricing.get("tau1", 0.0); // Maturity for the first
+    const double& noteFreq1 = pricing.get("freq1", 0.0); // coupon payment frequency for the first
+    const double& noteTau2 = pricing.get("tau2", 0.0); // Maturity for the second
+    const double& noteFreq2 = pricing.get("freq2", 0.0); // coupon payment frequency for the second
+    // Compute spread_5_10
+    const size_t& noteSteps = static_cast<size_t>(noteExpiry/dt);
+    Eigen::MatrixXd spread_5_10(numPaths, noteSteps+1); spread_5_10.setZero();
+    std::cout << "Start computing the spread between " << noteTau1 << "Y and " << noteTau2 << "Y IRS rates" << std::endl;
+    haganModel.computeSpread(spread_5_10, x, dt, noteTau1, noteFreq1, noteTau2, noteFreq2, 100);
+    // Compute the spread accrual...
+
+
+    Simulation::saveData(output_dir+"matrix.csv", x[numSteps]); // save matrix in output folder
     std::shared_ptr<Eigen::MatrixXd> r =  haganModel.computeInterestRate(t_i, dt, numPaths, numSteps, x); // size of (numPaths, numSteps+1)
     std::shared_ptr<Eigen::MatrixXd> M =  computeMSA(r, dt); // size of (numPaths, numSteps+1)
-    saveData(source_dir+"output/r.csv", (*r)); // save interest rate paths
-    saveData(source_dir+"output/M.csv", (*M)); // save money-savings-account paths
+    Simulation::saveData(output_dir+"r.csv", (*r)); // save interest rate paths
+    Simulation::saveData(output_dir+"M.csv", (*M)); // save money-savings-account paths
+    Simulation::saveData(output_dir+"spread_5_10.csv", spread_5_10); // save money-savings-account paths
 
     ql::Period today(0, ql::Years); // Current time for evaluation
     // double iVol = haganModel.impliedVol((*swaptionExpiry)[0], (*swaptionTenor)[0], 0.25, ql::Normal);
@@ -290,14 +309,14 @@ int main(int, char* []) {
 
             double iva = haganModel.impliedVolAnal((*swaptionExpiry)[i], (*swaptionTenor)[j], 0.25, ql::Normal);
             std::cout << "(expiry, tenor, K, V_opt, ivol, ivolAnal) " << std::endl << (*swaptionExpiry)[i] << " " << (*swaptionTenor)[j] << " "<< S_0 << " " << " " << V_opt << " " << myIvol << " " << iva << std::endl;
-
-
             // Compare
         }
     }
 
     std::cout << "myIvol from sim" << std::endl << myIvols << std::endl;
     std::cout << "computed" << std::endl << computedIvol << std::endl;
+
+
 
     // pt::ptree computedVol;
     // computedVol.put<double>("expiry_size", double(swaptionExpiry->size())+1000);

@@ -141,8 +141,57 @@ namespace StochasticModel{
         return res;
     }
     double HaganNF::computeForward(const double& t, const double& T1, const double& T2,const Eigen::VectorXd& x) const{
-        double l = (computeDiscount(t, T1, x) / computeDiscount(t, T2, x) - 1.0) / (T2-T1);
+        double l = (computeReducedDiscount(t, T1, x) / computeReducedDiscount(t, T2, x) - 1.0) / (T2-T1);
         return l;
+    }
+    double HaganNF::computeIRSRate(const double& t0, const double& t1, const double& freq, const size_t& N, const Eigen::VectorXd& x) const{
+        /*
+
+        x: vector of state variables of a path at t0. x(nFactor_)
+        */
+        // compute swap rate
+        double annuity_t0 = 0.0;
+        double ti = t1;
+        double tn = t1 + (N-1) * freq;
+        for (size_t i=0; i<N; i++){ // t1,...,tN
+            double P_0_i = computeReducedDiscount(t0, ti, x); // P(t0,tn) under QN
+            annuity_t0 += freq * P_0_i;
+            ti += freq;
+        }
+        double P_0_1 = computeReducedDiscount(t0, t1, x); // P(t0,t1) under QN
+        double P_0_n = computeReducedDiscount(t0, tn, x); // P(t0,tn) under QN
+        double S_t0 = (P_0_1 - P_0_n) / annuity_t0; // swap rate at the swaption's exercise date
+        return S_t0;
+    }
+    void HaganNF::computeSpread(Eigen::MatrixXd& spread_tau1_tau2, const std::vector<Eigen::MatrixXd>& x, const double& dt, 
+                                const double& tau1, const double& freq1,
+                                const double& tau2, const double& freq2, const double& expiry) const{
+        /*
+            Computes L(t,)
+            dt: time-step size in simulation
+        */
+        const size_t numSteps = spread_tau1_tau2.cols()-1;
+        const size_t nFactor = x[0].rows();
+        const size_t numPaths = spread_tau1_tau2.rows();
+        const double& T_max = numSteps * dt;
+        for (size_t i=0; i <= numSteps ;i++){
+            for (size_t path_ind=0; path_ind<numPaths; path_ind++){
+                // compute swap rate
+                double t0 = dt * i;
+                double t1 = t0 + freq1; // first interest payment date
+                double t1_2 = t0 + freq2; // first interest payment date
+                size_t N1 = static_cast<size_t>(tau1/freq1); // number of payments
+                size_t N2 = static_cast<size_t>(tau2/freq2); // number of payments
+                // if (expiry || (std::max(t0+tau1, t0+tau2) > T_max)) break;
+                // if (t0 > 15) break;
+                const auto& x_path = x[i].col(path_ind);
+                // First one
+                const double& S_t0_1 = computeIRSRate(t0, t1, freq1, N1, x_path);
+                // Second one
+                const double& S_t0_2 = computeIRSRate(t0, t1_2, freq2, N2, x_path);
+                spread_tau1_tau2(path_ind, i) = S_t0_1 - S_t0_2;
+            }
+        }
     }
     std::shared_ptr<Eigen::MatrixXd> HaganNF::computeInterestRate(const double& t_i, const double& dt, const size_t& numPaths, const size_t& numSteps, const std::vector<Eigen::MatrixXd>& x) const {
     /*
@@ -293,12 +342,12 @@ namespace StochasticModel{
             this_(thisObj), swaptionExpiry_(swaptionExpiry), swaptionTenor_(swaptionTenor), swaptionVolMat_(swaptionVolMat), 
             Optimizer::Functor<double>(swaptionExpiry->size()*swaptionTenor->size(),swaptionVolMat->rows()*swaptionVolMat->cols()) {
             // std::cout << "This is HaganFunctior " << std::endl << *swaptionExpiry_ << std::endl << *swaptionTenor_ << std::endl << *swaptionVolMat << std::endl;
-            std::cout << "This is HaganFunctior " << std::endl;
-            std::cout << "This is expiry " << std::endl;
+            // std::cout << "This is HaganFunctior " << std::endl;
+            // std::cout << "This is expiry " << std::endl;
             for (size_t i=0; i<swaptionExpiry->size(); i++) std::cout << (*swaptionExpiry)[i] << " ";
-            std::cout << std::endl << "This is tenor " << std::endl;
+            // std::cout << std::endl << "This is tenor " << std::endl;
             for (size_t i=0; i<swaptionTenor->size(); i++) std::cout << (*swaptionTenor)[i] << " ";
-            std::cout << std::endl << "Swaption vol mat " << std::endl << *swaptionVolMat << std::endl;
+            // std::cout << std::endl << "Swaption vol mat " << std::endl << *swaptionVolMat << std::endl;
             }
 
         // Implementation of the objective function
