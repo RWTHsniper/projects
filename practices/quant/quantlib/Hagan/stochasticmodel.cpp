@@ -119,20 +119,24 @@ namespace StochasticModel{
         const Eigen::VectorXd& H_t = computeH(t);
         const Eigen::MatrixXd& zeta_t = computeZeta(t);
         double Nt = std::exp(H_t.dot(x) + 0.5 * H_t.dot(zeta_t * H_t)) / yieldCurve_->discount(t);
-        // std::cout << "Num.. " << std::exp(H_t.dot(x) + 0.5 * H_t.dot(zeta_t * H_t)) << " " << yieldCurve_->discount(t) << std::endl;
-        // std::cout << "H and zeta_t t, x" << std::endl << H_t.transpose() << std::endl << zeta_t << std::endl << t << std::endl << x << std::endl; 
-        // std::cout << "Num.. " << (H_t.dot(x) + 0.5 * H_t.dot(zeta_t * H_t)) << " " << yieldCurve_->discount(t) << std::endl;
         return Nt;
+    }
+    double HaganNF::computeReducedDiscount(const double& t, const double& T, const Eigen::VectorXd& x) const{
+        const Eigen::VectorXd& H_T = computeH(T);
+        const Eigen::MatrixXd& zeta_t = computeZeta(t);
+        const double PT = yieldCurve_->discount(T); // P(0,T)
+        double res = PT * std::exp(-H_T.dot(x) - 0.5 * H_T.dot(zeta_t * H_T));
+        return res;
     }
     double HaganNF::computeDiscount(const double& t, const double& T, const Eigen::VectorXd& x) const{
         /*
-        Use initial yield curve and model parameters to compute the bond price at time t
+        Use initial yield curve and model parameters to compute the bond price at time t: P(t, T)
         */
         const Eigen::VectorXd& H_T = computeH(T);
         const Eigen::MatrixXd& zeta_t = computeZeta(t);
         const double Nt = computeNumeraire(t, x);
         // const double Pt = yieldCurve_->discount(t);
-        const double PT = yieldCurve_->discount(T);
+        const double PT = yieldCurve_->discount(T); // P(0,T)
         double res = PT * Nt * std::exp(-H_T.dot(x) - 0.5 * H_T.dot(zeta_t * H_T));
         return res;
     }
@@ -141,6 +145,11 @@ namespace StochasticModel{
         return l;
     }
     std::shared_ptr<Eigen::MatrixXd> HaganNF::computeInterestRate(const double& t_i, const double& dt, const size_t& numPaths, const size_t& numSteps, const std::vector<Eigen::MatrixXd>& x) const {
+    /*
+    t_i: initial time of the sim.
+    dt: time-step size in sim
+    x: vector of state variables [ind_step](ind_state,ind_path)
+    */
         double t = t_i + dt; // skip 0th step
         double T = t_i + numSteps * dt;
         std::shared_ptr<Eigen::MatrixXd> r = std::make_shared<Eigen::MatrixXd>(numPaths, numSteps+1);
@@ -151,7 +160,8 @@ namespace StochasticModel{
         Eigen::VectorXd H_t_deriv(nFactor_);
         Eigen::MatrixXd zeta_t(nFactor_, nFactor_);
         for (size_t step=1; step <= numSteps; step++){ // index for steps
-            double fwdRate = yieldCurve_->forwardRate(0.0,6.0, ql::Continuous);
+            // H_t_deriv, zeta_t are deterministic and independent of x
+            const double& fwdRate = yieldCurve_->forwardRate(0.0, t, ql::Continuous);
             for (size_t sv=0; sv<nFactor_; sv++){ // index for state variable
                 H_t[sv] = H_[sv].evaluate(t);
                 H_t_deriv[sv] = H_[sv].evalDeriv(t);
@@ -167,7 +177,7 @@ namespace StochasticModel{
             // dw = lowerMat_; dw *= dWIndep[i];
             // haganModel.evolve(x[i+1], t, x[i], dt, dw);
             // if (i==numSteps-1) saveData(source_dir+"output/dw.csv", dw);
-            t+= dt;
+            t += dt;
         }
     return r;
     }
@@ -190,7 +200,7 @@ namespace StochasticModel{
         for (size_t i=1; i<=N; i++){ // t1,...,tN
             annuity += tau * Pi[i];
         }
-        double S0 = (Pi[0] - Pi[N]) / annuity; // swap rate
+        double S0 = (Pi[0] - Pi[N]) / annuity; // swap rate at time 0
         if (type == ql::Normal){
             // std::cout << t0 << " " << ti << " " << tn << " " << std::endl << Pi << std::endl;
             // std::cout << N << std::endl;
@@ -202,11 +212,9 @@ namespace StochasticModel{
             // compute Htot
             for (size_t j=0; j<nFactor_; j++){
                 ti = t0;
-                // Htot[j] = Pi[N] * (H_[j].evaluate(tn) - H_[j].evaluate(0.0));
                 Htot[j] = Pi[N] * (H_[j].evaluate(tn));
                 for (size_t i=1; i<=N; i++){
                     ti += tau;
-                    // Htot[j] += S0 * tau * Pi[i] * (H_[j].evaluate(ti) - H_[j].evaluate(0.0));
                     Htot[j] += S0 * tau * Pi[i] * (H_[j].evaluate(ti));
                 }
             }
@@ -404,21 +412,3 @@ namespace StochasticModel{
 
 }
 
-/*
-namespace LevenbergMarquardtSpace {
-    enum Status {
-        NotStarted = -2,
-        Running = -1,
-        ImproperInputParameters = 0,
-        RelativeReductionTooSmall = 1,
-        RelativeErrorTooSmall = 2,
-        RelativeErrorAndReductionTooSmall = 3,
-        CosinusTooSmall = 4,
-        TooManyFunctionEvaluation = 5,
-        FtolTooSmall = 6,
-        XtolTooSmall = 7,
-        GtolTooSmall = 8,
-        UserAsked = 9
-    };
-}
-*/

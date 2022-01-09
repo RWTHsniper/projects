@@ -24,7 +24,7 @@ namespace pt = boost::property_tree;
 using namespace QuantLib;
 
 int main(int, char* []) {
-
+    // Model::testModule();
     // Read input file
     std::string file_dir(__FILE__);
     std::string source_dir(file_dir);
@@ -187,20 +187,15 @@ int main(int, char* []) {
     // const size_t numPaths = 10;
     const double T = lgm.get("T", 0);
     const size_t numPaths = lgm.get("numPaths", 0); // test
-    const size_t numAnnualSteps = lgm.get("numAnnualSteps", 0);
-    // const size_t numSteps = 365*T; // daily
-    // const size_t numSteps = 52*T; // weekly
+    const size_t numAnnualSteps = lgm.get("numAnnualSteps", 0); // 365: daily, 52: weekly, 12: monthly, 4: quarterly
     const size_t numSteps = numAnnualSteps*T; // monthly
 
     // Initialization for Brownian motion
     std::vector<Eigen::MatrixXd> dWIndep; // [numSteps](nFactor, numPaths)
     buildBrownianMotion(dWIndep, numSteps, nFactor, numPaths);
-    const double dt = T/(numSteps);
-    const double t_i = 0.0;
+    const double dt = T/(numSteps); // time-step size in the simulation
+    const double t_i = 0.0; // start time in simulation
     double t = t_i;
-    // std::cout << dWIndep[0] << std::endl;
-    // std::cout << dWIndep[numSteps-1] << std::endl;
-    // Eigen::VectorXd x(nFactor); x.setZero();
     std::vector<Eigen::MatrixXd> x;
     buildVectofMat(x, numSteps+1, nFactor, numPaths); // 0th element in vector represents the initial values
     Eigen::MatrixXd dw(nFactor, numPaths);
@@ -212,7 +207,7 @@ int main(int, char* []) {
         dw = lowerMat_ * dWIndep[i];
         haganModel.evolve(x[i+1], t, x[i], dt, dw);
         t+= dt;
-        if (i==numSteps-1) saveData(source_dir+"output/dw.csv", dw);
+        if (i==numSteps-1) saveData(source_dir+"output/dw.csv", dw); // for a test, save Brownian motion
     }
 
     saveData(source_dir+"output/matrix.csv", x[numSteps]); // save matrix in output folder
@@ -222,51 +217,28 @@ int main(int, char* []) {
     saveData(source_dir+"output/M.csv", (*M)); // save money-savings-account paths
 
     ql::Period today(0, ql::Years); // Current time for evaluation
-    double iVol = haganModel.impliedVol((*swaptionExpiry)[0], (*swaptionTenor)[0], 0.25, ql::Normal);
-    std::cout << "Ivol from HaganModel " << iVol << std::endl;
+    // double iVol = haganModel.impliedVol((*swaptionExpiry)[0], (*swaptionTenor)[0], 0.25, ql::Normal);
+    // std::cout << "Ivol from HaganModel " << iVol << std::endl;
 
-    // haganModel.calibrate(swaptionExpiry, swaptionTenor, swaptionVolMat); // skip calibration because I am working on validation
+    if(lgm.get("calibrate", false)){
+        haganModel.calibrate(swaptionExpiry, swaptionTenor, swaptionVolMat); // skip calibration because I am working on validation
+    }
 
-    // Write output as JSON
-    std::string jsonMsg;
-    jsonMsg = "{\"expiry_size\": " + std::to_string(swaptionExpiry->size()) + ",\n";
-    jsonMsg += "\"tenor_size\": " + std::to_string(swaptionTenor->size()) + ",\n";
-    jsonMsg += "\"expiry\": ["; 
-    for (size_t i=0; i < swaptionExpiry->size(); i++){
-        jsonMsg += std::to_string(ql::years((*swaptionExpiry)[i]));
-        if (i == swaptionExpiry->size()-1) jsonMsg += "],\n";
-        else jsonMsg += ", \n";
-    }
-    jsonMsg += "\"tenor\": ["; 
-    for (size_t i=0; i < swaptionTenor->size(); i++){
-        jsonMsg += std::to_string(ql::years((*swaptionTenor)[i]));
-        if (i == swaptionTenor->size()-1) jsonMsg += "],\n";
-        else jsonMsg += ", \n";
-    }
-    jsonMsg += "\"quote\": ["; 
     // row major
     Eigen::MatrixXd computedIvol(swaptionExpiry->size(), swaptionTenor->size());
     for (size_t i=0; i<swaptionExpiry->size(); i++){
         for (size_t j=0; j<swaptionTenor->size(); j++){
             computedIvol(i,j) = haganModel.impliedVol((*swaptionExpiry)[i], (*swaptionTenor)[j], 0.25, ql::Normal);
-            haganModel.impliedVolAnal((*swaptionExpiry)[i], (*swaptionTenor)[j], 0.25, ql::Normal);
-
-            jsonMsg += std::to_string(computedIvol(i,j));
-            // jsonMsg += std::to_string(haganModel.impliedVol(today, (*swaptionExpiry)[i], (*swaptionTenor)[j], 0.25, ql::Normal));
-            if ((i == swaptionExpiry->size()-1) &&(j == swaptionTenor->size()-1)) jsonMsg += "]\n";
-            else jsonMsg += ", \n";
         }
     }
-    jsonMsg += "}";
-    std::ofstream myfile;
-    myfile.open (output_dir+"computedVol.json");
-    myfile << jsonMsg;
-    myfile.close();    
-    std::cout << "computed Volatility " << std::endl << computedIvol << std::endl;
 
+    // Write output as JSON
+    std::string filePath = output_dir+"computedVol.json";
+    writeOutputJSON(filePath, swaptionExpiry, swaptionTenor, computedIvol);
+    std::cout << "computed Volatility " << std::endl << computedIvol << std::endl;
     std::cout << "Difference " << std::endl << computedIvol - *swaptionVolMat << std::endl;
 
-    // Validation of pricing impliedVol
+    // Validation of pricing swaption
     // It is important to check whether the model could succesfully calculate implied volatilities
     // It can be validated by running MC
     Eigen::MatrixXd myIvols(swaptionExpiry->size(), swaptionTenor->size());
@@ -274,10 +246,10 @@ int main(int, char* []) {
     for (size_t i=0; i<swaptionExpiry->size(); i++){
         for (size_t j=0; j<swaptionTenor->size(); j++){
             size_t N = static_cast<size_t>(ql::years((*swaptionTenor)[j]) / tau); // number of payments for a swap
-            double t = 0.0; // Evaluation 
-            double t0 = ql::years((*swaptionExpiry)[i]); // exercise date
+            double t = 0.0; // Evaluation
+            const double t0 = ql::years((*swaptionExpiry)[i]); // exercise date
             double ti = t0;
-            double tn = t0 + ql::years((*swaptionTenor)[j]);
+            const double tn = t0 + ql::years((*swaptionTenor)[j]);
             Eigen::VectorXd Pi(N+1); // t0,t1,...,tN
             // compute discount factors
             for (size_t k=0; k<=N; k++){ // t0,t1,...,tN
@@ -289,40 +261,35 @@ int main(int, char* []) {
             for (size_t i=1; i<=N; i++){ // t1,...,tN
                 annuity += tau * Pi[i];
             }
-            double S0 = (Pi[0] - Pi[N]) / annuity; // swap rate
+            double S_0 = (Pi[0] - Pi[N]) / annuity; // swap rate today
             // Find expiry and tenor in the simulation -> Compute the value of swaption at expiry
             // index for steps in the simulation
-            size_t t0_step = static_cast<size_t> ((t0)/dt);
-            size_t tn_step = static_cast<size_t> ((tn)/dt);
-            // size_t path_ind = 0;
-            // std::cout << "Pn " << Pn << std::endl;
+            size_t t0_step = static_cast<size_t> (t0/dt);
+            size_t tn_step = static_cast<size_t> (tn/dt);
             double V_opt = 0.0; // variable to accumulate payoff of swap at time t0
+            // Compute swap rate at time t0 from the simulation
             for (size_t path_ind=0; path_ind<numPaths; path_ind++){
-                double P_0_n = haganModel.computeDiscount(t0, tn, x[t0_step].col(path_ind)); // P(t0,tn)
                 ti = t0;
-                double V_pay_path = 1.0 - P_0_n; // -P(t0,t0) + P(t0,tn)
-                for (size_t i=1; i<=N; i++){ // index for payment
+                // Annuity at t0
+                double annuity_t0 = 0.0;
+                for (size_t i=1; i<=N; i++){ // t1,...,tN
                     ti += tau;
-                    size_t ti_step = static_cast<size_t> ((ti-t)/dt);
-                    // std::cout << "ti_step, x " << std::endl << ti_step << std::endl << x[ti_step].col(path_ind).transpose() << std::endl;
-                    double P_0_i = haganModel.computeDiscount(t0, ti, x[t0_step].col(path_ind)); // P(t0,ti)
-                    double li = haganModel.computeForward(t0, ti-tau, ti, x[t0_step].col(path_ind)); // l(t0,ti-1,ti)
-                    V_pay_path += tau * P_0_i * (li - S0); // discounted value of swap at time ti
+                    double P_0_i = haganModel.computeReducedDiscount(t0, ti, x[t0_step].col(path_ind)); // P(t0,tn) under QN
+                    annuity_t0 += tau * P_0_i;
                 }
-                V_opt += std::max(V_pay_path / (*M)(path_ind, t0_step), 0.0) ; // Discounted by MSA. (Numeraire)
+                double P_0_n = haganModel.computeReducedDiscount(t0, tn, x[t0_step].col(path_ind)); // P(t0,tn) under QN
+                double S_t0 = (1.0 - P_0_n) / annuity_t0; // swap rate at the swaption's exercise date
+                double V_pay_path = annuity_t0 * (S_t0 - S_0); // payer swap's value at t0
+                V_opt += std::max(V_pay_path, 0.0);
             }
             V_opt /= numPaths;
             std::cout << "Number of payments " << N << std::endl;
-            // Eigen::VectorXd dfs(N);
-            // for (size_t i=0; i<N; i++){
-            //     dfs[i] = yieldCurve->discount(t0+tau*(i+1));
-            // }
+
             double myIvol = StochasticModel::computeIvol(V_opt, 0.0, t0, 0.25, Pi(Eigen::seq(1,Eigen::last)), 0.1); // slicing Pi
-            // double myIvol = StochasticModel::computeIvol(V_opt, 0.0, t0, 0.25, dfs, 0.1);
             myIvols(i,j) = myIvol;
 
             double iva = haganModel.impliedVolAnal((*swaptionExpiry)[i], (*swaptionTenor)[j], 0.25, ql::Normal);
-            std::cout << "(expiry, tenor, K,V_opt, ivol, ivolAnal) " << (*swaptionExpiry)[i] << " " << (*swaptionTenor)[j] << " "<< S0 << " " << " " << V_opt << " " << myIvol << " " << iva << std::endl;
+            std::cout << "(expiry, tenor, K, V_opt, ivol, ivolAnal) " << std::endl << (*swaptionExpiry)[i] << " " << (*swaptionTenor)[j] << " "<< S_0 << " " << " " << V_opt << " " << myIvol << " " << iva << std::endl;
 
 
             // Compare

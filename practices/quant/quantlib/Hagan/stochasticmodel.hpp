@@ -34,6 +34,7 @@ namespace StochasticModel{
          Eigen::VectorXd evolve(const double& t, const Eigen::VectorXd& x, const double& dt, const Eigen::VectorXd& dw) const;
          double computeNumeraire(const double& t, const Eigen::VectorXd& x) const;
          double computeDiscount(const double& t, const double& T, const Eigen::VectorXd& x) const;
+         double computeReducedDiscount(const double& t, const double& T, const Eigen::VectorXd& x) const;
          double computeForward(const double& t, const double& T1, const double& T2, const Eigen::VectorXd& x) const;
          std::shared_ptr<Eigen::MatrixXd>  computeInterestRate(const double& t_i, const double& dt,  const size_t& numPaths, const size_t& numSteps, const std::vector<Eigen::MatrixXd>& x) const;
          double impliedVol(const ql::Period& swaptionExpiry, const ql::Period& swaptionTenor, const double& tau=0.25, const ql::VolatilityType& type=ql::Normal) const;
@@ -57,7 +58,6 @@ namespace StochasticModel{
          struct HaganFunctor;
 
    };
-
 
    /*
    * Bachelier's Normal model for pricing swaptions
@@ -136,7 +136,7 @@ namespace StochasticModel{
       std::cout << "zSolver: " << z.transpose() << std::endl;
       std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
       return z[0];
-    }
+   }
 }
 
 

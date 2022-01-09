@@ -59,7 +59,6 @@ std::shared_ptr<Eigen::MatrixXd> computeMSA(std::shared_ptr<Eigen::MatrixXd> r, 
         for (size_t j=1; j< M->cols(); j++){
             // std::cout << (*M)(i,j-1) << " " << (*r)(i,j-1) << " " << dt << std::endl; 
             (*M)(i,j) = ((*M)(i,j-1))*(1.0 + 0.5*((*r)(i,j) + (*r)(i,j-1))*dt);
-            // exit(-1);
         }
     }
     return M;

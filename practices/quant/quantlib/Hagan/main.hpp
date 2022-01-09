@@ -29,84 +29,47 @@
 using namespace QuantLib;
 
 
-void testModel(){
-    double tol = 1e-8;
-    Eigen::VectorXd xVals(5);
-    Eigen::VectorXd yVals(5);
-    xVals << 1,2,3,4,5;
-    yVals << 1,4,9,16,25;
-    Model::PolyFunc polyCurve(xVals, yVals, 2);
-    for (size_t i=0; i<xVals.size(); i++){
-        std::cout << polyCurve.evaluate(xVals[i]) << " " << yVals[i] << std::endl;
-        assert(tol >= std::abs(polyCurve.evaluate(xVals[i]) - yVals[i])); // should be less than a tolerance
-    }
-    std::cout << "+1" << std::endl;
-    polyCurve += 1;
-    for (size_t i=0; i<xVals.size(); i++){
-        std::cout << polyCurve.evaluate(xVals[i]) << " " << yVals[i] << std::endl;
-        assert(tol >= std::abs(polyCurve.evaluate(xVals[i]) - (yVals[i]+1))); // should be less than a tolerance
-    }
-    std::cout << "Integration of x^2 + 1" << std::endl; // 1/3*x^3 + x 
-    for (size_t i=0; i<xVals.size(); i++){
-        std::cout << xVals[i] << " " << polyCurve.evalInt(0.0, xVals[i]) << std::endl;
-        assert(tol >= std::abs(polyCurve.evalInt(0.0, xVals[i]) - (1/3.0 * pow(xVals[i],3) + xVals[i])));
-    }
-    Model::PolyFunc polyCurve2(polyCurve);
-    std::cout << "add1 " << &(polyCurve) << std::endl;
-    std::cout << "add2 " << &(polyCurve2) << std::endl;
-    Model::PolyFunc polyCurve3 = polyCurve + polyCurve2; // (x^2+1)*2
-    std::cout << "add3 " << &(polyCurve3) << std::endl;
-    for (size_t i=0; i<xVals.size(); i++){
-        std::cout << polyCurve3.evaluate(xVals[i]) << " " << yVals[i] << std::endl;
-        assert(tol >= std::abs(polyCurve3.evaluate(xVals[i]) - 2.0*(pow(xVals[i],2)+1)));
-    }
-    Model::PolyFunc polyCurve4 = polyCurve*polyCurve2; // (x^2+1)^2
-    for (size_t i=0; i<xVals.size(); i++){
-        std::cout << polyCurve4.evaluate(xVals[i]) << " " << yVals[i] << std::endl;
-        assert(tol >= std::abs(polyCurve4.evaluate(xVals[i]) - pow(pow(xVals[i],2)+1,2)));
-    }
-
-    Eigen::VectorXd params(3);
-    params << 1.0, 1.0, 1.0;
-    Eigen::VectorXd yExpVals(5); // exp(x) + 1
-    yExpVals << exp(1)+1,exp(2)+1,exp(3)+1,exp(4)+1,exp(5)+1;
-    Model::ExpFunc expCurve(xVals, yExpVals, params);
-    for (size_t i=0; i<xVals.size(); i++){
-        std::cout << expCurve.evaluate(xVals[i]) << " " << yExpVals[i] << std::endl;
-        assert(tol >= std::abs(expCurve.evaluate(xVals[i]) - yExpVals[i])); // should be less than a tolerance
-    }
+void testModules(){
+    Model::testModule();
+    std::cout << "All of the tests for modules are complete!" << std::endl;
+    exit(-1); // terminate program
 }
 
-/*
-Code to read input file. When I have time, I will try to automatically read JSON inputs.
-    // Read input file
-    std::string file_dir(__FILE__);
-    std::string source_dir(file_dir);
-    eraseSubStr(source_dir, "main.cpp");
-    std::string data_dir(source_dir+"data/");
-    std::cout << source_dir << std::endl;
-    std::cout << data_dir << std::endl;
+void writeOutputJSON(const std::string& filePath, std::shared_ptr<std::vector<Period>> swaptionExpiry, std::shared_ptr<std::vector<Period>> swaptionTenor,
+                    Eigen::MatrixXd computedIvol){
 
-    // Short alias for this namespace
-    namespace pt = boost::property_tree;
-    // Create a root
-    pt::ptree KRWIRS;
-    // Load the json file in this ptree
-    pt::read_json(data_dir+"KRWIRS.json", KRWIRS);
-    std::cout << KRWIRS.get("base_date", "None") << std::endl;
-    std::cout << KRWIRS.get("tenor_types", "None") << std::endl;
-    std::cout << KRWIRS.get("tenors", "None") << std::endl;
-    // A vector to allow storing our animals
-
-    std::vector<std::string> str_tenors;
-    std::vector<ql::Period> tenors;
-    for (pt::ptree::value_type &tenor : KRWIRS.get_child("tenors"))
-    {
-        // std::cout << tenor.first.data() << std::endl;
-        std::cout << tenor.second.data() << std::endl;
-        str_tenors.push_back(tenor.second.data());
-        tenors.push_back(ql::Period(tenor.second.data()));
+    // Write output as JSON
+    std::string jsonMsg;
+    jsonMsg = "{\"expiry_size\": " + std::to_string(swaptionExpiry->size()) + ",\n";
+    jsonMsg += "\"tenor_size\": " + std::to_string(swaptionTenor->size()) + ",\n";
+    jsonMsg += "\"expiry\": ["; 
+    for (size_t i=0; i < swaptionExpiry->size(); i++){
+        jsonMsg += std::to_string(ql::years((*swaptionExpiry)[i]));
+        if (i == swaptionExpiry->size()-1) jsonMsg += "],\n";
+        else jsonMsg += ", \n";
     }
-*/
+    jsonMsg += "\"tenor\": ["; 
+    for (size_t i=0; i < swaptionTenor->size(); i++){
+        jsonMsg += std::to_string(ql::years((*swaptionTenor)[i]));
+        if (i == swaptionTenor->size()-1) jsonMsg += "],\n";
+        else jsonMsg += ", \n";
+    }
+    jsonMsg += "\"quote\": ["; 
+    // row major
+    for (size_t i=0; i<swaptionExpiry->size(); i++){
+        for (size_t j=0; j<swaptionTenor->size(); j++){
+            jsonMsg += std::to_string(computedIvol(i,j));
+            if ((i == swaptionExpiry->size()-1) &&(j == swaptionTenor->size()-1)) jsonMsg += "]\n";
+            else jsonMsg += ", \n";
+        }
+    }
+    jsonMsg += "}";
+    std::ofstream myfile;
+    myfile.open (filePath);
+    myfile << jsonMsg;
+    myfile.close();    
+
+
+}
 
 #endif /* MAIN_HPP_ */

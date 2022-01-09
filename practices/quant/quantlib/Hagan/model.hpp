@@ -9,6 +9,7 @@
 #define MODEL_HPP_
 
 #include <iostream>
+#include <cassert> // assert
 #include <Eigen/Dense> // Dense matrices
 
 
@@ -129,7 +130,7 @@ namespace Model{
             }
     };
     
-
+    void testModule();
 
 
 
