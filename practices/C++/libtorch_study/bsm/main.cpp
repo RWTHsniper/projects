@@ -1,3 +1,10 @@
+/*
+Reference sites
+https://pytorch.org/tutorials/advanced/cpp_autograd.html
+https://qvious.com/docs/1-1_pricing/
+
+*/
+
 #pragma warning(disable:4251 4275 4244 4267 4522 4273 4018 4305)
 #include <torch/torch.h>
 #include <cmath>
@@ -112,17 +119,26 @@ PriceResult mcprice_torch(double s0, double k, double r, double q, double t,
 
 	double disc = exp(-r * t);
 	auto sAtMat = s.index({ torch::arange(0, s.size(0), torch::kLong), torch::tensor(s.size(1) - 1) }); // last column. s[:,-1]
-	torch::Tensor discPayoff = disc * torch::relu(type *( sAtMat - k));
+	// torch::Tensor discPayoff = disc * torch::relu(type *( sAtMat - k)); // original version
+	torch::Tensor discPayoff = disc * at::softplus(type *( sAtMat - k), 100.0, 10.0); // Softplus
 	auto price = discPayoff.mean();
-	price.backward();
-	return PriceResult({ price.item<double>(), s_0.grad().item<double>() });
-	// return PriceResult({ price.item<double>(), s_0.grad().item<double>(), s_0.grad().grad().item<double>() });
+
+	// Automatic differentiation
+    auto grad_output = torch::ones_like(price); // jacobian
+	auto first_derivative = torch::autograd::grad({price}, {s_0}, /*grad_outputs=*/{}, /*retain_graph=*/c10::nullopt, /*create_graph=*/true)[0];
+	std::cout << first_derivative.requires_grad() << std::endl;
+    auto second_derivative = torch::autograd::grad({first_derivative}, {s_0}, /*grad_outputs=*/{}, /*retain_graph=*/c10::nullopt, /*create_graph=*/true)[0];
+	// price.backward();
+
+	// return PriceResult({ price.item<double>(), s_0.grad().item<double>() }); // original version
+	return PriceResult({ price.item<double>(), first_derivative.item<double>(), second_derivative.item<double>() });
 }
 
 int main() {
 
 	Timer tmr;
 	double s = 100, k = 100, r = 0.02, q = 0.01, t = 0.25, sigma = 0.15;
+	// s = 90.0;
 	OptionType type = Call;
 	unsigned int ntimes = 100, numOfSimulation = 50000;
 
@@ -131,6 +147,7 @@ int main() {
 	PriceResult res_anal = bsprice(s, k, r, q, t, sigma, type);	
 	std::cout << "Anal Price = " << res_anal.price << "\t";
 	std::cout << "Delta = " << res_anal.delta << std::endl;
+    std::cout << "Gamma = " << res_anal.gamma << std::endl;
 	std::cout << std::string(40, '-') << std::endl;
 		
 	tmr.reset();
@@ -140,6 +157,7 @@ int main() {
 	std::cout << "MC Price = " << res_std.price << "\t";
 
 	std::cout << "Delta = " << res_std.delta << std::endl;
+    std::cout << "Gamma = " << res_std.gamma << std::endl;
 	std::cout << "Time = " << computationTime << std::endl;
 	std::cout << std::string(40, '-') << std::endl;
 
@@ -150,7 +168,9 @@ int main() {
 		PriceResult res_torch = mcprice_torch(s, k, r, q, t, sigma, type, ntimes, numOfSimulation);
 		computationTime = tmr.elapsed();
 		std::cout << "MC Price = " << res_torch.price << "\t";
+        // std::cout << "Delta = " << res_anal.delta << "\t" << "Gamma = " << res_torch.gamma << std::endl;
 		std::cout << "Delta = " << res_torch.delta << std::endl;
+		std::cout << "Gamma = " << res_torch.gamma << std::endl;
 		std::cout << "Time = " << computationTime << std::endl;
 		std::cout << std::string(40, '-') << std::endl;
 	}	
