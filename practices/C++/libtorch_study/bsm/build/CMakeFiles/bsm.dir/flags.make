@@ -4,7 +4,7 @@
 # compile CXX with /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++
 CXX_DEFINES = -DUSE_C10D_GLOO -DUSE_DISTRIBUTED -DUSE_RPC -DUSE_TENSORPIPE
 
-CXX_INCLUDES = -isystem /Users/jungjaeyong/opt/anaconda3/lib/python3.7/site-packages/torch/include -isystem /Users/jungjaeyong/opt/anaconda3/lib/python3.7/site-packages/torch/include/torch/csrc/api/include
+CXX_INCLUDES = -isystem /Users/jungjaeyong/Downloads/libtorch/include -isystem /Users/jungjaeyong/Downloads/libtorch/include/torch/csrc/api/include
 
 CXX_FLAGS =  -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.1.sdk -std=gnu++17
 

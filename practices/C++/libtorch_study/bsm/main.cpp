@@ -2,7 +2,10 @@
 Reference sites
 https://pytorch.org/tutorials/advanced/cpp_autograd.html
 https://qvious.com/docs/1-1_pricing/
-
+https://goodcalculators.com/black-scholes-calculator/
+https://www.carta.tech/man-pages/man3/M_SQRT1_2.3avr.html
+https://en.wikipedia.org/wiki/Normal_distribution
+https://en.wikipedia.org/wiki/Black%E2%80%93Scholes_model
 */
 
 #pragma warning(disable:4251 4275 4244 4267 4522 4273 4018 4305)
@@ -39,6 +42,11 @@ struct PriceResult {
 	double gamma = 0;
 };
 
+double normpdf(double x, double mu=0, double sigma=1) {
+	double res = exp(-0.5*pow((x-mu)/sigma, 2)) / (sigma*sqrt(2.0*M_PI));
+	return res;
+}
+
 double normcdf(double x, double mu=0, double sigma=1) {
 	double v = (x - mu) / sigma;
 	return 0.5 * erfc(-v * M_SQRT1_2);
@@ -52,7 +60,8 @@ PriceResult bsprice(double s, double k,	double r, double q, double t,
 	double nd2 = normcdf(type * d2);
 	double price = type * (s * exp(-q * t) * nd1 - k * exp(-r * t) * nd2);
 	double delta = type * exp(-q * t) * nd1;
-	return PriceResult({ price, delta });
+	double gamma = normpdf(d1) / (s * sigma * sqrt(t));
+	return PriceResult({ price, delta , gamma});
 }
 
 PriceResult mcprice_cpu(double s, double k, double r, double q, double t, 
@@ -119,12 +128,11 @@ PriceResult mcprice_torch(double s0, double k, double r, double q, double t,
 
 	double disc = exp(-r * t);
 	auto sAtMat = s.index({ torch::arange(0, s.size(0), torch::kLong), torch::tensor(s.size(1) - 1) }); // last column. s[:,-1]
-	// torch::Tensor discPayoff = disc * torch::relu(type *( sAtMat - k)); // original version
-	torch::Tensor discPayoff = disc * at::softplus(type *( sAtMat - k), 100.0, 10.0); // Softplus
+	torch::Tensor discPayoff = disc * torch::relu(type *( sAtMat - k)); // original version
+	// torch::Tensor discPayoff = disc * at::softplus(type *( sAtMat - k), 100.0, 10.0); // Softplus
 	auto price = discPayoff.mean();
 
 	// Automatic differentiation
-    auto grad_output = torch::ones_like(price); // jacobian
 	auto first_derivative = torch::autograd::grad({price}, {s_0}, /*grad_outputs=*/{}, /*retain_graph=*/c10::nullopt, /*create_graph=*/true)[0];
 	std::cout << first_derivative.requires_grad() << std::endl;
     auto second_derivative = torch::autograd::grad({first_derivative}, {s_0}, /*grad_outputs=*/{}, /*retain_graph=*/c10::nullopt, /*create_graph=*/true)[0];

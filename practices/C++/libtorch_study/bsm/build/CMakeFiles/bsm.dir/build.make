@@ -92,11 +92,11 @@ bsm_EXTERNAL_OBJECTS =
 
 bsm: CMakeFiles/bsm.dir/main.cpp.o
 bsm: CMakeFiles/bsm.dir/build.make
-bsm: /Users/jungjaeyong/opt/anaconda3/lib/python3.7/site-packages/torch/lib/libc10.dylib
-bsm: /usr/local/lib/libkineto.a
-bsm: /Users/jungjaeyong/opt/anaconda3/lib/python3.7/site-packages/torch/lib/libtorch.dylib
-bsm: /Users/jungjaeyong/opt/anaconda3/lib/python3.7/site-packages/torch/lib/libtorch_cpu.dylib
-bsm: /Users/jungjaeyong/opt/anaconda3/lib/python3.7/site-packages/torch/lib/libc10.dylib
+bsm: /Users/jungjaeyong/Downloads/libtorch/lib/libc10.dylib
+bsm: /Users/jungjaeyong/Downloads/libtorch/lib/libkineto.a
+bsm: /Users/jungjaeyong/Downloads/libtorch/lib/libtorch.dylib
+bsm: /Users/jungjaeyong/Downloads/libtorch/lib/libtorch_cpu.dylib
+bsm: /Users/jungjaeyong/Downloads/libtorch/lib/libc10.dylib
 bsm: CMakeFiles/bsm.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/jungjaeyong/projects/practices/C++/libtorch_study/bsm/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable bsm"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/bsm.dir/link.txt --verbose=$(VERBOSE)

@@ -208,7 +208,7 @@ CMAKE_STRIP:FILEPATH=/Applications/Xcode.app/Contents/Developer/Toolchains/Xcode
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
 //The directory containing a CMake configuration file for Caffe2.
-Caffe2_DIR:PATH=/Users/jungjaeyong/opt/anaconda3/lib/python3.7/site-packages/torch/share/cmake/Caffe2
+Caffe2_DIR:PATH=/Users/jungjaeyong/Downloads/libtorch/share/cmake/Caffe2
 
 //The directory containing a CMake configuration file for MKLDNN.
 MKLDNN_DIR:PATH=MKLDNN_DIR-NOTFOUND
@@ -217,10 +217,13 @@ MKLDNN_DIR:PATH=MKLDNN_DIR-NOTFOUND
 MKL_DIR:PATH=MKL_DIR-NOTFOUND
 
 //Path to a library.
-TORCH_LIBRARY:FILEPATH=/Users/jungjaeyong/opt/anaconda3/lib/python3.7/site-packages/torch/lib/libtorch.dylib
+TORCH_LIBRARY:FILEPATH=/Users/jungjaeyong/Downloads/libtorch/lib/libtorch.dylib
+
+//The directory containing a CMake configuration file for Torch.
+Torch_DIR:PATH=/Users/jungjaeyong/Downloads/libtorch/share/cmake/Torch
 
 //Path to a library.
-c10_LIBRARY:FILEPATH=/Users/jungjaeyong/opt/anaconda3/lib/python3.7/site-packages/torch/lib/libc10.dylib
+c10_LIBRARY:FILEPATH=/Users/jungjaeyong/Downloads/libtorch/lib/libc10.dylib
 
 //Value Computed by CMake
 example-app_BINARY_DIR:STATIC=/Users/jungjaeyong/projects/practices/C++/libtorch_study/bsm/build
@@ -232,7 +235,7 @@ example-app_IS_TOP_LEVEL:STATIC=ON
 example-app_SOURCE_DIR:STATIC=/Users/jungjaeyong/projects/practices/C++/libtorch_study/bsm
 
 //Path to a library.
-kineto_LIBRARY:FILEPATH=/usr/local/lib/libkineto.a
+kineto_LIBRARY:FILEPATH=/Users/jungjaeyong/Downloads/libtorch/lib/libkineto.a
 
 
 ########################
@@ -383,5 +386,5 @@ CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
 //Details about finding Threads
 FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
 //Details about finding Torch
-FIND_PACKAGE_MESSAGE_DETAILS_Torch:INTERNAL=[/Users/jungjaeyong/opt/anaconda3/lib/python3.7/site-packages/torch/lib/libtorch.dylib][/Users/jungjaeyong/opt/anaconda3/lib/python3.7/site-packages/torch/include;/Users/jungjaeyong/opt/anaconda3/lib/python3.7/site-packages/torch/include/torch/csrc/api/include][v()]
+FIND_PACKAGE_MESSAGE_DETAILS_Torch:INTERNAL=[/Users/jungjaeyong/Downloads/libtorch/lib/libtorch.dylib][/Users/jungjaeyong/Downloads/libtorch/include;/Users/jungjaeyong/Downloads/libtorch/include/torch/csrc/api/include][v()]
 
